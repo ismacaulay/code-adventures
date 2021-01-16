@@ -14,10 +14,10 @@ project(code-adventures
     DESCRIPTION "Code adventures"
     LANGUAGES C CXX)
 
-# if (APPLE)
-#     find_package(GLFW3 REQUIRED)
-#     find_package(OpenGL REQUIRED)
-# endif()
+if (APPLE)
+    find_package(GLFW3 REQUIRED)
+    find_package(OpenGL REQUIRED)
+endif()
 
 # set(THREADS_PREFER_THREAD_FLAG ON)
 # find_package(Threads REQUIRED)
@@ -26,8 +26,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 
-# add_subdirectory(vendor)
+add_subdirectory(vendor)
+add_subdirectory(toolkit)
+
 add_subdirectory(projects/hello-world)
+add_subdirectory(projects/opengl)
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Setting CMAKE_INSTALL_PREFIX" FORCE)
