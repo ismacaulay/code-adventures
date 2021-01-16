@@ -7,8 +7,10 @@ in mind, the code-adventures repository becomes a big monolith where I can devel
 the components in future projects without having to manage multiple repositories.
 
 ## Projects
+### C++
+- [Hello World](https://github.com/ismacaulay/code-adventures/tree/main/src/cpp/projects/hello-world)
 
 ## Topics
 ### AI/ML
-- [CS188 - Introduction to Artificial Intelligence](https://github.com/ismacaulay/code-adventures/topics/ai-ml/cs188-into-to-ai)
+- [CS188 - Introduction to Artificial Intelligence](https://github.com/ismacaulay/code-adventures/tree/main/topics/ai-ml/cs188-into-to-ai)
 
