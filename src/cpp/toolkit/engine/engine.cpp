@@ -2,8 +2,6 @@
 
 #include "window.h"
 
-#include <cstdio>
-
 namespace tk {
 namespace engine {
 

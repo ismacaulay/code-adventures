@@ -2,7 +2,8 @@
 
 #include "toolkit/engine.h"
 
-int main() {
+int main()
+{
     tk::engine::Engine engine;
 
     engine.run();
