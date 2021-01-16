@@ -1,4 +1,4 @@
-# CS 188 - Introduction to Artificial Intelligece (Fall 2018)
+# CS 188 - Introduction to Artificial Intelligence
 
 CS 188 - Fall 2018 provided by UC Berkley
 
