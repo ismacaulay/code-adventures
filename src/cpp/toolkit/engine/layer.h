@@ -14,7 +14,7 @@ namespace engine {
         virtual void update(float delta) = 0;
         virtual void detach() {}
 
-        // virtual bool process_event(const Event& event) { return false; }
+        virtual bool process_event(const Event& event) { return false; }
     };
 
 }

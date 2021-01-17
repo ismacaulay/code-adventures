@@ -1,9 +1,11 @@
 #pragma once
+#include <functional>
 #include <memory>
 
 namespace tk {
 namespace engine {
     struct WindowProps;
+    class Event;
 
     class Window
     {
@@ -13,6 +15,8 @@ namespace engine {
 
         bool should_close();
         void update();
+
+        void set_event_callback(std::function<void(const Event&)> callback);
 
         void* native_window() const;
 

@@ -19,6 +19,7 @@ int main()
     engine->run();
 
     engine->shutdown();
+    tutorial_layer = nullptr;
 
     return 0;
 }
