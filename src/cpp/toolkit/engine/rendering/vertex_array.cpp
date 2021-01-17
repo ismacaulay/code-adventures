@@ -1,8 +1,8 @@
 #include "vertex_array.h"
 
-#include "engine/buffer_layout.h"
-#include "engine/index_buffer.h"
-#include "engine/vertex_buffer.h"
+#include "buffer_layout.h"
+#include "index_buffer.h"
+#include "vertex_buffer.h"
 #include "logger/assert.h"
 
 #include <glad/glad.h>

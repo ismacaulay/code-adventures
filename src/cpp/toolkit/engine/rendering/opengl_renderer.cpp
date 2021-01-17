@@ -4,8 +4,8 @@
 
 #include <glad/glad.h>
 
-#include "engine/index_buffer.h"
-#include "engine/vertex_array.h"
+#include "index_buffer.h"
+#include "vertex_array.h"
 
 namespace tk {
 namespace engine {

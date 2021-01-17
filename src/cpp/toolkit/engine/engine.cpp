@@ -5,7 +5,7 @@
 #include "events/events.h"
 #include "layer.h"
 #include "logger/log.h"
-#include "renderer.h"
+#include "rendering/renderer.h"
 #include "window.h"
 
 namespace tk {
