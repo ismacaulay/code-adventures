@@ -7,13 +7,24 @@
 
 #include "logger/assert.h"
 #include "logger/log.h"
+#include "props.h"
 
 namespace tk {
 namespace engine {
+    void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+    {
+        glViewport(0, 0, width, height);
+    }
+    void process_input(GLFWwindow* window)
+    {
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, true);
+    }
+
     class Window::Impl
     {
     public:
-        Impl()
+        Impl(const WindowProps& props)
         {
             int success = glfwInit();
             CAT_ASSERTM(success, "Failed to initialize glfw");
@@ -26,12 +37,15 @@ namespace engine {
 #endif
 
             window_ = glfwCreateWindow(
-                800, 400, "[code-adventures] hello window", NULL, NULL);
+                props.width, props.height, props.title.c_str(), NULL, NULL);
             CAT_ASSERTM(window_, "Failed to create window");
+            glfwSetFramebufferSizeCallback(window_, framebuffer_size_callback);
 
             glfwMakeContextCurrent(window_);
-            int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-            CAT_ASSERTM(status, "Failed to load glad");
+            success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+            CAT_ASSERTM(success, "Failed to load glad");
+
+            glViewport(0, 0, props.width, props.height);
 
             CAT_LOG_INFO("OpenGL Info:");
             CAT_LOG_INFO("  Vender: {}", glGetString(GL_VENDOR));
@@ -47,19 +61,24 @@ namespace engine {
 
         void update()
         {
-            glfwPollEvents();
+            process_input(window_);
+
             glfwSwapBuffers(window_);
+            glfwPollEvents();
         }
 
         GLFWwindow* window_;
     };
 
-    Window::Window()
-        : p_(std::make_unique<Impl>())
+    Window::Window(const WindowProps& props)
+        : p_(std::make_unique<Impl>(props))
     {}
     Window::~Window() {}
 
     void Window::update() { p_->update(); }
 
+    bool Window::should_close() { return glfwWindowShouldClose(p_->window_); }
+
+    void* Window::native_window() const { return p_->window_; }
 }
 }

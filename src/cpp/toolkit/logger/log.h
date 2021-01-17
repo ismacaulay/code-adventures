@@ -4,8 +4,8 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-// #include <glm/glm.hpp>
-// #include <glm/gtx/string_cast.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 namespace tk {
 namespace logger {
@@ -35,7 +35,7 @@ namespace logger {
 #define CAT_LOG_ERROR(...)    spdlog::error(__VA_ARGS__)
 #define CAT_LOG_CRITICAL(...) spdlog::critical(__VA_ARGS__)
 
-// static inline std::ostream& operator<<(std::ostream& os, const glm::vec3& v)
-// {
-//     return os << glm::to_string(v);
-// }
+static inline std::ostream& operator<<(std::ostream& os, const glm::vec3& v)
+{
+    return os << glm::to_string(v);
+}

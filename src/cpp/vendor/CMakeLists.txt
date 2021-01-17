@@ -20,7 +20,7 @@ set_target_properties(glad PROPERTIES CXX_EXTENSIONS OFF)
 #
 # glm
 #
-# add_subdirectory(glm)
+add_subdirectory(glm)
 
 #
 # imgui

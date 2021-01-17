@@ -1,10 +1,19 @@
 set(TOOLKIT_SRC_FILES
+    engine/camera/orthographic_camera.cpp
+    engine/buffer_layout.cpp
     engine/engine.cpp
+    engine/index_buffer.cpp
+    engine/shader.cpp
+    engine/vertex_array.cpp
+    engine/vertex_buffer.cpp
     engine/window.cpp
+    engine/opengl_renderer.cpp
+    engine/renderer.cpp
+    engine/render_command.cpp
 )
 
 add_library(toolkit STATIC "${TOOLKIT_SRC_FILES}")
-target_link_libraries(toolkit PUBLIC glfw glad spdlog)
+target_link_libraries(toolkit PUBLIC glfw glad spdlog glm::glm)
 target_include_directories(toolkit
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}
 )

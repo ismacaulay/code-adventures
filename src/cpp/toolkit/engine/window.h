@@ -3,14 +3,18 @@
 
 namespace tk {
 namespace engine {
+    struct WindowProps;
 
     class Window
     {
     public:
-        explicit Window();
+        explicit Window(const WindowProps& props);
         ~Window();
 
+        bool should_close();
         void update();
+
+        void* native_window() const;
 
     private:
         class Impl;
