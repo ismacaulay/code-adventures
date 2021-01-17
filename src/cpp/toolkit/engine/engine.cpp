@@ -2,7 +2,8 @@
 
 #include <vector>
 
-#include "events/events.h"
+#include "events/event.h"
+#include "events/input.h"
 #include "layer.h"
 #include "logger/log.h"
 #include "rendering/renderer.h"
@@ -17,6 +18,8 @@ namespace engine {
         Impl(const WindowProps& window_props)
             : window_(std::make_shared<Window>(window_props))
         {
+            Input::init(*window_);
+
             window_->set_event_callback(
                 std::bind(&Impl::process_event, this, std::placeholders::_1));
 

@@ -6,7 +6,9 @@
 #include "toolkit/engine/time.h"
 
 #include "toolkit/engine/camera/camera.h"
+#include "toolkit/engine/camera/free_camera_controller.h"
 #include "toolkit/engine/camera/orthographic_camera.h"
+#include "toolkit/engine/camera/perspective_camera.h"
 
 #include "toolkit/engine/rendering/defines.h"
 #include "toolkit/engine/rendering/index_buffer.h"

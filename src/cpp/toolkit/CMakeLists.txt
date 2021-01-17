@@ -3,7 +3,12 @@ set(TOOLKIT_SRC_FILES
     engine/time.cpp
     engine/window.cpp
 
+    engine/camera/camera_controller.cpp
+    engine/camera/free_camera_controller.cpp
     engine/camera/orthographic_camera.cpp
+    engine/camera/perspective_camera.cpp
+
+    engine/events/input.cpp
 
     engine/rendering/buffer_layout.cpp
     engine/rendering/index_buffer.cpp

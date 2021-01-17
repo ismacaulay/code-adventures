@@ -5,7 +5,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "events/events.h"
+#include "events/event.h"
 #include "logger/assert.h"
 #include "logger/log.h"
 #include "props.h"
