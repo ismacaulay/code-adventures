@@ -48,12 +48,12 @@ add_subdirectory(spdlog)
 #
 # stb
 #
-# set(STB_SRCS
-#     stb/src/stb_image.cpp
-# )
-#
-# add_library(stb STATIC "${STB_SRCS}")
-# target_include_directories(stb PUBLIC stb/include)
-# target_compile_features(stb PUBLIC cxx_std_17)
-# set_target_properties(stb PROPERTIES CXX_EXTENSIONS OFF)
-#
+set(STB_SRCS
+    stb/src/stb_image.cpp
+)
+
+add_library(stb STATIC "${STB_SRCS}")
+target_include_directories(stb PUBLIC stb/include)
+target_compile_features(stb PUBLIC cxx_std_17)
+set_target_properties(stb PROPERTIES CXX_EXTENSIONS OFF)
+

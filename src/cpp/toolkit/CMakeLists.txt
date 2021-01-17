@@ -11,12 +11,13 @@ set(TOOLKIT_SRC_FILES
     engine/rendering/render_command.cpp
     engine/rendering/renderer.cpp
     engine/rendering/shader.cpp
+    engine/rendering/texture2d.cpp
     engine/rendering/vertex_array.cpp
     engine/rendering/vertex_buffer.cpp
 )
 
 add_library(toolkit STATIC "${TOOLKIT_SRC_FILES}")
-target_link_libraries(toolkit PUBLIC glfw glad spdlog glm::glm)
+target_link_libraries(toolkit PUBLIC glfw glad spdlog glm::glm stb)
 target_include_directories(toolkit
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}
 )

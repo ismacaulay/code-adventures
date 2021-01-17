@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <memory>
 
 namespace tk {
 namespace engine {
@@ -18,6 +19,8 @@ namespace engine {
         uint32_t count() const { return count_; }
 
         void set_indices(void* indices, size_t size);
+
+        static std::shared_ptr<IndexBuffer> create(void* indices, size_t size);
 
     private:
         uint32_t renderer_id_;

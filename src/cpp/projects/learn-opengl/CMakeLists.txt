@@ -15,3 +15,4 @@ set_target_properties(learn_opengl PROPERTIES
 )
 
 install(TARGETS learn_opengl OPTIONAL RUNTIME DESTINATION bin/learn-opengl)
+install(DIRECTORY assets/ DESTINATION bin/learn-opengl/assets)

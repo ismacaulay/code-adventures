@@ -13,5 +13,6 @@
 #include "toolkit/engine/rendering/render_command.h"
 #include "toolkit/engine/rendering/renderer.h"
 #include "toolkit/engine/rendering/shader.h"
+#include "toolkit/engine/rendering/texture2d.h"
 #include "toolkit/engine/rendering/vertex_array.h"
 #include "toolkit/engine/rendering/vertex_buffer.h"

@@ -39,5 +39,10 @@ namespace engine {
         size_ = size;
         count_ = size / sizeof(uint32_t);
     }
+
+    std::shared_ptr<IndexBuffer> IndexBuffer::create(void* indices, size_t size)
+    {
+        return std::make_shared<IndexBuffer>(indices, size);
+    }
 }
 }
