@@ -19,7 +19,7 @@ public:
 
     std::shared_ptr<tk::engine::FreeCameraController> camera_controller_;
 
-    std::vector<glm::vec3> cube_positions_;
+    std::vector<glm::mat4> cube_models_;
 
     Camera()
         : Tutorial("Camera")
@@ -100,13 +100,25 @@ public:
         texture2_ = tk::engine::Texture2D::create("assets/awesomeface.png");
         shader_->set_uniform_int("u_texture2", 1);
 
-        cube_positions_ = {
+        std::vector<glm::vec3> cube_positions = {
             glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
             glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
             glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
             glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
             glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)
         };
+
+        for (int i = 0; i < cube_positions.size(); i++) {
+            glm::mat4 model(1.0f);
+            model = glm::translate(model, cube_positions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, angle, { 1.0f, 0.3f, 0.5f });
+            cube_models_.push_back(model);
+        }
+
+        texture1_->bind(0);
+        texture2_->bind(1);
+        tk::engine::RenderCommand::set_clear_color({ 0.2f, 0.3f, 0.3f, 1.0f });
     }
 
     void detach() override
@@ -122,18 +134,11 @@ public:
     {
         camera_controller_->update(delta);
 
-        tk::engine::RenderCommand::set_clear_color({ 0.2f, 0.3f, 0.3f, 1.0f });
         tk::engine::RenderCommand::clear();
 
         tk::engine::Renderer::begin(*camera_controller_->camera());
 
-        texture1_->bind(0);
-        texture2_->bind(1);
-        for (int i = 0; i < cube_positions_.size(); i++) {
-            glm::mat4 model(1.0f);
-            model = glm::translate(model, cube_positions_[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, angle, { 1.0f, 0.3f, 0.5f });
+        for (const auto& model : cube_models_) {
             tk::engine::Renderer::submit(shader_, va_, model);
         }
 
