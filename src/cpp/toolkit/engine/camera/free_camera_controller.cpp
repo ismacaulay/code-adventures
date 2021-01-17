@@ -67,6 +67,19 @@ namespace engine {
             if (current_camera_ == CameraType::Perspective) {
                 perspective_camera_->set_aspect_ratio(e.width() / e.height());
             }
+        } else if (event.type() == EventType::MouseScroll &&
+                   current_camera_ == CameraType::Perspective) {
+            const MouseScrollEvent& e =
+                static_cast<const MouseScrollEvent&>(event);
+
+            float fov = perspective_camera_->fov();
+            fov -= e.y_offset();
+            if (fov < 1.0f)
+                fov = 1.0f;
+            if (fov > 45.0f)
+                fov = 45.0f;
+
+            perspective_camera_->set_fov(fov);
         }
     }
 

@@ -4,6 +4,7 @@
 
 #include "events/event.h"
 #include "events/input.h"
+#include "frame_time.h"
 #include "layer.h"
 #include "logger/log.h"
 #include "rendering/renderer.h"
@@ -32,9 +33,11 @@ namespace engine {
             running_ = true;
 
             while (running_) {
+                float delta = time_.update();
+
                 if (!minimized_) {
                     for (auto it = layers_.begin(); it != layers_.end(); ++it) {
-                        (*it)->update(0.0f);
+                        (*it)->update(delta);
                     }
                 }
 
@@ -86,6 +89,8 @@ namespace engine {
 
             Renderer::resize(event.width(), event.height());
         }
+
+        FrameTime time_;
         std::shared_ptr<Window> window_;
         std::vector<std::shared_ptr<Layer>> layers_;
         bool running_ = false;

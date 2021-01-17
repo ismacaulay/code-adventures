@@ -16,7 +16,7 @@ namespace engine {
         , near_(near)
         , far_(far)
         , view_(1.0f)
-        , projection_(glm::perspective(fov, aspect, near, far))
+        , projection_(glm::perspective(glm::radians(fov), aspect, near, far))
     {
         view_projection_ = projection_ * view_;
     }
@@ -24,7 +24,16 @@ namespace engine {
     void PerspectiveCamera::set_aspect_ratio(float aspect)
     {
         aspect_ = aspect;
-        projection_ = glm::perspective(fov_, aspect_, near_, far_);
+        projection_ =
+            glm::perspective(glm::radians(fov_), aspect_, near_, far_);
+        view_projection_ = projection_ * view_;
+    }
+
+    void PerspectiveCamera::set_fov(float fov)
+    {
+        fov_ = fov;
+        projection_ =
+            glm::perspective(glm::radians(fov_), aspect_, near_, far_);
         view_projection_ = projection_ * view_;
     }
 

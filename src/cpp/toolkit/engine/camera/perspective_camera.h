@@ -21,6 +21,7 @@ namespace engine {
         }
 
         void set_aspect_ratio(float aspect);
+        void set_fov(float fov);
 
         void look_at(const glm::vec3& position,
                      const glm::vec3& target,

@@ -2,13 +2,14 @@
 #include "tutorial.h"
 
 #include "toolkit/engine.h"
+#include "toolkit/logger.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "geometry.h"
 
-class CoordinateSystems : public Tutorial
+class Camera : public Tutorial
 {
 public:
     std::shared_ptr<tk::engine::VertexArray> va_;
@@ -17,19 +18,31 @@ public:
     std::shared_ptr<tk::engine::Texture2D> texture2_;
 
     std::shared_ptr<tk::engine::FreeCameraController> camera_controller_;
-    std::vector<glm::vec3> cubePositions_;
 
-    CoordinateSystems()
-        : Tutorial("Coordinate Systems")
+    std::vector<glm::vec3> cube_positions_;
+
+    Camera()
+        : Tutorial("Camera")
     {
-        auto camera = std::make_shared<tk::engine::PerspectiveCamera>(
-            45.0f, 1280.0f / 720.0f, 0.1f, 100.0f);
+        float aspect_ratio = 1280.0f / 720.0f;
+
+        auto perspective_camera =
+            std::make_shared<tk::engine::PerspectiveCamera>(
+                45.0f, aspect_ratio, 0.1f, 100.0f);
+
         camera_controller_ =
             std::make_shared<tk::engine::FreeCameraController>();
-        camera_controller_->set_perspective_camera(camera);
+        camera_controller_->set_perspective_camera(perspective_camera);
+
+        // orthographic_camera_ =
+        // std::make_shared<tk::engine::OrthographicCamera>(
+        //     -aspect_ratio, aspect_ratio, -1.0f, 1.0f, 0.1f, 100.0f);
+        // camera_controller_.set_orthographic_camera(orthographic_camera_);
+
         camera_controller_->select_camera(tk::engine::CameraType::Perspective);
+        camera_controller_->set_position({ 0.0f, 0.0f, 3.0f });
     }
-    ~CoordinateSystems() = default;
+    ~Camera() = default;
 
     void attach() override
     {
@@ -87,9 +100,7 @@ public:
         texture2_ = tk::engine::Texture2D::create("assets/awesomeface.png");
         shader_->set_uniform_int("u_texture2", 1);
 
-        camera_controller_->set_position({ 0.0f, 0.0f, 3.0f });
-
-        cubePositions_ = {
+        cube_positions_ = {
             glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
             glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
             glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
@@ -118,14 +129,20 @@ public:
 
         texture1_->bind(0);
         texture2_->bind(1);
-        for (int i = 0; i < cubePositions_.size(); i++) {
+        for (int i = 0; i < cube_positions_.size(); i++) {
             glm::mat4 model(1.0f);
-            model = glm::translate(model, cubePositions_[i]);
+            model = glm::translate(model, cube_positions_[i]);
             float angle = 20.0f * i;
             model = glm::rotate(model, angle, { 1.0f, 0.3f, 0.5f });
             tk::engine::Renderer::submit(shader_, va_, model);
         }
 
         tk::engine::Renderer::end();
+    }
+
+    bool process_event(const tk::engine::Event& event) override
+    {
+        camera_controller_->on_event(event);
+        return false;
     }
 };

@@ -1,5 +1,6 @@
 set(TOOLKIT_SRC_FILES
     engine/engine.cpp
+    engine/frame_time.cpp
     engine/time.cpp
     engine/window.cpp
 
