@@ -60,19 +60,16 @@ namespace engine {
 
         glBindVertexArray(renderer_id_);
         buffer->bind();
-        glVertexAttribPointer(
-            0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-        // for (const auto& element : layout.elements()) {
-        //     glEnableVertexAttribArray(vertex_buffer_idx_);
-        //     glVertexAttribPointer(vertex_buffer_idx_,
-        //                           element.count,
-        //                           shader_type_to_opengl_type(element.type),
-        //                           element.normalized ? GL_TRUE : GL_FALSE,
-        //                           layout.stride(),
-        //                           (const void*)element.offset);
-        //     vertex_buffer_idx_++;
-        // }
+        for (const auto& element : layout.elements()) {
+            glEnableVertexAttribArray(vertex_buffer_idx_);
+            glVertexAttribPointer(vertex_buffer_idx_,
+                                  element.count,
+                                  shader_type_to_opengl_type(element.type),
+                                  element.normalized ? GL_TRUE : GL_FALSE,
+                                  layout.stride(),
+                                  (const void*)element.offset);
+            vertex_buffer_idx_++;
+        }
         vertex_buffers_.push_back(buffer);
     }
 
@@ -86,6 +83,11 @@ namespace engine {
     const std::shared_ptr<IndexBuffer>& VertexArray::index_buffer() const
     {
         return index_buffer_;
+    }
+
+    std::shared_ptr<VertexArray> VertexArray::create()
+    {
+        return std::make_shared<VertexArray>();
     }
 }
 }

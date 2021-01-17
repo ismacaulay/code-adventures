@@ -8,6 +8,7 @@
 #include "toolkit/engine/render_command.h"
 #include "toolkit/engine/renderer.h"
 #include "toolkit/engine/shader.h"
+#include "toolkit/engine/time.h"
 #include "toolkit/engine/vertex_array.h"
 #include "toolkit/engine/vertex_buffer.h"
 

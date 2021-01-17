@@ -1,20 +1,20 @@
 #pragma once
-#include "toolkit/engine.h"
-#include "toolkit/logger.h"
+#include "tutorial.h"
 
-class HelloTriangle : public tk::engine::Layer
+class HelloTriangle : public Tutorial
 {
 public:
     std::shared_ptr<tk::engine::VertexArray> va_;
     std::shared_ptr<tk::engine::Shader> shader_;
     tk::engine::OrthographicCamera camera_;
 
-    HelloTriangle() {}
+    HelloTriangle()
+        : Tutorial("Hello Triangle")
+    {}
     ~HelloTriangle(){};
 
     void attach() override
     {
-        CAT_LOG_DEBUG("Hello triangle");
         camera_.set_position({ 0.0, 0.0, 5.0 });
 
         // clang-format off

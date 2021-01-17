@@ -23,6 +23,7 @@ namespace engine {
         void set_index_buffer(std::shared_ptr<IndexBuffer> buffer);
         const std::shared_ptr<IndexBuffer>& index_buffer() const;
 
+        static std::shared_ptr<VertexArray> create();
     private:
         uint32_t renderer_id_;
         uint32_t vertex_buffer_idx_;

@@ -21,6 +21,8 @@ namespace engine {
 
         // void set_data(void* data, size_t size);
 
+        static std::shared_ptr<VertexBuffer> create(void* data, size_t size);
+
     private:
         uint32_t renderer_id_;
         uint32_t size_;

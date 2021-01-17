@@ -1,15 +1,16 @@
 set(TOOLKIT_SRC_FILES
-    engine/camera/orthographic_camera.cpp
     engine/buffer_layout.cpp
+    engine/camera/orthographic_camera.cpp
     engine/engine.cpp
     engine/index_buffer.cpp
+    engine/opengl_renderer.cpp
+    engine/render_command.cpp
+    engine/renderer.cpp
     engine/shader.cpp
+    engine/time.cpp
     engine/vertex_array.cpp
     engine/vertex_buffer.cpp
     engine/window.cpp
-    engine/opengl_renderer.cpp
-    engine/renderer.cpp
-    engine/render_command.cpp
 )
 
 add_library(toolkit STATIC "${TOOLKIT_SRC_FILES}")

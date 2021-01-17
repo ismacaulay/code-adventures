@@ -46,5 +46,10 @@ namespace engine {
     //
     //     size_ = size;
     // }
+
+    std::shared_ptr<VertexBuffer> VertexBuffer::create(void* data, size_t size)
+    {
+        return std::make_shared<VertexBuffer>(data, size);
+    }
 }
 }
