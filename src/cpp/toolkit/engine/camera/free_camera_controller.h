@@ -23,7 +23,7 @@ namespace engine {
         glm::vec3 front_ = { 0.0f, 0.0f, -1.0f };
         glm::vec3 up_ = { 0.0f, 1.0f, 0.0f };
 
-        float camera_speed_ = 3.0f;
+        float camera_speed_ = 2.5f;
         float yaw_ = -90.0f;
         float pitch_ = 0.0f;
 

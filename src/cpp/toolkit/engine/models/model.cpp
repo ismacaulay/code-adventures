@@ -1,28 +1,68 @@
 #include "model.h"
 
+#include "defines.h"
 #include "engine/rendering/shader.h"
+#include "math/box.h"
 #include "mesh.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace tk {
 namespace engine {
+    Model::Model()
+        : box_(std::make_unique<math::Box>())
+    {}
     Model::~Model() {}
 
     void Model::add_mesh(std::unique_ptr<Mesh> mesh)
     {
         meshes_.push_back(std::move(mesh));
+        update_bounding_box();
     }
 
     void Model::render(const std::shared_ptr<Shader>& shader)
     {
         glm::mat4 transform = glm::mat4(1.0f);
-        transform = glm::translate(transform, glm::vec3(0.0f, -1.75f, 0.0f));
-        transform = glm::scale(transform, { 0.2f, 0.2f, 0.2f });
-        shader->set_uniform_mat4("u_model", transform);
+        transform = glm::translate(transform, -box_->centre());
         for (auto& mesh : meshes_) {
-            mesh->render(shader);
+            mesh->render(shader, transform);
         }
+    }
+
+    void Model::update_bounding_box()
+    {
+        if (meshes_.size() == 0) {
+            return;
+        }
+
+        glm::vec3 min = { MAX_F32, MAX_F32, MAX_F32 };
+        glm::vec3 max = { MIN_F32, MIN_F32, MIN_F32 };
+        for (auto& mesh : meshes_) {
+            if (auto mesh_box = mesh->compute_bounding_box()) {
+                if (mesh_box->min.x < min.x) {
+                    min.x = mesh_box->min.x;
+                }
+                if (mesh_box->min.y < min.y) {
+                    min.y = mesh_box->min.y;
+                }
+                if (mesh_box->min.z < min.z) {
+                    min.z = mesh_box->min.z;
+                }
+
+                if (mesh_box->max.x > max.x) {
+                    max.x = mesh_box->max.x;
+                }
+                if (mesh_box->max.y > max.y) {
+                    max.y = mesh_box->max.y;
+                }
+                if (mesh_box->max.z > max.z) {
+                    max.z = mesh_box->max.z;
+                }
+            }
+        }
+
+        box_->min = min;
+        box_->max = max;
     }
 }
 }

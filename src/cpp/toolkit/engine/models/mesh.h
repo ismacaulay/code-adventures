@@ -5,6 +5,10 @@
 #include <glm/glm.hpp>
 
 namespace tk {
+namespace math {
+    struct Box;
+}
+
 namespace engine {
     class Shader;
     class VertexArray;
@@ -28,9 +32,12 @@ namespace engine {
         explicit Mesh(const std::vector<Vertex>& vertices,
                       const std::vector<Index>& indices,
                       const std::vector<std::shared_ptr<Texture2D>>& textures);
-        ~Mesh() = default;
+        ~Mesh();
 
-        void render(const std::shared_ptr<Shader>& shader);
+        void render(const std::shared_ptr<Shader>& shader,
+                    const glm::mat4& transform = glm::mat4(1.0f));
+
+        math::Box* compute_bounding_box();
 
     private:
         std::vector<Vertex> vertices_;
@@ -38,6 +45,8 @@ namespace engine {
         std::vector<std::shared_ptr<Texture2D>> textures_;
 
         std::shared_ptr<VertexArray> va_;
+
+        std::unique_ptr<math::Box> box_;
     };
 }
 }
