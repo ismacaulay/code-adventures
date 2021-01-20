@@ -6,6 +6,7 @@
 #include "shaders.h"
 #include "textures.h"
 #include "transformations.h"
+#include "assimp_models.h"
 
 static tk::engine::WindowProps WINDOW_PROPS =
     tk::engine::WindowProps{ "ca: learn-opengl", 1280, 720 };
@@ -19,7 +20,8 @@ int main()
     // auto tutorial_layer = std::make_shared<Textures>();
     // auto tutorial_layer = std::make_shared<Transformations>();
     // auto tutorial_layer = std::make_shared<CoordinateSystems>();
-    auto tutorial_layer = std::make_shared<Camera>();
+    // auto tutorial_layer = std::make_shared<Camera>();
+    auto tutorial_layer = std::make_shared<AssimpModels>();
 
     auto engine = std::make_shared<tk::engine::Engine>(WINDOW_PROPS);
     engine->push_layer(tutorial_layer);
