@@ -2,6 +2,8 @@
 #include <functional>
 #include <memory>
 
+#include <glm/glm.hpp>
+
 namespace tk {
 namespace engine {
     struct WindowProps;
@@ -15,6 +17,9 @@ namespace engine {
 
         bool should_close();
         void update();
+
+        uint32_t width() const;
+        uint32_t height() const;
 
         void set_event_callback(std::function<void(const Event&)> callback);
 

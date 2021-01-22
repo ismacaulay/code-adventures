@@ -31,7 +31,7 @@ public:
     }
     ~CoordinateSystems() = default;
 
-    void attach() override
+    void attach(const tk::engine::Engine&) override
     {
         auto vb = tk::engine::VertexBuffer::create(
             CUBE_VERTICES_WITH_TEXCOORDS.data(),
@@ -98,7 +98,7 @@ public:
         };
     }
 
-    void detach() override
+    void detach(const tk::engine::Engine& engine) override
     {
         camera_controller_ = nullptr;
         texture2_ = nullptr;

@@ -47,10 +47,6 @@ namespace engine {
 
         void shutdown()
         {
-            for (const auto& layer : layers_) {
-                layer->detach();
-            }
-            layers_.clear();
 
             Renderer::shutdown();
             window_ = nullptr;
@@ -65,7 +61,6 @@ namespace engine {
 
             if (event.type() == EventType::WindowResize) {
                 on_window_resize(static_cast<const WindowResizeEvent&>(event));
-                return;
             }
 
             for (auto it = layers_.rbegin(); it != layers_.rend(); it++) {
@@ -102,11 +97,21 @@ namespace engine {
     {}
 
     void Engine::run() { p_->run(); }
-    void Engine::shutdown() { p_->shutdown(); }
+    void Engine::shutdown()
+    {
+        for (const auto& layer : p_->layers_) {
+            layer->detach(*this);
+        }
+        p_->layers_.clear();
+
+        p_->shutdown();
+    }
     void Engine::push_layer(std::shared_ptr<Layer> layer)
     {
         p_->layers_.push_back(layer);
-        layer->attach();
+        layer->attach(*this);
     }
+
+    const Window& Engine::window() const { return *p_->window_; }
 }
 }

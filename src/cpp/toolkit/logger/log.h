@@ -36,6 +36,11 @@ namespace logger {
 #define CAT_LOG_CRITICAL(...) spdlog::critical(__VA_ARGS__)
 
 namespace std {
+static inline std::ostream& operator<<(std::ostream& os, const glm::vec2& v)
+{
+    return os << glm::to_string(v);
+}
+
 static inline std::ostream& operator<<(std::ostream& os, const glm::vec3& v)
 {
     return os << glm::to_string(v);

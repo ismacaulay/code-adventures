@@ -4,9 +4,11 @@
 #include "toolkit/engine/layer.h"
 #include "toolkit/engine/props.h"
 #include "toolkit/engine/time.h"
+#include "toolkit/engine/window.h"
 
 #include "toolkit/engine/camera/camera.h"
 #include "toolkit/engine/camera/free_camera_controller.h"
+#include "toolkit/engine/camera/orbit_camera_controller.h"
 #include "toolkit/engine/camera/orthographic_camera.h"
 #include "toolkit/engine/camera/perspective_camera.h"
 

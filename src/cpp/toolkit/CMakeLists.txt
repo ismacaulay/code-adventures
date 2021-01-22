@@ -6,6 +6,7 @@ set(TOOLKIT_SRC_FILES
 
     engine/camera/camera_controller.cpp
     engine/camera/free_camera_controller.cpp
+    engine/camera/orbit_camera_controller.cpp
     engine/camera/orthographic_camera.cpp
     engine/camera/perspective_camera.cpp
 
@@ -24,6 +25,8 @@ set(TOOLKIT_SRC_FILES
     engine/rendering/texture2d.cpp
     engine/rendering/vertex_array.cpp
     engine/rendering/vertex_buffer.cpp
+
+    math/math.cpp
 )
 
 add_library(toolkit STATIC "${TOOLKIT_SRC_FILES}")

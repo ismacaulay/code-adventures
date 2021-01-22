@@ -53,12 +53,17 @@ namespace engine {
                 }
             });
 
+            data_.width = props.width;
+            data_.height = props.height;
             glfwSetWindowSizeCallback(
                 window_, [](GLFWwindow* window, int width, int height) {
                     WindowData* data =
                         (WindowData*)glfwGetWindowUserPointer(window);
-                    WindowResizeEvent event(width, height);
+                    data->width = width;
+                    data->height = height;
+
                     if (data->event_callback) {
+                        WindowResizeEvent event(width, height);
                         data->event_callback(event);
                     }
                 });
@@ -188,6 +193,9 @@ namespace engine {
     Window::~Window() {}
 
     void Window::update() { p_->update(); }
+
+    uint32_t Window::width() const { return p_->data_.width; }
+    uint32_t Window::height() const { return p_->data_.height; }
 
     void Window::set_event_callback(std::function<void(const Event&)> callback)
     {

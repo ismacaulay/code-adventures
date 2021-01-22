@@ -44,7 +44,7 @@ public:
     }
     ~Camera() = default;
 
-    void attach() override
+    void attach(const tk::engine::Engine&) override
     {
         auto vb = tk::engine::VertexBuffer::create(
             CUBE_VERTICES_WITH_TEXCOORDS.data(),
@@ -121,7 +121,7 @@ public:
         tk::engine::RenderCommand::set_clear_color({ 0.2f, 0.3f, 0.3f, 1.0f });
     }
 
-    void detach() override
+    void detach(const tk::engine::Engine&) override
     {
         camera_controller_ = nullptr;
         texture2_ = nullptr;

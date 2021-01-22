@@ -13,7 +13,7 @@ public:
     {}
     ~HelloTriangle(){};
 
-    void attach() override
+    void attach(const tk::engine::Engine&) override
     {
         camera_.set_position({ 0.0, 0.0, 5.0 });
 
@@ -84,7 +84,7 @@ public:
         tk::engine::RenderCommand::set_fill_mode(tk::engine::FillMode::Line);
     }
 
-    void detach() override
+    void detach(const tk::engine::Engine& engine) override
     {
         shader_ = nullptr;
         va_ = nullptr;

@@ -18,7 +18,7 @@ public:
     {}
     ~Shaders() = default;
 
-    void attach() override
+    void attach(const tk::engine::Engine&) override
     {
         auto vb = tk::engine::VertexBuffer::create(
             TRIANGLE_VERTICES_WITH_COLOR.data(),
@@ -68,7 +68,7 @@ public:
         shader_ = tk::engine::Shader::from_source(vertex_src, fragment_src);
     }
 
-    void detach() override
+    void detach(const tk::engine::Engine& engine) override
     {
         shader_ = nullptr;
         va_ = nullptr;
@@ -84,7 +84,8 @@ public:
         // float time = tk::engine::Time::get_time();
         // float green_value = (sin(time) / 2.0f) + 0.5f;
         // shader_->bind();
-        // shader_->set_uniform_vec4("u_color", { 0.0f, green_value, 0.0f, 1.0f });
+        // shader_->set_uniform_vec4("u_color", { 0.0f, green_value, 0.0f, 1.0f
+        // });
 
         tk::engine::Renderer::submit(shader_, va_);
 
