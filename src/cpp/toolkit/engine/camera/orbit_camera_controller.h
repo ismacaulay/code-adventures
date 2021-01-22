@@ -1,6 +1,7 @@
 #pragma once
 
 #include "camera_controller.h"
+#include "math/math.h"
 
 namespace tk {
 namespace engine {
@@ -30,7 +31,7 @@ namespace engine {
         uint32_t height_;
 
         glm::vec2 start_;
-        glm::vec3 spherical_delta_;
+        math::Spherical rotate_delta_;
         glm::vec3 pan_delta_;
 
         glm::vec3 position_;

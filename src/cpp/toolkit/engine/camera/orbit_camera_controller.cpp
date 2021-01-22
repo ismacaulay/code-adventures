@@ -16,7 +16,7 @@ namespace engine {
         : width_(width)
         , height_(height)
         , start_(0.0f)
-        , spherical_delta_(0.0f)
+        , rotate_delta_{ 0.0f, 0.0f, 0.0f }
         , pan_delta_(0.0f)
         , position_(0.0f)
         , target_(0.0f)
@@ -27,12 +27,13 @@ namespace engine {
     {
         glm::vec3 offset = position_ - target_;
 
-        glm::vec3 spherical = math::to_spherical(offset);
-        spherical.x = std::max(0.0f, spherical.x);
-        spherical.y += spherical_delta_.y;
-        spherical.z = std::max(EPS,
-                               std::min(static_cast<float>(M_PI) - EPS,
-                                        spherical.z + spherical_delta_.z));
+        auto spherical = math::to_spherical(offset);
+
+        spherical.r = std::max(0.0f, spherical.r);
+        spherical.theta += rotate_delta_.theta;
+        spherical.phi = std::max(EPS,
+                                 std::min(static_cast<float>(M_PI) - EPS,
+                                          spherical.phi + rotate_delta_.phi));
 
         target_ += pan_delta_;
 
@@ -41,7 +42,7 @@ namespace engine {
 
         camera()->look_at(position_, target_, up_);
 
-        spherical_delta_ = glm::vec3(0.0f);
+        rotate_delta_ = math::Spherical{ 0.0f, 0.0f, 0.0f };
         pan_delta_ = glm::vec3(0.0f);
     }
 
@@ -66,25 +67,40 @@ namespace engine {
             glm::vec2 delta = end - start_;
 
             if (state_ == ControlState::Rotate) {
-                spherical_delta_.y -=
+                // rotate based on the mouse delta.
+                // a full width/height delta is a distance of 2pi
+                rotate_delta_.theta -=
                     2.0f * M_PI * delta.x / static_cast<float>(width_);
-                spherical_delta_.z -=
+                rotate_delta_.phi -=
                     2.0f * M_PI * delta.y / static_cast<float>(height_);
             } else if (state_ == ControlState::Pan) {
 
                 if (current_camera_ == CameraType::Perspective) {
                     glm::vec3 offset = position_ - target_;
+
+                    // compute the distance from the centre to the top of the
+                    // screen based on half the fov
                     float target_distance =
                         glm::length(offset) *
                         tan(glm::radians(perspective_camera_->fov()) / 2);
 
                     const glm::mat4& view = perspective_camera_->view();
 
+                    // 2 * target_distance: the total height based on the fov
+                    // right: the right vector of the camera
+                    // delta.x / height: the ratio of the distance pan wrt to
+                    //                   the height. the height is used here so
+                    //                   that it is not distorted by the aspect
+                    //                   ratio since the target_distance is
+                    //                   based on the vertical fov
                     glm::vec3 right =
                         glm::vec3(view[0][0], view[1][0], view[2][0]);
                     pan_delta_ -= right * 2.0f * target_distance *
                                   (delta.x / static_cast<float>(height_));
 
+                    // up: the up vector of the camera
+                    // delta.y / height: the ratio of the distance pan wrt to
+                    //                   the height.
                     glm::vec3 up =
                         glm::vec3(view[0][1], view[1][1], view[2][1]);
                     pan_delta_ += up * 2.0f * target_distance *
