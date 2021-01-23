@@ -59,6 +59,17 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.values = util.Counter() # A Counter is a dict with default 0
         self.runValueIteration()
 
+    def _compute_value_for_state(self, state):
+        max_a = -10000
+        for a in self.mdp.getPossibleActions(state):
+            value = 0
+            for ns, p in self.mdp.getTransitionStatesAndProbs(state, a):
+                value += p * (self.mdp.getReward(state, a, ns) + self.discount * self.values[ns])
+            if value > max_a:
+                max_a = value
+        return max_a
+
+
     def runValueIteration(self):
         # Write value iteration code here
         for i in range(0, self.iterations):
@@ -68,14 +79,7 @@ class ValueIterationAgent(ValueEstimationAgent):
                     vector_k[s] = self.mdp.getReward(s, None, None)
                     continue
 
-                max_a = -10000
-                for a in self.mdp.getPossibleActions(s):
-                    value = 0
-                    for ns, p in self.mdp.getTransitionStatesAndProbs(s, a):
-                        value += p * (self.mdp.getReward(s, a, ns) + self.discount * self.values[ns])
-                    if value > max_a:
-                        max_a = value
-                vector_k[s] = max_a
+                vector_k[s] = self._compute_value_for_state(s)
             self.values = vector_k
 
     def getValue(self, state):
@@ -153,7 +157,14 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
         ValueIterationAgent.__init__(self, mdp, discount, iterations)
 
     def runValueIteration(self):
-        "*** YOUR CODE HERE ***"
+        states = self.mdp.getStates()
+        for i in range(0, self.iterations):
+            s = states[i % len(states)]
+            if self.mdp.isTerminal(s):
+                continue
+
+            self.values[s] = self._compute_value_for_state(s)
+
 
 class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
     """
