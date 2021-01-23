@@ -22,12 +22,11 @@ namespace engine {
 
         void set_aspect_ratio(float aspect);
         void set_fov(float fov);
+        float fov() const { return fov_; }
 
         void look_at(const glm::vec3& position,
                      const glm::vec3& target,
                      const glm::vec3& up) override;
-
-        float fov() const override { return fov_; }
 
     private:
         float fov_;

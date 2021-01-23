@@ -31,6 +31,7 @@ add_subdirectory(toolkit)
 
 add_subdirectory(projects/hello-world)
 add_subdirectory(projects/learn-opengl)
+add_subdirectory(projects/orbit-controls)
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Setting CMAKE_INSTALL_PREFIX" FORCE)

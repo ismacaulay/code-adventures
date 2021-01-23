@@ -33,6 +33,7 @@ namespace engine {
         glm::vec2 start_;
         math::Spherical rotate_delta_;
         glm::vec3 pan_delta_;
+        float dolly_scale_;
 
         glm::vec3 position_;
         glm::vec3 target_;

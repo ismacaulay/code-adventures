@@ -16,8 +16,6 @@ namespace engine {
         virtual void look_at(const glm::vec3& position,
                              const glm::vec3& target,
                              const glm::vec3& up) = 0;
-
-        virtual float fov() const = 0;
     };
 
 }

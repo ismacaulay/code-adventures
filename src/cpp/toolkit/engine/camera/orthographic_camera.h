@@ -14,8 +14,9 @@ namespace engine {
                                     float right,
                                     float bottom,
                                     float top,
-                                    float near = -1.0f,
-                                    float far = 1.0f);
+                                    float near,
+                                    float far,
+                                    float aspect);
         ~OrthographicCamera() = default;
 
         const glm::mat4& view() const override { return view_; }
@@ -29,35 +30,28 @@ namespace engine {
                      const glm::vec3& target,
                      const glm::vec3& up) override;
 
-        float fov() const override
-        {
-            CAT_ABORT("[OrthographicCamera] fov not implemented");
-            return 0.0f;
-        }
+        float zoom() const;
+        void set_zoom(float zoom);
 
-        void set_projection(float left,
-                            float right,
-                            float bottom,
-                            float top,
-                            float near = -1.0f,
-                            float far = 1.0f);
+        float aspect_ratio() const;
+        void set_aspect_ratio(float aspect);
 
-        void set_position(const glm::vec3& position);
-        const glm::vec3& position() const { return position_; }
-
-        void set_rotation(float radians);
-        float rotation() const { return rotation_; }
+        float width() const;
+        float height() const;
 
     private:
-        void recalculate();
+        void update_matrix();
 
     private:
         glm::mat4 view_;
         glm::mat4 projection_;
         glm::mat4 view_projection_;
 
-        glm::vec3 position_;
-        float rotation_;
+        float left_, right_;
+        float bottom_, top_;
+        float near_, far_;
+        float zoom_;
+        float aspect_;
     };
 }
 }

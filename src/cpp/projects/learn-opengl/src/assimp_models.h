@@ -6,8 +6,7 @@
 class AssimpModels : public Tutorial
 {
 public:
-    // std::shared_ptr<tk::engine::FreeCameraController> camera_controller_;
-    std::shared_ptr<tk::engine::OrbitCameraController> camera_controller_;
+    std::shared_ptr<tk::engine::FreeCameraController> camera_controller_;
 
     std::shared_ptr<tk::engine::Shader> model_shader_;
     std::unique_ptr<tk::engine::Model> model_;
@@ -28,18 +27,16 @@ public:
             std::make_shared<tk::engine::PerspectiveCamera>(
                 glm::radians(45.0f), aspect_ratio, 0.1f, 100.0f);
 
-        // camera_controller_ =
-        //     std::make_shared<tk::engine::FreeCameraController>();
         camera_controller_ =
-            std::make_shared<tk::engine::OrbitCameraController>(
-                window.width(), window.height());
+            std::make_shared<tk::engine::FreeCameraController>();
         camera_controller_->set_perspective_camera(perspective_camera);
         camera_controller_->select_camera(tk::engine::CameraType::Perspective);
         camera_controller_->set_position({ 0.0f, 0.0f, 10.0f });
 
         model_shader_ =
-            tk::engine::Shader::from_file("assets/shaders/bunny_shader.glsl");
-        model_ = tk::engine::ModelLoader::load("assets/models/bunny/bunny.obj");
+            tk::engine::Shader::from_file("assets/shaders/model_shader.glsl");
+        model_ = tk::engine::ModelLoader::load(
+            "assets/models/nanosuit/nanosuit.obj");
     }
 
     void detach(const tk::engine::Engine& engine) override
