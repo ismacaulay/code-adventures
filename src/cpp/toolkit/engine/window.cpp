@@ -177,6 +177,17 @@ namespace engine {
             glfwPollEvents();
         }
 
+        void set_cursor_enabled(bool enabled)
+        {
+            cursor_enabled_ = enabled;
+            glfwSetInputMode(window_,
+                             GLFW_CURSOR,
+                             enabled ? GLFW_CURSOR_NORMAL
+                                     : GLFW_CURSOR_DISABLED);
+        }
+
+        bool cursor_enabled() const { return cursor_enabled_; }
+
         struct WindowData
         {
             uint32_t width, height;
@@ -185,6 +196,7 @@ namespace engine {
 
         WindowData data_;
         GLFWwindow* window_;
+        bool cursor_enabled_;
     };
 
     Window::Window(const WindowProps& props)
@@ -194,8 +206,18 @@ namespace engine {
 
     void Window::update() { p_->update(); }
 
+    void Window::set_cursor_enabled(bool enabled)
+    {
+        p_->set_cursor_enabled(enabled);
+    }
+    bool Window::cursor_enabled() const { return p_->cursor_enabled(); }
+
     uint32_t Window::width() const { return p_->data_.width; }
     uint32_t Window::height() const { return p_->data_.height; }
+    float Window::aspect() const
+    {
+        return static_cast<float>(width()) / static_cast<float>(height());
+    }
 
     void Window::set_event_callback(std::function<void(const Event&)> callback)
     {

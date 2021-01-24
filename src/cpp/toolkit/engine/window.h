@@ -18,8 +18,12 @@ namespace engine {
         bool should_close();
         void update();
 
+        void set_cursor_enabled(bool enabled);
+        bool cursor_enabled() const;
+
         uint32_t width() const;
         uint32_t height() const;
+        float aspect() const;
 
         void set_event_callback(std::function<void(const Event&)> callback);
 
