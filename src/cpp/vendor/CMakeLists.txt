@@ -63,3 +63,9 @@ target_include_directories(stb PUBLIC stb/include)
 target_compile_features(stb PUBLIC cxx_std_17)
 set_target_properties(stb PROPERTIES CXX_EXTENSIONS OFF)
 
+#
+# catch
+#
+add_library(catch2 INTERFACE)
+target_include_directories(catch2 INTERFACE catch/include)
+

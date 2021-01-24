@@ -22,6 +22,7 @@ endif()
 # set(THREADS_PREFER_THREAD_FLAG ON)
 # find_package(Threads REQUIRED)
 
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
@@ -32,6 +33,9 @@ add_subdirectory(toolkit)
 add_subdirectory(projects/hello-world)
 add_subdirectory(projects/learn-opengl)
 add_subdirectory(projects/orbit-controls)
+
+enable_testing()
+add_subdirectory(tests)
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Setting CMAKE_INSTALL_PREFIX" FORCE)
