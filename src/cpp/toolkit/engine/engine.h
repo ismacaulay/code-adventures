@@ -19,6 +19,7 @@ namespace engine {
         void push_layer(std::shared_ptr<Layer> layer);
 
         const Window& window() const;
+        Window& window();
 
     private:
         class Impl;

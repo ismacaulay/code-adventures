@@ -113,5 +113,6 @@ namespace engine {
     }
 
     const Window& Engine::window() const { return *p_->window_; }
+    Window& Engine::window() { return *p_->window_; }
 }
 }
