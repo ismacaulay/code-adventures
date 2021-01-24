@@ -184,5 +184,53 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
         ValueIterationAgent.__init__(self, mdp, discount, iterations)
 
     def runValueIteration(self):
-        "*** YOUR CODE HERE ***"
+        predecessors = self._compute_predecessors()
+        queue = util.PriorityQueue()
+        for s in self.mdp.getStates():
+            if self.mdp.isTerminal(s):
+                continue
 
+            diff = abs(self.values[s] - self._compute_max_q_value(s))
+            queue.update(s, -diff)
+
+        for i in range(0, self.iterations):
+            if queue.isEmpty():
+                break
+
+            s = queue.pop()
+            if not self.mdp.isTerminal(s):
+                self.values[s] = self._compute_value_for_state(s)
+
+            for p in predecessors.get(s, set()):
+                if self.mdp.isTerminal(p):
+                    continue
+
+                diff = abs(self.values[p] - self._compute_max_q_value(p))
+                if diff > self.theta:
+                    queue.push(p, -diff)
+
+
+    def _compute_predecessors(self):
+        predecessors = {}
+        for s in self.mdp.getStates():
+            for a in self.mdp.getPossibleActions(s):
+                for ns, p in self.mdp.getTransitionStatesAndProbs(s, a):
+                    if p > 0:
+                        # predecessors needs to a be an ORDERED set
+                        cur = predecessors.get(ns, [])
+                        if s not in cur:
+                            cur.append(s)
+                        predecessors[ns] = cur
+        return predecessors
+
+    def _compute_max_q_value(self, state):
+        actions = self.mdp.getPossibleActions(state)
+        if len(actions) == 0:
+            return 0
+
+        q_value = -10000
+        for a in self.mdp.getPossibleActions(state):
+            v = self.computeQValueFromValues(state, a)
+            if v > q_value:
+                q_value = v
+        return q_value
