@@ -32,6 +32,14 @@ namespace engine {
                 glm::normalize(glm::cross(front_, up_)) * camera_speed_ * delta;
         }
 
+        if (Input::is_key_pressed(CAT_KEY_SPACE)) {
+            position_ += up_ * camera_speed_ * delta;
+        }
+
+        if (Input::is_key_pressed(CAT_KEY_C)) {
+            position_ -= up_ * camera_speed_ * delta;
+        }
+
         camera()->look_at(position_, position_ + front_, up_);
     }
 
