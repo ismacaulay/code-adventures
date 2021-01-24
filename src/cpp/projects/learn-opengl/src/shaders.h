@@ -18,7 +18,7 @@ public:
     {}
     ~Shaders() = default;
 
-    void attach(const tk::engine::Engine&) override
+    void attach(tk::engine::Engine&) override
     {
         auto vb = tk::engine::VertexBuffer::create(
             TRIANGLE_VERTICES_WITH_COLOR.data(),
@@ -68,7 +68,7 @@ public:
         shader_ = tk::engine::Shader::from_source(vertex_src, fragment_src);
     }
 
-    void detach(const tk::engine::Engine& engine) override
+    void detach(tk::engine::Engine& engine) override
     {
         shader_ = nullptr;
         va_ = nullptr;

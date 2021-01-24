@@ -16,7 +16,7 @@ public:
     {}
     ~AssimpModels() = default;
 
-    void attach(const tk::engine::Engine& engine) override
+    void attach(tk::engine::Engine& engine) override
     {
         const auto& window = engine.window();
 
@@ -39,7 +39,7 @@ public:
             "assets/models/nanosuit/nanosuit.obj");
     }
 
-    void detach(const tk::engine::Engine& engine) override
+    void detach(tk::engine::Engine& engine) override
     {
         model_ = nullptr;
         model_shader_ = nullptr;

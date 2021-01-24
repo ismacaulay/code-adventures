@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 
 namespace tk {
 namespace engine {
@@ -11,9 +12,9 @@ namespace engine {
     public:
         virtual ~Layer() = default;
 
-        virtual void attach(const Engine& engine) {}
+        virtual void attach(Engine& engine) {}
         virtual void update(float delta) = 0;
-        virtual void detach(const Engine& engine) {}
+        virtual void detach(Engine& engine) {}
 
         virtual bool process_event(const Event& event) { return false; }
     };

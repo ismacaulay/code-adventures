@@ -13,10 +13,9 @@ public:
     {}
     ~HelloTriangle(){};
 
-    void attach(const tk::engine::Engine&) override
+    void attach(tk::engine::Engine&) override
     {
-        camera_.set_position({ 0.0, 0.0, 5.0 });
-
+        camera_.look_at({ 0.0f, 0.0f, 5.0f }, glm::vec3(0.0f), { 0.0f, 1.0f, 0.0f });
         // clang-format off
         // std::vector<float> vertices = {
         //     -0.5f, -0.5f, 0.0f,
@@ -84,7 +83,7 @@ public:
         tk::engine::RenderCommand::set_fill_mode(tk::engine::FillMode::Line);
     }
 
-    void detach(const tk::engine::Engine& engine) override
+    void detach(tk::engine::Engine& engine) override
     {
         shader_ = nullptr;
         va_ = nullptr;

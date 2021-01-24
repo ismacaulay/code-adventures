@@ -24,7 +24,7 @@ public:
     {}
     ~Transformations() = default;
 
-    void attach(const tk::engine::Engine&) override
+    void attach(tk::engine::Engine&) override
     {
 
         auto vb = tk::engine::VertexBuffer::create(
@@ -91,7 +91,7 @@ public:
         shader_->set_uniform_int("u_texture2", 1);
     }
 
-    void detach(const tk::engine::Engine& engine) override
+    void detach(tk::engine::Engine& engine) override
     {
         texture2_ = nullptr;
         texture1_ = nullptr;

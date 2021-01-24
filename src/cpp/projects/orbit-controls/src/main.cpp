@@ -12,7 +12,7 @@ public:
     OrbitControls() = default;
     ~OrbitControls() = default;
 
-    void attach(const tk::engine::Engine& engine) override
+    void attach(tk::engine::Engine& engine) override
     {
         const auto& window = engine.window();
 
@@ -43,7 +43,7 @@ public:
         tk::engine::RenderCommand::set_fill_mode(tk::engine::FillMode::Line);
     }
 
-    void detach(const tk::engine::Engine& engine) override
+    void detach(tk::engine::Engine& engine) override
     {
         model_ = nullptr;
         model_shader_ = nullptr;
