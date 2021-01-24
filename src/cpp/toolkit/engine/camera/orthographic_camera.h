@@ -14,6 +14,12 @@ namespace engine {
                                     float right,
                                     float bottom,
                                     float top,
+                                    float near = -1.0f,
+                                    float far = 1.0f);
+        explicit OrthographicCamera(float left,
+                                    float right,
+                                    float bottom,
+                                    float top,
                                     float near,
                                     float far,
                                     float aspect);

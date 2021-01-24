@@ -14,6 +14,25 @@ namespace engine {
                                            float bottom,
                                            float top,
                                            float near,
+                                           float far)
+        : view_(1.0f)
+        , left_(left)
+        , right_(right)
+        , bottom_(bottom)
+        , top_(top)
+        , near_(near)
+        , far_(far)
+        , zoom_(1.0f)
+        , aspect_(1.0f)
+    {
+        update_matrix();
+    }
+
+    OrthographicCamera::OrthographicCamera(float left,
+                                           float right,
+                                           float bottom,
+                                           float top,
+                                           float near,
                                            float far,
                                            float aspect)
         : view_(1.0f)
