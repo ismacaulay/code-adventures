@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "outDir": "./dist/",
+        "module": "ESNext",
+        "target": "es5",
+        "jsx": "react",
+        "allowJs": true,
+        "strictNullChecks": true,
+        "noImplicitAny": true
+    },
+    "include": ["./projects/**/*.ts"],
+    "exclude": ["./minimals/public"]
+}

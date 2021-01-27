@@ -132,3 +132,5 @@ bin/
 build/
 .ccls-cache
 .vim
+node_modules/
+src/web/public/
