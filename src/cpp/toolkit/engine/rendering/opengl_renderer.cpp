@@ -22,13 +22,18 @@ namespace engine {
         return GL_TRIANGLES;
     }
 
-    void OpenGLRenderer::init()
+    static GLenum depthFuncToGLDepthFunc(DepthFunc func)
     {
-        // glEnable(GL_BLEND);
-        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glEnable(GL_DEPTH_TEST);
+        switch (func) {
+            case DepthFunc::Always:
+                return GL_ALWAYS;
+            case DepthFunc::Less:
+                return GL_LESS;
+        }
+        return GL_NEVER;
     }
+
+    void OpenGLRenderer::init() { enable_depth_test(true); }
 
     void OpenGLRenderer::set_viewport(uint32_t x,
                                       uint32_t y,
@@ -36,6 +41,27 @@ namespace engine {
                                       uint32_t height)
     {
         glViewport(x, y, width, height);
+    }
+
+    void OpenGLRenderer::enable_depth_test(bool enabled)
+    {
+        depth_test_enabled_ = enabled;
+
+        if (enabled) {
+            glEnable(GL_DEPTH_TEST);
+        } else {
+            glDisable(GL_DEPTH_TEST);
+        }
+    }
+
+    bool OpenGLRenderer::depth_test_enabled() const
+    {
+        return depth_test_enabled_;
+    }
+
+    void OpenGLRenderer::set_depth_func(DepthFunc func)
+    {
+        glDepthFunc(depthFuncToGLDepthFunc(func));
     }
 
     void OpenGLRenderer::set_fill_mode(FillMode mode)
@@ -51,7 +77,13 @@ namespace engine {
 
     void OpenGLRenderer::clear()
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        GLbitfield state = GL_COLOR_BUFFER_BIT;
+
+        if (depth_test_enabled()) {
+            state |= GL_DEPTH_BUFFER_BIT;
+        }
+
+        glClear(state);
     }
 
     void OpenGLRenderer::draw_array(

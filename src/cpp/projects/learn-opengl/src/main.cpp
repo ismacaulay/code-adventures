@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "colors.h"
 #include "coordinate_systems.h"
+#include "depth_testing.h"
 #include "hello_triangle.h"
 #include "light_casters.h"
 #include "lighting_maps.h"
@@ -36,6 +37,7 @@ static std::unordered_map<std::string,
         { "multiplelights",
           []() { return std::make_shared<MultipleLights>(); } },
         { "assimpmodels", []() { return std::make_shared<AssimpModels>(); } },
+        { "depthtesting", []() { return std::make_shared<DepthTesting>(); } },
     };
 
 int main(int argc, char** argv)

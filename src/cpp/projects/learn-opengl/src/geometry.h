@@ -178,4 +178,15 @@ static std::array<glm::vec3, 4> POINT_LIGHT_POSITIONS = {
     glm::vec3(-4.0f, 2.0f, -12.0f),
     glm::vec3(0.0f, 0.0f, -3.0f)
 };
-// clang-format onset_uniform_vec3
+
+static std::array<float, 30> PLANE_VERTICES = {
+    // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
+     5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+    -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+    -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+
+     5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+    -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+     5.0f, -0.5f, -5.0f,  2.0f, 2.0f
+};
+// clang-format on

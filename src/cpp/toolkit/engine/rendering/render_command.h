@@ -24,6 +24,9 @@ namespace engine {
 
         static void set_fill_mode(FillMode mode);
 
+        static void enable_depth_test(bool enable);
+        static void set_depth_func(DepthFunc func);
+
         static void draw_array(
             RenderMode mode,
             const std::shared_ptr<VertexArray>& vertex_array);

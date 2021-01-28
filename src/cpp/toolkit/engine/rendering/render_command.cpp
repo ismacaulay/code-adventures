@@ -28,6 +28,16 @@ namespace engine {
         renderer_->set_fill_mode(mode);
     }
 
+    void RenderCommand::enable_depth_test(bool enable)
+    {
+        renderer_->enable_depth_test(enable);
+    }
+
+    void RenderCommand::set_depth_func(DepthFunc func)
+    {
+        renderer_->set_depth_func(func);
+    }
+
     void RenderCommand::clear() { renderer_->clear(); }
 
     void RenderCommand::draw_array(

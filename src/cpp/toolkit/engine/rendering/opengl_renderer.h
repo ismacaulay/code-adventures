@@ -21,6 +21,11 @@ namespace engine {
                           uint32_t width,
                           uint32_t height);
 
+        void enable_depth_test(bool enabled);
+        bool depth_test_enabled() const;
+
+        void set_depth_func(DepthFunc func);
+
         void set_fill_mode(FillMode mode);
 
         void set_clear_color(const glm::vec4& color);
@@ -31,6 +36,9 @@ namespace engine {
 
         void draw_indexed(RenderMode mode,
                           const std::shared_ptr<VertexArray>& vertex_array);
+
+    private:
+        bool depth_test_enabled_ = false;
     };
 }
 }

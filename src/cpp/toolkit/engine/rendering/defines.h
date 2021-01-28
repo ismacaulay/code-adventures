@@ -14,5 +14,11 @@ namespace engine {
         Line,
     };
 
+    enum class DepthFunc
+    {
+        Always,
+        Less,
+    };
+
 }
 }
