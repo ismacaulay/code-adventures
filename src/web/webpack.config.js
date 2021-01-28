@@ -25,7 +25,11 @@ function makeProject(name) {
     };
 }
 
-const PROJECTS = ['hello-three', 'rotation-camera-controls'];
+const PROJECTS = [
+    'hello-three',
+    'rotation-camera-controls',
+    'orbit-camera-controls',
+];
 
 module.exports = (env, argv) => {
     console.log(env);
