@@ -12,6 +12,10 @@
 #include "toolkit/engine/camera/orthographic_camera.h"
 #include "toolkit/engine/camera/perspective_camera.h"
 
+#include "toolkit/engine/ecs/components.h"
+#include "toolkit/engine/ecs/entity.h"
+#include "toolkit/engine/ecs/scene.h"
+
 #include "toolkit/engine/models/model.h"
 #include "toolkit/engine/models/model_loader.h"
 

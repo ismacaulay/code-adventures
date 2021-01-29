@@ -1,4 +1,5 @@
 #pragma once
+#include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 
@@ -19,7 +20,8 @@ namespace engine {
 
         void add_mesh(std::unique_ptr<Mesh> mesh);
 
-        void render(const std::shared_ptr<Shader>& shader);
+        void render(const std::shared_ptr<Shader>& shader,
+                    const glm::mat4& transform = glm::mat4(1.0f));
 
     private:
         void update_bounding_box();

@@ -69,3 +69,8 @@ set_target_properties(stb PROPERTIES CXX_EXTENSIONS OFF)
 add_library(catch2 INTERFACE)
 target_include_directories(catch2 INTERFACE catch/include)
 
+#
+# entt
+#
+add_library(entt INTERFACE)
+target_include_directories(entt INTERFACE entt/include)

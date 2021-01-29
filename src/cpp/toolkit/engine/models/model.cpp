@@ -20,12 +20,14 @@ namespace engine {
         update_bounding_box();
     }
 
-    void Model::render(const std::shared_ptr<Shader>& shader)
+    void Model::render(const std::shared_ptr<Shader>& shader,
+                       const glm::mat4& transform)
     {
-        glm::mat4 transform = glm::mat4(1.0f);
-        transform = glm::translate(transform, -box_->centre());
+        glm::mat4 local_transform = glm::mat4(1.0f);
+        local_transform = glm::translate(local_transform, -box_->centre());
+        local_transform = transform * local_transform;
         for (auto& mesh : meshes_) {
-            mesh->render(shader, transform);
+            mesh->render(shader, local_transform);
         }
     }
 

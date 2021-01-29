@@ -10,6 +10,8 @@ set(TOOLKIT_SRC_FILES
     engine/camera/orthographic_camera.cpp
     engine/camera/perspective_camera.cpp
 
+    engine/ecs/scene.cpp
+
     engine/events/input.cpp
 
     engine/models/mesh.cpp
@@ -30,7 +32,7 @@ set(TOOLKIT_SRC_FILES
 )
 
 add_library(toolkit STATIC "${TOOLKIT_SRC_FILES}")
-target_link_libraries(toolkit PUBLIC glfw glad spdlog glm::glm stb assimp)
+target_link_libraries(toolkit PUBLIC glfw glad spdlog glm::glm stb assimp entt)
 target_include_directories(toolkit
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}
 )

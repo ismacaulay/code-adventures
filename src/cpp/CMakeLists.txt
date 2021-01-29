@@ -33,6 +33,7 @@ add_subdirectory(toolkit)
 add_subdirectory(projects/hello-world)
 add_subdirectory(projects/learn-opengl)
 add_subdirectory(projects/orbit-controls)
+add_subdirectory(projects/ecs)
 
 enable_testing()
 add_subdirectory(tests)
