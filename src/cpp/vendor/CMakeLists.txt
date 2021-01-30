@@ -31,20 +31,21 @@ add_subdirectory(glm)
 #
 # imgui
 #
-# set(IMGUI_SRCS
-#     imgui/imgui.cpp
-#     imgui/imgui_demo.cpp
-#     imgui/imgui_draw.cpp
-#     imgui/imgui_widgets.cpp
-#     imgui/examples/imgui_impl_opengl3.cpp
-#     imgui/examples/imgui_impl_glfw.cpp)
-#
-# add_library(imgui STATIC "${IMGUI_SRCS}")
-# target_link_libraries(imgui PUBLIC glfw glad ${OPENGL_LIBRARIES})
-# target_include_directories(imgui PUBLIC imgui)
-# target_include_directories(imgui PUBLIC imgui/examples)
-# target_compile_features(imgui PUBLIC cxx_std_17)
-# set_target_properties(imgui PROPERTIES CXX_EXTENSIONS OFF)
+set(IMGUI_SRCS
+    imgui/imgui.cpp
+    imgui/imgui_demo.cpp
+    imgui/imgui_draw.cpp
+    imgui/imgui_tables.cpp
+    imgui/imgui_widgets.cpp
+    imgui/backends/imgui_impl_opengl3.cpp
+    imgui/backends/imgui_impl_glfw.cpp)
+
+add_library(imgui STATIC "${IMGUI_SRCS}")
+target_link_libraries(imgui PUBLIC glfw glad ${OPENGL_LIBRARIES})
+target_include_directories(imgui PUBLIC imgui)
+target_include_directories(imgui PUBLIC imgui/backends)
+target_compile_features(imgui PUBLIC cxx_std_17)
+set_target_properties(imgui PROPERTIES CXX_EXTENSIONS OFF)
 
 #
 # spdlog

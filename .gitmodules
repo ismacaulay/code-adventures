@@ -7,3 +7,6 @@
 [submodule "src/cpp/vendor/assimp"]
 	path = src/cpp/vendor/assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "src/cpp/vendor/imgui"]
+	path = src/cpp/vendor/imgui
+	url = https://github.com/ocornut/imgui.git

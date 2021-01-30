@@ -19,5 +19,15 @@ namespace engine {
         virtual bool process_event(const Event& event) { return false; }
     };
 
+    class UILayer
+    {
+    public:
+        virtual ~UILayer() = default;
+
+        virtual void attach() {}
+        virtual void render() = 0;
+        virtual void detach() {}
+    };
+
 }
 }

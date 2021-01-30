@@ -1,6 +1,7 @@
 set(TOOLKIT_SRC_FILES
     engine/engine.cpp
     engine/frame_time.cpp
+    engine/imgui_renderer.cpp
     engine/time.cpp
     engine/window.cpp
 
@@ -32,7 +33,7 @@ set(TOOLKIT_SRC_FILES
 )
 
 add_library(toolkit STATIC "${TOOLKIT_SRC_FILES}")
-target_link_libraries(toolkit PUBLIC glfw glad spdlog glm::glm stb assimp entt)
+target_link_libraries(toolkit PUBLIC glfw glad spdlog glm::glm stb assimp entt imgui)
 target_include_directories(toolkit
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}
 )

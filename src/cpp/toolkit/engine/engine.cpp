@@ -5,8 +5,10 @@
 #include "events/event.h"
 #include "events/input.h"
 #include "frame_time.h"
+#include "imgui_renderer.h"
 #include "layer.h"
 #include "logger/log.h"
+#include "rendering/render_command.h"
 #include "rendering/renderer.h"
 #include "window.h"
 
@@ -25,6 +27,10 @@ namespace engine {
                 std::bind(&Impl::process_event, this, std::placeholders::_1));
 
             Renderer::init();
+            ImGuiRenderer::init(*window_);
+
+            tk::engine::RenderCommand::set_clear_color(
+                { 0.1f, 0.1f, 0.1f, 1.0f });
         }
         ~Impl() = default;
 
@@ -36,9 +42,13 @@ namespace engine {
                 float delta = time_.update();
 
                 if (!minimized_) {
+                    tk::engine::RenderCommand::clear();
+
                     for (auto it = layers_.begin(); it != layers_.end(); ++it) {
                         (*it)->update(delta);
                     }
+
+                    ImGuiRenderer::update();
                 }
 
                 window_->update();
@@ -47,8 +57,10 @@ namespace engine {
 
         void shutdown()
         {
-
+            ImGuiRenderer::shutdown();
             Renderer::shutdown();
+            Input::shutdown();
+
             window_ = nullptr;
         }
 
@@ -61,6 +73,10 @@ namespace engine {
 
             if (event.type() == EventType::WindowResize) {
                 on_window_resize(static_cast<const WindowResizeEvent&>(event));
+            }
+
+            if (ImGuiRenderer::process_event(event)) {
+                return;
             }
 
             for (auto it = layers_.rbegin(); it != layers_.rend(); it++) {
@@ -110,6 +126,11 @@ namespace engine {
     {
         p_->layers_.push_back(layer);
         layer->attach(*this);
+    }
+
+    void Engine::push_ui_layer(std::shared_ptr<UILayer> layer)
+    {
+        ImGuiRenderer::push_layer(layer);
     }
 
     const Window& Engine::window() const { return *p_->window_; }

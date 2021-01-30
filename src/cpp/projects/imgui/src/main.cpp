@@ -1,22 +1,21 @@
 #include "toolkit/engine.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <imgui.h>
 
 namespace {
 static const char* BUNNY_MODEL_PATH = "assets/models/bunny/bunny.obj";
 static const char* BUNNY_SHADER_PATH = "assets/shaders/bunny.glsl";
 }
 
-class ECSExample : public tk::engine::Layer
+class ExampleLayer : public tk::engine::Layer
 {
 public:
     std::shared_ptr<tk::engine::OrbitCameraController> camera_controller_;
 
     tk::engine::Scene scene_;
 
-    ECSExample() = default;
-    ~ECSExample() = default;
+    ExampleLayer() = default;
+    ~ExampleLayer() = default;
 
     void attach(tk::engine::Engine& engine) override
     {
@@ -72,15 +71,32 @@ public:
     }
 };
 
+class ImGuiExampleUILayer : public tk::engine::UILayer
+{
+public:
+    bool show_demo_window = true;
+
+    void attach() override {}
+
+    void detach() override {}
+
+    void render() override
+    {
+        if (show_demo_window)
+            ImGui::ShowDemoWindow(&show_demo_window);
+    }
+};
+
 int main()
 {
     tk::engine::WindowProps WINDOW_PROPS =
-        tk::engine::WindowProps{ "ca: ecs example", 1280, 720 };
+        tk::engine::WindowProps{ "ca: imgui example", 1280, 720 };
 
     tk::logger::set_log_level(tk::logger::LogLevel::Debug);
 
     auto engine = std::make_shared<tk::engine::Engine>(WINDOW_PROPS);
-    engine->push_layer(std::make_shared<ECSExample>());
+    engine->push_layer(std::make_shared<ExampleLayer>());
+    engine->push_ui_layer(std::make_shared<ImGuiExampleUILayer>());
 
     engine->run();
 

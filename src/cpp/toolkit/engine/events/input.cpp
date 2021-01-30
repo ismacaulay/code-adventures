@@ -25,6 +25,8 @@ namespace engine {
         instance_ = std::make_unique<Impl>(window);
     }
 
+    void Input::shutdown() { instance_ = nullptr; }
+
     bool Input::is_key_pressed(int keycode)
     {
         CAT_ASSERTM(instance_, "Input instance has not been initialized");

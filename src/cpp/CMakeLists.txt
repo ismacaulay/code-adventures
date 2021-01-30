@@ -26,7 +26,6 @@ endif()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
-
 add_subdirectory(vendor)
 add_subdirectory(toolkit)
 
@@ -34,6 +33,7 @@ add_subdirectory(projects/hello-world)
 add_subdirectory(projects/learn-opengl)
 add_subdirectory(projects/orbit-controls)
 add_subdirectory(projects/ecs)
+add_subdirectory(projects/imgui)
 
 enable_testing()
 add_subdirectory(tests)

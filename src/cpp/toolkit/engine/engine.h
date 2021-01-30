@@ -4,6 +4,7 @@
 namespace tk {
 namespace engine {
     class Layer;
+    class UILayer;
     class Window;
     struct WindowProps;
 
@@ -17,6 +18,7 @@ namespace engine {
         void shutdown();
 
         void push_layer(std::shared_ptr<Layer> layer);
+        void push_ui_layer(std::shared_ptr<UILayer> layer);
 
         const Window& window() const;
         Window& window();

@@ -10,6 +10,8 @@ namespace engine {
     {
     public:
         static void init(const Window& window);
+        static void shutdown();
+
         static bool is_key_pressed(int keycode);
     };
 
