@@ -27,3 +27,5 @@
 #include "toolkit/engine/rendering/texture2d.h"
 #include "toolkit/engine/rendering/vertex_array.h"
 #include "toolkit/engine/rendering/vertex_buffer.h"
+
+#include "toolkit/engine/ui/scene_heirarchy_panel.h"

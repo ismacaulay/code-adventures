@@ -7,18 +7,25 @@ static const char* BUNNY_MODEL_PATH = "assets/models/bunny/bunny.obj";
 static const char* BUNNY_SHADER_PATH = "assets/shaders/bunny.glsl";
 }
 
-class ExampleLayer : public tk::engine::Layer
+class ExampleLayer
+    : public tk::engine::Layer
+    , public tk::engine::UILayer
 {
 public:
     std::shared_ptr<tk::engine::OrbitCameraController> camera_controller_;
 
-    tk::engine::Scene scene_;
+    std::shared_ptr<tk::engine::Scene> scene_;
+    std::shared_ptr<tk::engine::SceneHeirarchyPanel> scene_panel_;
 
     ExampleLayer() = default;
     ~ExampleLayer() = default;
 
     void attach(tk::engine::Engine& engine) override
     {
+        scene_ = std::make_shared<tk::engine::Scene>();
+        scene_panel_ =
+            std::make_shared<tk::engine::SceneHeirarchyPanel>(*scene_);
+
         const auto& window = engine.window();
 
         float width = static_cast<float>(window.width());
@@ -36,7 +43,7 @@ public:
         camera_controller_->select_camera(tk::engine::CameraType::Orthographic);
         camera_controller_->set_position({ 0.0f, 0.0f, 1.0f });
 
-        auto bunny_entity = scene_.create_entity();
+        auto bunny_entity = scene_->create_entity("bunny");
         auto& model_renderer =
             bunny_entity.add_component<tk::engine::ModelRendererComponent>();
         model_renderer.model = tk::engine::ModelLoader::load(BUNNY_MODEL_PATH);
@@ -47,6 +54,8 @@ public:
 
     void detach(tk::engine::Engine& engine) override
     {
+        scene_panel_ = nullptr;
+        scene_ = nullptr;
         camera_controller_ = nullptr;
     }
 
@@ -59,7 +68,7 @@ public:
 
         tk::engine::Renderer::begin(*camera_controller_->camera());
 
-        scene_.update(delta);
+        scene_->update(delta);
 
         tk::engine::Renderer::end();
     }
@@ -69,21 +78,12 @@ public:
         camera_controller_->on_event(event);
         return false;
     }
-};
-
-class ImGuiExampleUILayer : public tk::engine::UILayer
-{
-public:
-    bool show_demo_window = true;
-
-    void attach() override {}
-
-    void detach() override {}
 
     void render() override
     {
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
+        scene_panel_->render();
+
+        ImGui::ShowDemoWindow();
     }
 };
 
@@ -95,8 +95,9 @@ int main()
     tk::logger::set_log_level(tk::logger::LogLevel::Debug);
 
     auto engine = std::make_shared<tk::engine::Engine>(WINDOW_PROPS);
-    engine->push_layer(std::make_shared<ExampleLayer>());
-    engine->push_ui_layer(std::make_shared<ImGuiExampleUILayer>());
+    auto layer = std::make_shared<ExampleLayer>();
+    engine->push_layer(layer);
+    engine->push_ui_layer(layer);
 
     engine->run();
 

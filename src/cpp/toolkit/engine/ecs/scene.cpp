@@ -8,9 +8,10 @@ namespace engine {
     Scene::Scene() {}
     Scene::~Scene() { registry_.clear(); }
 
-    Entity Scene::create_entity()
+    Entity Scene::create_entity(const std::string& name)
     {
         auto entity = registry_.create();
+        registry_.emplace<TagComponent>(entity, name);
         registry_.emplace<TransformComponent>(entity);
         return Entity{ entity, &registry_ };
     }

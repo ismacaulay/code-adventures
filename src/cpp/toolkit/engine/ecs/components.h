@@ -7,6 +7,19 @@
 namespace tk {
 namespace engine {
 
+    struct TagComponent
+    {
+        std::string tag;
+
+        TagComponent() = default;
+        TagComponent(const std::string& tag)
+            : tag(tag)
+        {}
+        TagComponent(const TagComponent& other)
+            : tag(other.tag)
+        {}
+    };
+
     struct TransformComponent
     {
         glm::mat4 transform;

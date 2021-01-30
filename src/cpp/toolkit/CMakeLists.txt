@@ -1,7 +1,6 @@
 set(TOOLKIT_SRC_FILES
     engine/engine.cpp
     engine/frame_time.cpp
-    engine/imgui_renderer.cpp
     engine/time.cpp
     engine/window.cpp
 
@@ -28,6 +27,9 @@ set(TOOLKIT_SRC_FILES
     engine/rendering/texture2d.cpp
     engine/rendering/vertex_array.cpp
     engine/rendering/vertex_buffer.cpp
+
+    engine/ui/imgui_renderer.cpp
+    engine/ui/scene_heirarchy_panel.cpp
 
     math/math.cpp
 )

@@ -13,12 +13,15 @@ namespace engine {
         explicit Scene();
         ~Scene();
 
-        Entity create_entity();
+        Entity create_entity(const std::string& name = "Entity");
 
         void update(float delta);
 
     private:
         entt::registry registry_;
+
+        friend class SceneHeirarchyPanel;
     };
+
 }
 }

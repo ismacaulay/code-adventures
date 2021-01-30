@@ -1,11 +1,12 @@
 #pragma once
-#include "layer.h"
 
 #include <memory>
 #include <vector>
 
 namespace tk {
 namespace engine {
+    class Event;
+    class UILayer;
     class Window;
 
     class ImGuiRenderer

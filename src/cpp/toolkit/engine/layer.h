@@ -24,9 +24,7 @@ namespace engine {
     public:
         virtual ~UILayer() = default;
 
-        virtual void attach() {}
         virtual void render() = 0;
-        virtual void detach() {}
     };
 
 }

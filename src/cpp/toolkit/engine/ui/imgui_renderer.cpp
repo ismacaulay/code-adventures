@@ -9,9 +9,9 @@
 #include <imgui_impl_opengl3.h>
 #include <vector>
 
-#include "engine.h"
 #include "engine/events/event.h"
-#include "window.h"
+#include "engine/layer.h"
+#include "engine/window.h"
 
 namespace tk {
 namespace engine {
@@ -56,6 +56,17 @@ namespace engine {
 
             ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
             ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+
+            // if (ImGui::BeginMenuBar()) {
+            //     if (ImGui::BeginMenu("File")) {
+            //         if (ImGui::MenuItem("Quit", NULL, false, true)) {
+            //
+            //         }
+            //         ImGui::EndMenu();
+            //     }
+            //
+            //     ImGui::EndMenuBar();
+            // }
 
             for (auto it = layers_.begin(); it != layers_.end(); it++) {
                 (*it)->render();
