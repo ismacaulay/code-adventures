@@ -4,6 +4,10 @@
 #include "logger/assert.h"
 
 namespace tk {
+namespace math {
+    struct Box;
+}
+
 namespace engine {
 
     class OrthographicCamera : public Camera
@@ -35,6 +39,14 @@ namespace engine {
         void look_at(const glm::vec3& position,
                      const glm::vec3& target,
                      const glm::vec3& up) override;
+
+        void set_projection_from_box(const math::Box& box);
+        void set_projection(float left,
+                            float right,
+                            float bottom,
+                            float top,
+                            float near,
+                            float far);
 
         float zoom() const;
         void set_zoom(float zoom);

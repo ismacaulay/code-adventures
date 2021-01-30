@@ -1,4 +1,5 @@
 #include "toolkit/engine.h"
+#include "toolkit/math.h"
 #include <glm/glm.hpp>
 
 class OrbitControls : public tk::engine::Layer
@@ -41,6 +42,8 @@ public:
         model_ = tk::engine::ModelLoader::load("assets/models/bunny/bunny.obj");
 
         tk::engine::RenderCommand::set_fill_mode(tk::engine::FillMode::Line);
+
+        orthographic_camera->set_projection_from_box(model_->bounding_box());
     }
 
     void detach(tk::engine::Engine& engine) override

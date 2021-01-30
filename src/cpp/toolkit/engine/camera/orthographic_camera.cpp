@@ -1,6 +1,9 @@
 #include "orthographic_camera.h"
 
+#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "math/box.h"
 
 namespace tk {
 namespace engine {
@@ -54,6 +57,35 @@ namespace engine {
     {
         view_ = glm::lookAt(position, target, up);
         view_projection_ = projection_ * view_;
+    }
+
+    void OrthographicCamera::set_projection_from_box(const math::Box& box)
+    {
+        float radius = glm::length(box.min - box.max) / 2.0f;
+
+        left_ = -radius;
+        right_ = radius;
+        bottom_ = -radius;
+        top_ = radius;
+
+        update_matrix();
+    }
+
+    void OrthographicCamera::set_projection(float left,
+                                            float right,
+                                            float bottom,
+                                            float top,
+                                            float near,
+                                            float far)
+    {
+        left_ = left;
+        right_ = right;
+        bottom_ = bottom;
+        top_ = top;
+        near_ = near;
+        far_ = far;
+
+        update_matrix();
     }
 
     float OrthographicCamera::zoom() const { return zoom_; }

@@ -23,6 +23,8 @@ namespace engine {
         void render(const std::shared_ptr<Shader>& shader,
                     const glm::mat4& transform = glm::mat4(1.0f));
 
+        const math::Box& bounding_box() const { return *box_; }
+
     private:
         void update_bounding_box();
 
