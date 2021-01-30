@@ -12,18 +12,24 @@ the components in future projects without having to manage multiple repositories
 ### C++
 
 - [hello-world](https://github.com/ismacaulay/code-adventures/tree/main/src/cpp/projects/hello-world):
-A simple hello world to show the build working
+  A simple hello world to show the build working
 - [learn-opengl](https://github.com/ismacaulay/code-adventures/tree/main/src/cpp/projects/learn-opengl):
-Tutorial implementations from http://learnopengl.com/
+  Tutorial implementations from http://learnopengl.com/
 - [orbit-controls](https://github.com/ismacaulay/code-adventures/tree/main/src/cpp/projects/orbit-controls):
-An implementation of orbit controls
+  An implementation of orbit controls
+- [ecs](https://github.com/ismacaulay/code-adventures/tree/main/src/cpp/projects/ecs):
+  Experimenting with entity component system
+- [imgui](https://github.com/ismacaulay/code-adventures/tree/main/src/cpp/projects/imgui):
+  Experimenting with imgui
 
 ### Web
 
 - [hello-three](https://github.com/ismacaulay/code-adventures/tree/main/src/web/projects/hello-three):
-The threejs demo app from the docs: [Creating a scene](https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene)
+  The threejs demo app from the docs: [Creating a scene](https://threejs.org/docs/index.html#manual/en/introduction/Creating-a-scene)
 - [rotation-camera-controls](https://github.com/ismacaulay/code-adventures/tree/main/src/web/projects/rotation-camera-controls):
-A demo application showing how rotation based camera changes the view fustrum
+  A demo application showing how rotation based camera controls change the view fustrum
+- [orbit-camera-controls](https://github.com/ismacaulay/code-adventures/tree/main/src/web/projects/orbit-camera-controls):
+  A demo application showing how orbit based camera controls change the view fustrum
 
 ## Topics
 
