@@ -46,6 +46,16 @@ static inline std::ostream& operator<<(std::ostream& os, const glm::vec3& v)
     return os << glm::to_string(v);
 }
 
+static inline std::ostream& operator<<(std::ostream& os, const glm::vec4& v)
+{
+    return os << glm::to_string(v);
+}
+
+static inline std::ostream& operator<<(std::ostream& os, const glm::i8vec3& v)
+{
+    return os << glm::to_string(v);
+}
+
 static inline std::ostream& operator<<(std::ostream& os, const glm::mat4& m)
 {
     return os << glm::to_string(m);

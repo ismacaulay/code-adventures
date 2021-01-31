@@ -16,3 +16,4 @@ set_target_properties(engine2d PROPERTIES
 
 install(TARGETS engine2d OPTIONAL RUNTIME DESTINATION bin/engine2d)
 install(FILES ../../assets/shaders/basic_texture.glsl DESTINATION bin/engine2d/assets/shaders)
+install(FILES ../../assets/textures/awesomeface.png DESTINATION bin/engine2d/assets/textures)

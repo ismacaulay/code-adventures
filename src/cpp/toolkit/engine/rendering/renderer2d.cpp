@@ -101,10 +101,12 @@ namespace engine {
         data_->texture_slots[0] = white_texture;
 
         int32_t samplers[data_->max_texture_slots];
-        for (uint32_t i = 0; i < data_->max_texture_slots; i++)
+        for (int32_t i = 0; i < data_->max_texture_slots; i++) {
             samplers[i] = i;
+        }
 
         auto shader = Shader::from_file("assets/shaders/basic_texture.glsl");
+        shader->bind();
         shader->set_uniform_int_array(
             "u_textures", samplers, data_->max_texture_slots);
         data_->shader = shader;

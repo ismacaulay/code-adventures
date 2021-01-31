@@ -6,6 +6,8 @@ class Engine2D : public tk::engine::Layer
 {
 public:
     std::shared_ptr<tk::engine::CameraController2D> camera_controller_;
+    std::shared_ptr<tk::engine::Texture2D> texture_;
+    glm::mat4 texture_quad_transform_;
 
     Engine2D() = default;
     ~Engine2D() = default;
@@ -23,6 +25,14 @@ public:
 
         camera_controller_ = std::make_shared<tk::engine::CameraController2D>(
             orthographic_camera, aspect_ratio);
+
+        texture_ =
+            tk::engine::Texture2D::create("assets/textures/awesomeface.png");
+        texture_quad_transform_ = glm::mat4(1.0f);
+        texture_quad_transform_ =
+            glm::translate(texture_quad_transform_, { 2.0f, 0.0f, 0.0f });
+        texture_quad_transform_ =
+            glm::scale(texture_quad_transform_, { 2.0f, 2.0f, 1.0f });
 
         // orthographic_camera->set_projection_from_box(model_->bounding_box());
     }
@@ -44,6 +54,7 @@ public:
         tk::engine::Renderer2D::draw_quad(glm::mat4(1.0f),
                                           { 1.0f, 0.0f, 0.0f, 1.0f });
 
+        tk::engine::Renderer2D::draw_quad(texture_quad_transform_, texture_);
         tk::engine::Renderer2D::end();
     }
 
