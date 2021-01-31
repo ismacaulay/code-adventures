@@ -38,7 +38,7 @@ namespace engine {
 
         void look_at(const glm::vec3& position,
                      const glm::vec3& target,
-                     const glm::vec3& up) override;
+                     const glm::vec3& up);
 
         void set_projection_from_box(const math::Box& box);
         void set_projection(float left,

@@ -32,7 +32,8 @@ namespace engine {
             const std::shared_ptr<VertexArray>& vertex_array);
         static void draw_indexed(
             RenderMode mode,
-            const std::shared_ptr<VertexArray>& vertex_array);
+            const std::shared_ptr<VertexArray>& vertex_array,
+            size_t count);
 
     private:
         static std::unique_ptr<OpenGLRenderer> renderer_;

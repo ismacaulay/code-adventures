@@ -35,7 +35,8 @@ namespace engine {
                         const std::shared_ptr<VertexArray>& vertex_array);
 
         void draw_indexed(RenderMode mode,
-                          const std::shared_ptr<VertexArray>& vertex_array);
+                          const std::shared_ptr<VertexArray>& vertex_array,
+                          size_t count);
 
     private:
         bool depth_test_enabled_ = false;

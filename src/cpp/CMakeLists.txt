@@ -22,18 +22,19 @@ endif()
 # set(THREADS_PREFER_THREAD_FLAG ON)
 # find_package(Threads REQUIRED)
 
-
+# set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 add_subdirectory(vendor)
 add_subdirectory(toolkit)
 
+add_subdirectory(projects/ecs)
+add_subdirectory(projects/engine2d)
 add_subdirectory(projects/hello-world)
+add_subdirectory(projects/imgui)
 add_subdirectory(projects/learn-opengl)
 add_subdirectory(projects/orbit-controls)
-add_subdirectory(projects/ecs)
-add_subdirectory(projects/imgui)
 
 enable_testing()
 add_subdirectory(tests)

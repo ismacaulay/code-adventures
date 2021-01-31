@@ -52,6 +52,14 @@ namespace engine {
         glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
     }
 
+    void Shader::set_uniform_int_array(const std::string& name,
+                                       int* data,
+                                       size_t size)
+    {
+        GLint location = get_location(name);
+        glUniform1iv(location, size, data);
+    }
+
     uint32_t Shader::create_shader(const std::string& vertex_src,
                                    const std::string& fragment_src)
     {

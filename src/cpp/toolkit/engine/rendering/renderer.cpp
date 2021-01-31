@@ -1,6 +1,7 @@
 #include "renderer.h"
 
 #include "engine/camera/camera.h"
+#include "index_buffer.h"
 #include "logger/assert.h"
 #include "render_command.h"
 #include "shader.h"
@@ -8,10 +9,14 @@
 
 namespace tk {
 namespace engine {
-    std::unique_ptr<Renderer::SceneData> Renderer::data_ =
-        std::make_unique<Renderer::SceneData>();
+    std::unique_ptr<Renderer::SceneData> Renderer::data_ = nullptr;
 
-    void Renderer::init() { RenderCommand::init(); }
+    void Renderer::init()
+    {
+        data_ = std::make_unique<Renderer::SceneData>();
+
+        RenderCommand::init();
+    }
 
     void Renderer::shutdown() {}
 
@@ -46,7 +51,8 @@ namespace engine {
 
         vertex_array->bind();
         if (vertex_array->index_buffer()) {
-            RenderCommand::draw_indexed(mode, vertex_array);
+            RenderCommand::draw_indexed(
+                mode, vertex_array, vertex_array->index_buffer()->count());
         } else {
             RenderCommand::draw_array(mode, vertex_array);
         }

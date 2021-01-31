@@ -4,6 +4,14 @@
 
 namespace tk {
 namespace engine {
+    VertexBuffer::VertexBuffer(size_t size)
+        : size_(size)
+    {
+        glGenBuffers(1, &renderer_id_);
+        glBindBuffer(GL_ARRAY_BUFFER, renderer_id_);
+        glBufferData(GL_ARRAY_BUFFER, size_, nullptr, GL_DYNAMIC_DRAW);
+    }
+
     VertexBuffer::VertexBuffer(void* data, size_t size)
         : size_(size)
     {
@@ -33,19 +41,18 @@ namespace engine {
         layout_ = layout;
     }
 
-    // void VertexBuffer::set_data(void* data, size_t size)
-    // {
-    //     glBindBuffer(GL_ARRAY_BUFFER, renderer_id_);
-    //
-    //     if (size_ < size) {
-    //         glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-    //     } else {
-    //         // TODO: could also use a glMapBuffer here?
-    //         glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
-    //     }
-    //
-    //     size_ = size;
-    // }
+    void VertexBuffer::set_data(void* data, size_t size)
+    {
+        size_ = size;
+
+        glBindBuffer(GL_ARRAY_BUFFER, renderer_id_);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+    }
+
+    std::shared_ptr<VertexBuffer> VertexBuffer::create(size_t size)
+    {
+        return std::make_shared<VertexBuffer>(size);
+    }
 
     std::shared_ptr<VertexBuffer> VertexBuffer::create(void* data, size_t size)
     {

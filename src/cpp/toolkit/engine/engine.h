@@ -8,10 +8,23 @@ namespace engine {
     class Window;
     struct WindowProps;
 
+    enum class RendererType
+    {
+        Renderer2D,
+        Renderer3D,
+    };
+
+    struct EngineProps
+    {
+        RendererType renderer_type;
+    };
+
     class Engine
     {
     public:
         explicit Engine(const WindowProps& window_props);
+        explicit Engine(const EngineProps& engine_props,
+                        const WindowProps& window_props);
         virtual ~Engine() = default;
 
         void run();

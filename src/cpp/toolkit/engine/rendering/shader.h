@@ -25,6 +25,9 @@ namespace engine {
         void set_uniform_vec4(const std::string& name, const glm::vec4& vec);
 
         void set_uniform_mat4(const std::string& name, const glm::mat4& matrix);
+        void set_uniform_int_array(const std::string& name,
+                                   int* data,
+                                   size_t size);
 
         static std::shared_ptr<Shader> from_file(const std::string& path);
         static std::shared_ptr<Shader> from_file(const std::string& vertex,

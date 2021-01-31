@@ -9,24 +9,40 @@
 #include "logger/log.h"
 #include "rendering/render_command.h"
 #include "rendering/renderer.h"
+#include "rendering/renderer2d.h"
 #include "ui/imgui_renderer.h"
 #include "window.h"
 
 namespace tk {
 namespace engine {
 
+    namespace {
+        static const EngineProps DEFAULT_ENGINE_PROPS = {
+            RendererType::Renderer3D
+        };
+    }
+
     class Engine::Impl
     {
     public:
-        Impl(const WindowProps& window_props)
-            : window_(std::make_shared<Window>(window_props))
+        Impl(const EngineProps& engine_props, const WindowProps& window_props)
+            : engine_props_(engine_props)
+            , window_(std::make_shared<Window>(window_props))
         {
             Input::init(*window_);
 
             window_->set_event_callback(
                 std::bind(&Impl::process_event, this, std::placeholders::_1));
 
-            Renderer::init();
+            switch (engine_props_.renderer_type) {
+                case RendererType::Renderer2D:
+                    Renderer2D::init();
+                    break;
+                case RendererType::Renderer3D:
+                    Renderer::init();
+                    break;
+            }
+
             ImGuiRenderer::init(*window_);
 
             tk::engine::RenderCommand::set_clear_color(
@@ -58,7 +74,14 @@ namespace engine {
         void shutdown()
         {
             ImGuiRenderer::shutdown();
-            Renderer::shutdown();
+            switch (engine_props_.renderer_type) {
+                case RendererType::Renderer2D:
+                    Renderer2D::shutdown();
+                    break;
+                case RendererType::Renderer3D:
+                    Renderer::shutdown();
+                    break;
+            }
             Input::shutdown();
 
             window_ = nullptr;
@@ -102,6 +125,7 @@ namespace engine {
         }
 
         FrameTime time_;
+        const EngineProps& engine_props_;
         std::shared_ptr<Window> window_;
         std::vector<std::shared_ptr<Layer>> layers_;
         bool running_ = false;
@@ -109,7 +133,11 @@ namespace engine {
     };
 
     Engine::Engine(const WindowProps& window_props)
-        : p_(std::make_shared<Impl>(window_props))
+        : p_(std::make_shared<Impl>(DEFAULT_ENGINE_PROPS, window_props))
+    {}
+    Engine::Engine(const EngineProps& engine_props,
+                   const WindowProps& window_props)
+        : p_(std::make_shared<Impl>(engine_props, window_props))
     {}
 
     void Engine::run() { p_->run(); }

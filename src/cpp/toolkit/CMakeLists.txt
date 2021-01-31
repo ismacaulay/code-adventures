@@ -5,9 +5,11 @@ set(TOOLKIT_SRC_FILES
     engine/window.cpp
 
     engine/camera/camera_controller.cpp
+    engine/camera/camera_controller2d.cpp
     engine/camera/free_camera_controller.cpp
     engine/camera/orbit_camera_controller.cpp
     engine/camera/orthographic_camera.cpp
+    engine/camera/orthographic_camera2d.cpp
     engine/camera/perspective_camera.cpp
 
     engine/ecs/scene.cpp
@@ -23,6 +25,7 @@ set(TOOLKIT_SRC_FILES
     engine/rendering/opengl_renderer.cpp
     engine/rendering/render_command.cpp
     engine/rendering/renderer.cpp
+    engine/rendering/renderer2d.cpp
     engine/rendering/shader.cpp
     engine/rendering/texture2d.cpp
     engine/rendering/vertex_array.cpp

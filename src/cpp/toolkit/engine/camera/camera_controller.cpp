@@ -58,14 +58,18 @@ namespace engine {
         }
 
         // TODO: Sync cameras on change
-        // if (current_camera_ == CameraType::Orthographic &&
-        //     type == CameraType::Perspective) {
-        //     perspective_camera_->set_position(orthographic_camera_->position());
-        // } else if (current_camera_ == CameraType::Perspective &&
-        //            type == CameraType::Orthographic) {
-        //     orthographic_camera_->set_position(perspective_camera_->position());
-        // }
         current_camera_ = type;
+    }
+
+    void CameraController::look_at(const glm::vec3& position,
+                                   const glm::vec3& target,
+                                   const glm::vec3& up)
+    {
+        if (current_camera_ == CameraType::Orthographic) {
+            orthographic_camera_->look_at(position, target, up);
+        } else if (current_camera_ == CameraType::Perspective) {
+            perspective_camera_->look_at(position, target, up);
+        }
     }
 }
 }

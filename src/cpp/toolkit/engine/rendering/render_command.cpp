@@ -49,9 +49,10 @@ namespace engine {
 
     void RenderCommand::draw_indexed(
         RenderMode mode,
-        const std::shared_ptr<VertexArray>& vertex_array)
+        const std::shared_ptr<VertexArray>& vertex_array,
+        size_t count)
     {
-        renderer_->draw_indexed(mode, vertex_array);
+        renderer_->draw_indexed(mode, vertex_array, count);
     }
 }
 }

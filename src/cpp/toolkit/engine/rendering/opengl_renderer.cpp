@@ -95,12 +95,10 @@ namespace engine {
 
     void OpenGLRenderer::draw_indexed(
         RenderMode mode,
-        const std::shared_ptr<VertexArray>& vertex_array)
+        const std::shared_ptr<VertexArray>& vertex_array,
+        size_t count)
     {
-        glDrawElements(modeToGLMode(mode),
-                       vertex_array->index_buffer()->count(),
-                       GL_UNSIGNED_INT,
-                       nullptr);
+        glDrawElements(modeToGLMode(mode), count, GL_UNSIGNED_INT, nullptr);
     }
 
 }

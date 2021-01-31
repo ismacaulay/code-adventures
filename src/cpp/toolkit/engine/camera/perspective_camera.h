@@ -26,7 +26,7 @@ namespace engine {
 
         void look_at(const glm::vec3& position,
                      const glm::vec3& target,
-                     const glm::vec3& up) override;
+                     const glm::vec3& up);
 
     private:
         float fov_;

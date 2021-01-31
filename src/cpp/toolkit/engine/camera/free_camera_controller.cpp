@@ -40,7 +40,7 @@ namespace engine {
             position_ -= up_ * camera_speed_ * delta;
         }
 
-        camera()->look_at(position_, position_ + front_, up_);
+        look_at(position_, position_ + front_, up_);
     }
 
     void FreeCameraController::on_event(const Event& event)

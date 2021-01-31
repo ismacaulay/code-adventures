@@ -42,7 +42,7 @@ namespace engine {
         offset = math::to_cartesian(spherical);
         position_ = target_ + offset;
 
-        camera()->look_at(position_, target_, up_);
+        look_at(position_, target_, up_);
 
         rotate_delta_ = math::Spherical{ 0.0f, 0.0f, 0.0f };
         pan_delta_ = glm::vec3(0.0f);

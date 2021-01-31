@@ -1,6 +1,6 @@
 #pragma once
-#include <memory>
 #include <glm/glm.hpp>
+#include <memory>
 
 namespace tk {
 namespace engine {
@@ -40,10 +40,14 @@ namespace engine {
             perspective_camera_ = camera;
         }
 
-        virtual void update(float delta) {};
-        virtual void on_event(const Event& event) {};
+        virtual void update(float delta){};
+        virtual void on_event(const Event& event){};
 
     protected:
+        void look_at(const glm::vec3& position,
+                     const glm::vec3& target,
+                     const glm::vec3& up);
+
         CameraType current_camera_ = CameraType::None;
 
         std::shared_ptr<OrthographicCamera> orthographic_camera_;

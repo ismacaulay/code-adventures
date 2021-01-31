@@ -7,6 +7,7 @@ namespace engine {
     class VertexBuffer
     {
     public:
+        explicit VertexBuffer(size_t size);
         explicit VertexBuffer(void* data, size_t size);
         ~VertexBuffer();
 
@@ -19,8 +20,9 @@ namespace engine {
         const BufferLayout& layout() const;
         void set_layout(const BufferLayout& layout);
 
-        // void set_data(void* data, size_t size);
+        void set_data(void* data, size_t size);
 
+        static std::shared_ptr<VertexBuffer> create(size_t size);
         static std::shared_ptr<VertexBuffer> create(void* data, size_t size);
 
     private:
