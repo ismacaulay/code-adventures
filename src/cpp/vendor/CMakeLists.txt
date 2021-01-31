@@ -15,6 +15,24 @@ SET(CMAKE_INSTALL_INCLUDEDIR ${_INCLUDE_INSTALL_DIR})
 SET(CMAKE_INSTALL_BINDIR ${_BIN_INSTALL_DIR})
 
 #
+# catch
+#
+add_library(catch2 INTERFACE)
+target_include_directories(catch2 INTERFACE catch/include)
+
+#
+# entt
+#
+add_library(entt INTERFACE)
+target_include_directories(entt INTERFACE entt/include)
+
+#
+# FastNoise
+#
+add_library(FastNoise INTERFACE)
+target_include_directories(FastNoise INTERFACE FastNoise/include)
+
+#
 # glad
 #
 add_library(glad STATIC glad/src/glad.c)
@@ -64,14 +82,3 @@ target_include_directories(stb PUBLIC stb/include)
 target_compile_features(stb PUBLIC cxx_std_17)
 set_target_properties(stb PROPERTIES CXX_EXTENSIONS OFF)
 
-#
-# catch
-#
-add_library(catch2 INTERFACE)
-target_include_directories(catch2 INTERFACE catch/include)
-
-#
-# entt
-#
-add_library(entt INTERFACE)
-target_include_directories(entt INTERFACE entt/include)
