@@ -22,7 +22,8 @@ namespace engine {
             template <typename OStream>
             friend OStream& operator<<(OStream& os, const Vertex& v)
             {
-                return os << "[Vertex] p:" << v.position << " c:" << v.color;
+                return os << "[Vertex] p: " << v.position << " c: " << v.color
+                          << " uv: " << v.uv << " t: " << v.texture_idx;
             }
         };
 

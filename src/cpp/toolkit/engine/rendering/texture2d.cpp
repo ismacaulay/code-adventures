@@ -4,11 +4,12 @@
 #include <stb/stb_image.h>
 
 #include "logger/assert.h"
+#include "opengl_errors.h"
 
 namespace tk {
 namespace engine {
 
-    Texture2D::Texture2D(uint32_t width, uint32_t height)
+    Texture2D::Texture2D(uint32_t width, uint32_t height, void* data)
         : width_(width)
         , height_(height)
     {
@@ -17,6 +18,7 @@ namespace engine {
 
         glGenTextures(1, &renderer_id_);
         glBindTexture(GL_TEXTURE_2D, renderer_id_);
+
         glTexImage2D(GL_TEXTURE_2D,
                      0,
                      internal_format,
@@ -25,13 +27,13 @@ namespace engine {
                      0,
                      data_format_,
                      GL_UNSIGNED_BYTE,
-                     nullptr);
+                     data);
 
-        glTexParameteri(renderer_id_, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(renderer_id_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        glTexParameteri(renderer_id_, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(renderer_id_, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
     Texture2D::Texture2D(const std::string& path)
@@ -110,9 +112,10 @@ namespace engine {
     }
 
     std::shared_ptr<Texture2D> Texture2D::create(uint32_t width,
-                                                 uint32_t height)
+                                                 uint32_t height,
+                                                 void* data)
     {
-        return std::make_shared<Texture2D>(width, height);
+        return std::make_shared<Texture2D>(width, height, data);
     }
 
     std::shared_ptr<Texture2D> Texture2D::create(const std::string& path)

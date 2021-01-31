@@ -13,6 +13,15 @@ namespace engine {
             ;
     }
 
+    static void glCheckError()
+    {
+        GLenum err;
+        while ((err = glGetError()) != GL_NO_ERROR) {
+            if (err != GL_NO_ERROR) {
+                CAT_LOG_ERROR("[opengl error] {}", err);
+            }
+        }
+    }
     static bool glLogCall(const char* function, const char* file, int line)
     {
         GLenum err = glGetError();
