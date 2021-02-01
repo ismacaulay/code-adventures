@@ -14,5 +14,11 @@ namespace math {
 
     Spherical to_spherical(const glm::vec3& v);
     glm::vec3 to_cartesian(const Spherical& s);
+
+    template <typename T>
+    T inverse_lerp(T min, T max, T value)
+    {
+        return (value - min) / (max - min);
+    }
 }
 }

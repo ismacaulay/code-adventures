@@ -1,47 +1,56 @@
 #include "noise_generator.h"
 
+#include <algorithm>
+
 #include <FastNoise/FastNoiseLite.h>
+
+#include "defines.h"
+#include "toolkit/math/math.h"
 
 namespace tk {
 namespace noise {
-    FastNoiseLite::NoiseType noiseTypeToFastNoiseType(NoiseType type)
-    {
-        switch (type) {
-            case NoiseType::Perlin:
-                return FastNoiseLite::NoiseType_Perlin;
-        }
+    NoiseGenerator::NoiseGenerator(size_t width, size_t height)
+        : width_(width)
+        , height_(height)
+    {}
 
-        return FastNoiseLite::NoiseType_Value;
-    }
-
-    float* generate_perlin_noise(size_t width, size_t height, float scale)
+    float* NoiseGenerator::generate()
     {
         FastNoiseLite noise;
-        noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-        noise.SetSeed(1337);
-        noise.SetFrequency(0.010);
+        noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
         noise.SetFractalType(FastNoiseLite::FractalType_FBm);
-        noise.SetFractalOctaves(5);
-        noise.SetFractalLacunarity(2);
-        noise.SetFractalGain(0.50);
 
-        if (scale <= 0.0) {
-            scale = 0.0001f;
+        noise.SetFrequency(1);
+        noise.SetFractalOctaves(octaves_);
+        noise.SetFractalLacunarity(lacunarity_);
+        noise.SetFractalGain(persistance_);
+
+        if (scale_ <= 0.0) {
+            scale_ = 0.0001f;
         }
 
-        float* data = new float[width * height];
+        float* data = new float[width_ * height_];
         size_t idx = 0;
-        for (size_t y = 0; y < height; ++y) {
-            for (size_t x = 0; x < width; ++x) {
-                float sample_x = x / scale;
-                float sample_y = y / scale;
+        float min = MAX_F32;
+        float max = MIN_F32;
 
-                // GetNoise returns values between -1 and 1
+        float half_width = width_ / 2.0f;
+        float half_height = height_ / 2.0f;
+        for (size_t y = 0; y < height_; ++y) {
+            for (size_t x = 0; x < width_; ++x) {
+                float sample_x = (x - half_width) / scale_;
+                float sample_y = (y - half_height) / scale_;
+
                 float value = noise.GetNoise(sample_x, sample_y);
-                data[idx++] = (value + 1.0) / 2.0;
+                min = std::min(min, value);
+                max = std::max(max, value);
+                data[idx++] = value;
             }
         }
 
+        for (size_t i = 0; i < width_ * height_; ++i) {
+            data[i] = math::inverse_lerp(min, max, data[i]);
+        }
         return data;
     }
 }
