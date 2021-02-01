@@ -39,7 +39,9 @@ namespace engine {
             CAT_LOG_INFO("  Renderer: {}", glGetString(GL_RENDERER));
             CAT_LOG_INFO("  Version: {}", glGetString(GL_VERSION));
 
-            glViewport(0, 0, props.width, props.height);
+            int texture_units;
+            glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &texture_units);
+            CAT_LOG_INFO("  Texture Units: {}", texture_units);
 
             glfwSetWindowUserPointer(window_, &data_);
 
@@ -53,9 +55,13 @@ namespace engine {
                 }
             });
 
-            data_.width = props.width;
-            data_.height = props.height;
-            glfwSetWindowSizeCallback(
+
+            int width, height;
+            glfwGetFramebufferSize(window_, &width, &height);
+            glViewport(0, 0, width, height);
+            data_.width = width;
+            data_.height = height;
+            glfwSetFramebufferSizeCallback(
                 window_, [](GLFWwindow* window, int width, int height) {
                     WindowData* data =
                         (WindowData*)glfwGetWindowUserPointer(window);

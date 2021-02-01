@@ -33,7 +33,7 @@ namespace engine {
             static const uint32_t max_vertices = max_quads * 4;
             static const uint32_t max_indices = max_quads * 6;
             // TODO: This should be queried for based on the GPU capabilities
-            static const uint32_t max_texture_slots = 32;
+            static const uint32_t max_texture_slots = 16;
 
             std::shared_ptr<VertexArray> va;
             std::shared_ptr<VertexBuffer> vb;

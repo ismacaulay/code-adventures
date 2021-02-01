@@ -134,3 +134,4 @@ build/
 .vim
 node_modules/
 src/web/public/
+compile_commands.json

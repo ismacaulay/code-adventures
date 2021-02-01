@@ -27,7 +27,7 @@ in vec4 v_color;
 in vec2 v_uv;
 in float v_texture_idx;
 
-uniform sampler2D u_textures[32];
+uniform sampler2D u_textures[16];
 
 out vec4 frag_color;
 
@@ -83,54 +83,54 @@ void main()
         case 15:
             color *= texture(u_textures[15], v_uv);
             break;
-        case 16:
-            color *= texture(u_textures[16], v_uv);
-            break;
-        case 17:
-            color *= texture(u_textures[17], v_uv);
-            break;
-        case 18:
-            color *= texture(u_textures[18], v_uv);
-            break;
-        case 19:
-            color *= texture(u_textures[19], v_uv);
-            break;
-        case 20:
-            color *= texture(u_textures[20], v_uv);
-            break;
-        case 21:
-            color *= texture(u_textures[21], v_uv);
-            break;
-        case 22:
-            color *= texture(u_textures[22], v_uv);
-            break;
-        case 23:
-            color *= texture(u_textures[23], v_uv);
-            break;
-        case 24:
-            color *= texture(u_textures[24], v_uv);
-            break;
-        case 25:
-            color *= texture(u_textures[25], v_uv);
-            break;
-        case 26:
-            color *= texture(u_textures[26], v_uv);
-            break;
-        case 27:
-            color *= texture(u_textures[27], v_uv);
-            break;
-        case 28:
-            color *= texture(u_textures[28], v_uv);
-            break;
-        case 29:
-            color *= texture(u_textures[29], v_uv);
-            break;
-        case 30:
-            color *= texture(u_textures[30], v_uv);
-            break;
-        case 31:
-            color *= texture(u_textures[31], v_uv);
-            break;
+        /* case 16: */
+        /*     color *= texture(u_textures[16], v_uv); */
+        /*     break; */
+        /* case 17: */
+        /*     color *= texture(u_textures[17], v_uv); */
+        /*     break; */
+        /* case 18: */
+        /*     color *= texture(u_textures[18], v_uv); */
+        /*     break; */
+        /* case 19: */
+        /*     color *= texture(u_textures[19], v_uv); */
+        /*     break; */
+        /* case 20: */
+        /*     color *= texture(u_textures[20], v_uv); */
+        /*     break; */
+        /* case 21: */
+        /*     color *= texture(u_textures[21], v_uv); */
+        /*     break; */
+        /* case 22: */
+        /*     color *= texture(u_textures[22], v_uv); */
+        /*     break; */
+        /* case 23: */
+        /*     color *= texture(u_textures[23], v_uv); */
+        /*     break; */
+        /* case 24: */
+        /*     color *= texture(u_textures[24], v_uv); */
+        /*     break; */
+        /* case 25: */
+        /*     color *= texture(u_textures[25], v_uv); */
+        /*     break; */
+        /* case 26: */
+        /*     color *= texture(u_textures[26], v_uv); */
+        /*     break; */
+        /* case 27: */
+        /*     color *= texture(u_textures[27], v_uv); */
+        /*     break; */
+        /* case 28: */
+        /*     color *= texture(u_textures[28], v_uv); */
+        /*     break; */
+        /* case 29: */
+        /*     color *= texture(u_textures[29], v_uv); */
+        /*     break; */
+        /* case 30: */
+        /*     color *= texture(u_textures[30], v_uv); */
+        /*     break; */
+        /* case 31: */
+        /*     color *= texture(u_textures[31], v_uv); */
+        /*     break; */
     }
     frag_color = color;
 }
