@@ -1,6 +1,8 @@
 #pragma once
 
 #include <array>
+#include <vector>
+
 #include <glm/glm.hpp>
 
 namespace tk {
@@ -32,5 +34,6 @@ namespace math {
         }
     };
 
+    Box compute_aabb(const std::vector<float>& vertices);
 }
 }

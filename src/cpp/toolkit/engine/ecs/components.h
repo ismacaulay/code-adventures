@@ -1,5 +1,6 @@
 #pragma once
 
+#include "toolkit/engine/models/geometry.h"
 #include "toolkit/engine/models/model.h"
 #include "toolkit/engine/rendering/defines.h"
 #include "toolkit/engine/rendering/shader.h"
@@ -41,6 +42,16 @@ namespace engine {
 
         ModelRendererComponent() = default;
         ModelRendererComponent(const ModelRendererComponent&) = default;
+    };
+
+    struct MeshRendererComponent
+    {
+        std::shared_ptr<MeshGeometry> geometry;
+        std::shared_ptr<Shader> shader;
+        FillMode fill_mode;
+
+        MeshRendererComponent() = default;
+        MeshRendererComponent(const MeshRendererComponent&) = default;
     };
 
 }

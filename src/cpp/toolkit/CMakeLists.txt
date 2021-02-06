@@ -35,6 +35,7 @@ set(TOOLKIT_SRC_FILES
     engine/ui/scene_heirarchy_panel.cpp
 
     math/math.cpp
+    math/box.cpp
 
     noise/noise_generator.cpp
 )

@@ -1,11 +1,14 @@
 #include "renderer.h"
 
 #include "engine/camera/camera.h"
+#include "engine/models/geometry.h"
 #include "index_buffer.h"
 #include "logger/assert.h"
+#include "logger/log.h"
 #include "render_command.h"
 #include "shader.h"
 #include "vertex_array.h"
+#include "vertex_buffer.h"
 
 namespace tk {
 namespace engine {
@@ -18,7 +21,7 @@ namespace engine {
         RenderCommand::init();
     }
 
-    void Renderer::shutdown() {}
+    void Renderer::shutdown() { data_ = nullptr; }
 
     void Renderer::resize(uint32_t width, uint32_t height)
     {
@@ -27,7 +30,7 @@ namespace engine {
 
     void Renderer::begin(const Camera& camera)
     {
-        data_->view_projection_ = camera.view_projection();
+        data_->view_projection = camera.view_projection();
     }
 
     void Renderer::end() {}
@@ -46,7 +49,7 @@ namespace engine {
         CAT_ASSERT(vertex_array);
 
         shader->bind();
-        shader->set_uniform_mat4("u_view_projection", data_->view_projection_);
+        shader->set_uniform_mat4("u_view_projection", data_->view_projection);
         shader->set_uniform_mat4("u_model", transform);
 
         vertex_array->bind();
@@ -56,6 +59,34 @@ namespace engine {
         } else {
             RenderCommand::draw_array(mode, vertex_array);
         }
+    }
+
+    void Renderer::submit(const std::shared_ptr<Shader>& shader,
+                          const std::shared_ptr<MeshGeometry>& geometry,
+                          const glm::mat4& transform,
+                          RenderMode mode)
+    {
+        auto it = data_->va_map.find(geometry.get());
+        if (it != data_->va_map.end()) {
+            submit(shader, it->second, transform, mode);
+            return;
+        }
+
+        auto vb =
+            VertexBuffer::create(geometry->positions.data(),
+                                 sizeof(float) * geometry->positions.size());
+        vb->set_layout({ { ShaderDataType::Float3, "a_position" } });
+
+        auto ib =
+            IndexBuffer::create(geometry->indices.data(),
+                                sizeof(uint32_t) * geometry->indices.size());
+
+        auto va = VertexArray::create();
+        va->set_index_buffer(ib);
+        va->add_vertex_buffer(vb);
+
+        data_->va_map[geometry.get()] = va;
+        submit(shader, va, transform, mode);
     }
 }
 }

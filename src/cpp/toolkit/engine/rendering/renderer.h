@@ -1,7 +1,9 @@
 #pragma once
 #include <cstdint>
-#include <glm/glm.hpp>
 #include <memory>
+#include <unordered_map>
+
+#include <glm/glm.hpp>
 
 #include "defines.h"
 
@@ -11,6 +13,7 @@ namespace engine {
     class Camera;
     class Shader;
     class VertexArray;
+    struct MeshGeometry;
 
     class Renderer
     {
@@ -30,10 +33,16 @@ namespace engine {
                            const glm::mat4& transform = glm::mat4(1.0f),
                            RenderMode mode = RenderMode::Triangles);
 
+        static void submit(const std::shared_ptr<Shader>& shader,
+                           const std::shared_ptr<MeshGeometry>& geometry,
+                           const glm::mat4& transform = glm::mat4(1.0f),
+                           RenderMode mode = RenderMode::Triangles);
+
     private:
         struct SceneData
         {
-            glm::mat4 view_projection_;
+            glm::mat4 view_projection;
+            std::unordered_map<void*, std::shared_ptr<VertexArray>> va_map;
         };
 
         static std::unique_ptr<SceneData> data_;
