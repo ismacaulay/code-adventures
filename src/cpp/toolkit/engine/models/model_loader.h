@@ -11,7 +11,7 @@ namespace engine {
     {
     public:
         static std::unique_ptr<Model> load(const std::string& path);
-        static std::unique_ptr<MeshGeometry> load_mesh_geometry(
+        static std::shared_ptr<MeshGeometry> load_mesh_geometry(
             const std::string& path);
 
     private:

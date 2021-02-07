@@ -39,16 +39,18 @@ public:
         camera_controller_->select_camera(tk::engine::CameraType::Orthographic);
         camera_controller_->set_position({ 0.0f, 0.0f, 1.0f });
 
+        auto bunny_geometry = tk::engine::ModelLoader::load_mesh_geometry(
+            "assets/models/bunny/bunny.obj");
+        auto aabb = tk::math::compute_aabb(bunny_geometry->positions);
+
         auto bunny_entity = scene_.create_entity();
         auto& renderer =
             bunny_entity.add_component<tk::engine::MeshRendererComponent>();
-        renderer.geometry = tk::engine::ModelLoader::load_mesh_geometry(
-            "assets/models/bunny/bunny.obj");
+        renderer.geometry = bunny_geometry;
         renderer.shader =
             tk::engine::Shader::from_file("assets/shaders/bunny.glsl");
         renderer.fill_mode = tk::engine::FillMode::Line;
 
-        auto aabb = tk::math::compute_aabb(renderer.geometry->positions);
         auto& transform =
             bunny_entity.get_component<tk::engine::TransformComponent>();
         transform.transform = glm::translate(glm::mat4(1.0f), -aabb.centre());

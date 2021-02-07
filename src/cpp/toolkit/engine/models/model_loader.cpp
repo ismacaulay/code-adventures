@@ -155,7 +155,7 @@ namespace engine {
         return std::move(model);
     }
 
-    std::unique_ptr<MeshGeometry> ModelLoader::load_mesh_geometry(
+    std::shared_ptr<MeshGeometry> ModelLoader::load_mesh_geometry(
         const std::string& path)
     {
         Assimp::Importer importer;
@@ -165,9 +165,9 @@ namespace engine {
                     importer.GetErrorString());
         CAT_LOG_DEBUG("Loaded scene for path {}", path);
 
-        auto mesh = std::make_unique<MeshGeometry>();
+        auto mesh = std::make_shared<MeshGeometry>();
         process_node(scene->mRootNode, scene, mesh.get());
-        return std::move(mesh);
+        return mesh;
     }
 }
 }

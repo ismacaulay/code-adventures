@@ -12,12 +12,16 @@ namespace math {
         glm::vec3 min;
         glm::vec3 max;
 
-        glm::vec3 centre()
+        glm::vec3 centre() const
         {
-            return glm::vec3(min.x + ((max.x - min.x) / 2.0f),
-                             min.y + ((max.y - min.y) / 2.0f),
-                             min.z + ((max.z - min.z) / 2.0f));
+            return glm::vec3(min.x + (width() * 0.5),
+                             min.y + (height() * 0.5),
+                             min.z + (depth() * 0.5));
         }
+
+        float width() const { return max.x - min.x; }
+        float height() const { return max.y - min.y; }
+        float depth() const { return max.z - min.z; }
 
         std::array<glm::vec3, 8> corners() const
         {
