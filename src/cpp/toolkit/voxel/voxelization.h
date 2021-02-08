@@ -47,7 +47,8 @@ namespace voxel {
     };
 
     VoxelOctree* generate_voxel_octree(const std::vector<float>& vertices,
-                                       uint32_t resolution);
+                                       const std::vector<uint32_t>& triangles,
+                                       float voxel_size);
 
 }
 }

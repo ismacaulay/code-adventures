@@ -5,10 +5,24 @@
 namespace tk {
 namespace voxel {
 
+    uint32_t next_power_of_two(uint32_t value)
+    {
+        uint32_t v = value;
+
+        v--;
+        v |= v >> 1;
+        v |= v >> 2;
+        v |= v >> 4;
+        v |= v >> 8;
+        v |= v >> 16;
+        v++;
+        return v;
+    }
+
     void subdivide(VoxelOctree* octree,
                    VoxelOctreeNode* node,
                    const std::vector<float>& vertices,
-                   const std::vector<size_t>& triangles)
+                   const std::vector<uint32_t>& triangles)
 
     {
         // get the half width of the parent AABB
@@ -37,17 +51,17 @@ namespace voxel {
             }
         }
 
-        std::vector<size_t> child_triangle_list;
+        std::vector<uint32_t> child_triangle_list;
         std::array<glm::vec3, 3> triangle_verts;
         for (size_t i = 0; i < 8; ++i) {
             child_triangle_list.clear();
             auto* child = node->children[i];
 
             // build the triangle list that the child world aabb intersects with
-            for (size_t t = 0; t < triangles.size(); ++t) {
-                size_t t1 = triangles[t * 3 + 0];
-                size_t t2 = triangles[t * 3 + 1];
-                size_t t3 = triangles[t * 3 + 2];
+            for (uint32_t t = 0; t < triangles.size() / 3; ++t) {
+                auto t1 = triangles[t * 3 + 0];
+                auto t2 = triangles[t * 3 + 1];
+                auto t3 = triangles[t * 3 + 2];
 
                 triangle_verts[0].x = vertices[t1 * 3 + 0];
                 triangle_verts[0].y = vertices[t1 * 3 + 1];
@@ -63,7 +77,9 @@ namespace voxel {
 
                 if (math::aabb_triangle_intersection(child->world_aabb,
                                                      triangle_verts)) {
-                    child_triangle_list.push_back(t);
+                    child_triangle_list.push_back(t1);
+                    child_triangle_list.push_back(t2);
+                    child_triangle_list.push_back(t3);
                 }
             }
 
@@ -86,15 +102,37 @@ namespace voxel {
     }
 
     VoxelOctree* generate_voxel_octree(const std::vector<float>& vertices,
-                                       uint32_t resolution)
+                                       const std::vector<uint32_t>& triangles,
+                                       float voxel_size)
     {
+        VoxelOctree* tree = new VoxelOctree;
+        tree->root = new VoxelOctreeNode;
+        tree->voxel_size = voxel_size;
 
-        std::vector<size_t> triangle_list;
-        for (size_t i = 0; i < vertices.size(); i += 3) {
-            triangle_list.push_back(i);
-        }
+        auto mesh_aabb = math::compute_aabb(vertices);
 
-        return nullptr;
+        float inverse_voxel_size = 1.0f / voxel_size;
+        math::Box aabb = mesh_aabb;
+        aabb.min *= inverse_voxel_size;
+        aabb.max *= inverse_voxel_size;
+
+        // find the longest axis
+        auto dim = glm::abs(aabb.max - aabb.min);
+        float max = std::max(std::max(dim.x, dim.y), dim.z);
+        float power_of_two_dim =
+            static_cast<float>(next_power_of_two(static_cast<uint32_t>(max)));
+
+        // create the world/local aabb
+        float world_size = power_of_two_dim * voxel_size;
+        tree->origin = mesh_aabb.centre() - glm::vec3(world_size / 2.0f);
+        tree->root->world_aabb.min = tree->origin;
+        tree->root->world_aabb.max = tree->origin + glm::vec3(world_size);
+        tree->root->local_aabb.min = glm::vec3(0);
+        tree->root->local_aabb.max = glm::vec3(power_of_two_dim);
+
+        subdivide(tree, tree->root, vertices, triangles);
+
+        return tree;
     }
 
 }

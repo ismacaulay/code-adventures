@@ -1,5 +1,7 @@
 #include "toolkit/engine.h"
+#include "toolkit/geometry.h"
 #include "toolkit/math.h"
+#include "toolkit/voxel.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -46,7 +48,20 @@ public:
         auto bunny_entity = scene_.create_entity();
         auto& renderer =
             bunny_entity.add_component<tk::engine::MeshRendererComponent>();
-        renderer.geometry = bunny_geometry;
+        // renderer.geometry = bunny_geometry;
+        //
+        auto dim = glm::abs(aabb.max - aabb.min);
+        float max = std::max(std::max(dim.x, dim.y), dim.z);
+        float voxel_size = max / 10.0f;
+        auto* tree = tk::voxel::generate_voxel_octree(
+            bunny_geometry->positions, bunny_geometry->indices, voxel_size);
+        renderer.geometry = tk::geometry::from_voxel_octree(tree);
+        CAT_LOG_DEBUG("tree bb: {}", tree->root->world_aabb);
+        CAT_LOG_DEBUG("verts: {}, indices: {}",
+                      renderer.geometry->positions.size(),
+                      renderer.geometry->indices.size());
+
+        delete tree;
         renderer.shader =
             tk::engine::Shader::from_file("assets/shaders/bunny.glsl");
         renderer.fill_mode = tk::engine::FillMode::Line;

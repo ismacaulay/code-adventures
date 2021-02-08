@@ -34,10 +34,15 @@ set(TOOLKIT_SRC_FILES
     engine/ui/imgui_renderer.cpp
     engine/ui/scene_heirarchy_panel.cpp
 
-    math/math.cpp
+    geometry/voxel_octree.cpp
+
     math/box.cpp
+    math/intersection.cpp
+    math/math.cpp
 
     noise/noise_generator.cpp
+
+    voxel/voxelization.cpp
 )
 
 add_library(toolkit STATIC "${TOOLKIT_SRC_FILES}")

@@ -5,7 +5,7 @@
 #include <assimp/scene.h>
 
 #include "engine/rendering/texture2d.h"
-#include "geometry.h"
+#include "geometry/geometry.h"
 #include "logger/assert.h"
 #include "mesh.h"
 #include "model.h"
@@ -80,7 +80,7 @@ namespace engine {
 
     void process_mesh(aiMesh* mesh,
                       const aiScene* scene,
-                      MeshGeometry* geometry)
+                      geometry::MeshGeometry* geometry)
     {
         CAT_LOG_DEBUG(
             "[process_mesh] {} {}", mesh->mNumVertices, mesh->mNumFaces);
@@ -125,7 +125,7 @@ namespace engine {
 
     void process_node(aiNode* node,
                       const aiScene* scene,
-                      MeshGeometry* geometry)
+                      geometry::MeshGeometry* geometry)
     {
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
@@ -155,7 +155,7 @@ namespace engine {
         return std::move(model);
     }
 
-    std::shared_ptr<MeshGeometry> ModelLoader::load_mesh_geometry(
+    std::shared_ptr<geometry::MeshGeometry> ModelLoader::load_mesh_geometry(
         const std::string& path)
     {
         Assimp::Importer importer;
@@ -165,7 +165,7 @@ namespace engine {
                     importer.GetErrorString());
         CAT_LOG_DEBUG("Loaded scene for path {}", path);
 
-        auto mesh = std::make_shared<MeshGeometry>();
+        auto mesh = std::make_shared<geometry::MeshGeometry>();
         process_node(scene->mRootNode, scene, mesh.get());
         return mesh;
     }

@@ -23,7 +23,6 @@
 #include "toolkit/engine/events/key_codes.h"
 #include "toolkit/engine/events/mouse_codes.h"
 
-#include "toolkit/engine/models/geometry.h"
 #include "toolkit/engine/models/model.h"
 #include "toolkit/engine/models/model_loader.h"
 

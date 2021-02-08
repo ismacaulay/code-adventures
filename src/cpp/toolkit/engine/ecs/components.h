@@ -1,9 +1,9 @@
 #pragma once
 
-#include "toolkit/engine/models/geometry.h"
-#include "toolkit/engine/models/model.h"
-#include "toolkit/engine/rendering/defines.h"
-#include "toolkit/engine/rendering/shader.h"
+#include "engine/models/model.h"
+#include "engine/rendering/defines.h"
+#include "engine/rendering/shader.h"
+#include "geometry/geometry.h"
 
 namespace tk {
 namespace engine {
@@ -46,7 +46,7 @@ namespace engine {
 
     struct MeshRendererComponent
     {
-        std::shared_ptr<MeshGeometry> geometry;
+        std::shared_ptr<geometry::MeshGeometry> geometry;
         std::shared_ptr<Shader> shader;
         FillMode fill_mode;
 

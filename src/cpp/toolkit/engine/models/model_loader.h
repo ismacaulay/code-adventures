@@ -3,15 +3,18 @@
 #include <string>
 
 namespace tk {
+namespace geometry {
+    struct MeshGeometry;
+}
+
 namespace engine {
     class Model;
-    struct MeshGeometry;
 
     class ModelLoader
     {
     public:
         static std::unique_ptr<Model> load(const std::string& path);
-        static std::shared_ptr<MeshGeometry> load_mesh_geometry(
+        static std::shared_ptr<geometry::MeshGeometry> load_mesh_geometry(
             const std::string& path);
 
     private:

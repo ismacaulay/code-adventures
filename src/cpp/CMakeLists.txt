@@ -21,8 +21,8 @@ endif()
 
 # set(THREADS_PREFER_THREAD_FLAG ON)
 # find_package(Threads REQUIRED)
-
 # set(CMAKE_BUILD_TYPE Debug)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GLAD)

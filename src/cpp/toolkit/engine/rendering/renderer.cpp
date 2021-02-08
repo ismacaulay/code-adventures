@@ -1,7 +1,7 @@
 #include "renderer.h"
 
 #include "engine/camera/camera.h"
-#include "engine/models/geometry.h"
+#include "geometry/geometry.h"
 #include "index_buffer.h"
 #include "logger/assert.h"
 #include "logger/log.h"
@@ -61,10 +61,11 @@ namespace engine {
         }
     }
 
-    void Renderer::submit(const std::shared_ptr<Shader>& shader,
-                          const std::shared_ptr<MeshGeometry>& geometry,
-                          const glm::mat4& transform,
-                          RenderMode mode)
+    void Renderer::submit(
+        const std::shared_ptr<Shader>& shader,
+        const std::shared_ptr<geometry::MeshGeometry>& geometry,
+        const glm::mat4& transform,
+        RenderMode mode)
     {
         auto it = data_->va_map.find(geometry.get());
         if (it != data_->va_map.end()) {

@@ -8,12 +8,15 @@
 #include "defines.h"
 
 namespace tk {
+namespace geometry {
+    struct MeshGeometry;
+}
+
 namespace engine {
 
     class Camera;
     class Shader;
     class VertexArray;
-    struct MeshGeometry;
 
     class Renderer
     {
@@ -33,10 +36,11 @@ namespace engine {
                            const glm::mat4& transform = glm::mat4(1.0f),
                            RenderMode mode = RenderMode::Triangles);
 
-        static void submit(const std::shared_ptr<Shader>& shader,
-                           const std::shared_ptr<MeshGeometry>& geometry,
-                           const glm::mat4& transform = glm::mat4(1.0f),
-                           RenderMode mode = RenderMode::Triangles);
+        static void submit(
+            const std::shared_ptr<Shader>& shader,
+            const std::shared_ptr<geometry::MeshGeometry>& geometry,
+            const glm::mat4& transform = glm::mat4(1.0f),
+            RenderMode mode = RenderMode::Triangles);
 
     private:
         struct SceneData

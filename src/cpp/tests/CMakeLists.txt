@@ -3,6 +3,7 @@ set(TEST_SRC_FILES
 
     test_hello_world.cpp
     test_noise_generator.cpp
+    test_glm.cpp
 )
 
 add_executable(cpp_tests ${TEST_SRC_FILES})

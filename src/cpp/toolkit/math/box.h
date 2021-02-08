@@ -36,6 +36,12 @@ namespace math {
                 { min.x, max.y, max.z },
             };
         }
+
+        template <typename OStream>
+        friend OStream& operator<<(OStream& os, const Box& box)
+        {
+            return os << "[box min=" << box.min << ", max=" << box.max << "]";
+        }
     };
 
     Box compute_aabb(const std::vector<float>& vertices);

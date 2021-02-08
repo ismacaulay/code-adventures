@@ -1,10 +1,9 @@
 #pragma once
-
 #include <cstdint>
 #include <vector>
 
 namespace tk {
-namespace engine {
+namespace geometry {
 
     struct MeshGeometry
     {
