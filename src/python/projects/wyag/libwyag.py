@@ -11,7 +11,7 @@ import os
 import re
 import sys
 import zlib
-from typing import Optional, BinaryIO
+from typing import Optional, BinaryIO, cast
 
 argparser = argparse.ArgumentParser(description="Simplified git")
 argsubparser = argparser.add_subparsers(title="Commands", dest="command")
@@ -34,6 +34,12 @@ argsp.add_argument("-t", metavar="type", dest="type", choices=[
 argsp.add_argument("-w", dest="write", action="store_true",
                    help="Actually write the object to the repository")
 argsp.add_argument("path", help="Read object from <file>")
+
+
+argsp = argsubparser.add_parser(
+    "log", help="Display history of a given commit")
+argsp.add_argument("commit", default="HEAD", nargs="?",
+                   help="Commit to start at.")
 
 
 class Repository(object):
@@ -79,6 +85,12 @@ class GitObject(object):
 
 class GitCommit(GitObject):
     fmt = b'commit'
+
+    def serialize(self):
+        return kvlm_serialize(self.kvlm)
+
+    def deserialize(self, data: bytes):
+        self.kvlm = kvlm_parse(data)
 
 
 class GitTree(GitObject):
@@ -213,6 +225,72 @@ def object_write(obj: GitObject, actually_write=True) -> str:
     return sha
 
 
+def kvlm_parse(raw: bytes, start=0, dct: Optional[collections.OrderedDict] = None) -> collections.OrderedDict:
+    """parse the message and return an ordered dict of the key-value pairs"""
+    if not dct:
+        dct = collections.OrderedDict()
+
+    # search for the next space and the next newline
+    spc = raw.find(b' ', start)
+    nl = raw.find(b'\n', start)
+
+    # if newline appears first (or there is no space at all), we assume a blank line
+    # this means that the remainder of the data is the message
+    if spc < 0 or nl < spc:
+        assert(nl == start)
+        dct[b''] = raw[start+1:]
+        return dct
+
+    # read a key-value pair and recurse for the next
+    key = raw[start:spc]
+
+    # find the end of the value, it may continue on multiple lines
+    end = start
+    while True:
+        # find the newline char
+        end = raw.find(b'\n', end+1)
+        # if the next character is not a space, we found the end of the value
+        if raw[end+1] != ord(' '):
+            break
+
+    # get the value and drop the leading space on continuation lines
+    value = raw[spc+1:end].replace(b'\n ', b'\n')
+
+    # store the value in dct, but dont just replace it. if it already
+    # exists turn it into a list of values for the key
+    if key in dct:
+        if type(dct[key]) == list:
+            dct[key].append(value)
+        else:
+            dct[key] = [dct[key], value]
+    else:
+        dct[key] = value
+
+    return kvlm_parse(raw, start=end+1, dct=dct)
+
+
+def kvlm_serialize(kvlm: collections.OrderedDict) -> bytes:
+    ret = b''
+
+    for k in kvlm.keys():
+        # skip the message itself
+        if k == b'':
+            continue
+
+        value = kvlm[k]
+        if type(value) != list:
+            value = [value]
+
+        for v in value:
+            # serialize the key-value pair and ensure the continuation lines start with a space
+            ret += k + b' ' + (v.replace(b'\n', b'\n ')) + b'\n'
+
+    # append the message
+    ret += b'\n' + kvlm[b'']
+
+    return ret
+
+
 def create_repo(path: str):
     """Creates a new repository at path"""
     repo = Repository(path, True)
@@ -275,6 +353,29 @@ def create_default_config() -> configparser.ConfigParser:
     return config
 
 
+def log_graphviz(repo: Repository, sha: str, seen: set):
+    if sha in seen:
+        return
+
+    seen.add(sha)
+    obj = object_read(repo, sha)
+    assert(obj.fmt == b'commit')
+
+    commit = cast(GitCommit, obj)
+
+    if not b'parent' in commit.kvlm.keys():
+        return
+
+    parents = commit.kvlm[b'parent']
+    if type(parents) != list:
+        parents = [parents]
+
+    for p in parents:
+        p = p.decode("ascii")
+        print(f"c_{sha} -> c_{p};")
+        log_graphviz(repo, p, seen)
+
+
 def cmd_init(args):
     create_repo(args.path)
 
@@ -297,6 +398,17 @@ def cmd_hash_object(args):
         print(sha)
 
 
+def cmd_log(args):
+    repo = repo_find()
+
+    if not repo:
+        raise Exception("Not a git repository")
+
+    print("digraph wyaglog{")
+    log_graphviz(repo, object_find(repo, args.commit), set())
+    print("}")
+
+
 def main(argv=sys.argv[1:]):
     args = argparser.parse_args(argv)
 
@@ -306,3 +418,5 @@ def main(argv=sys.argv[1:]):
         cmd_cat_file(args)
     elif args.command == "hash-object":
         cmd_hash_object(args)
+    elif args.command == "log":
+        cmd_log(args)
