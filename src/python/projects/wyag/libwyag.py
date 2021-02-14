@@ -11,7 +11,7 @@ import os
 import re
 import sys
 import zlib
-from typing import Optional, BinaryIO, cast
+from typing import Optional, BinaryIO, cast, Tuple, List
 
 argparser = argparse.ArgumentParser(description="Simplified git")
 argsubparser = argparser.add_subparsers(title="Commands", dest="command")
@@ -35,11 +35,19 @@ argsp.add_argument("-w", dest="write", action="store_true",
                    help="Actually write the object to the repository")
 argsp.add_argument("path", help="Read object from <file>")
 
-
 argsp = argsubparser.add_parser(
     "log", help="Display history of a given commit")
 argsp.add_argument("commit", default="HEAD", nargs="?",
                    help="Commit to start at.")
+
+argsp = argsubparser.add_parser(
+    "ls-tree", help="Pretty-print a tree object")
+argsp.add_argument("object", help="The object to show")
+
+argsp = argsubparser.add_parser(
+    "checkout", help="Checkout a commit inside a directory")
+argsp.add_argument("commit", help="The commit or tree to checkout")
+argsp.add_argument("path", help="The EMPTY directory to checkout on")
 
 
 class Repository(object):
@@ -95,6 +103,19 @@ class GitCommit(GitObject):
 
 class GitTree(GitObject):
     fmt = b'tree'
+
+    def serialize(self):
+        return tree_serialize(self)
+
+    def deserialize(self, data: bytes):
+        self.items = tree_parse(data)
+
+
+class GitTreeLeaf(object):
+    def __init__(self, mode, path, sha):
+        self.mode = mode
+        self.path = path
+        self.sha = sha
 
 
 class GitTag(GitObject):
@@ -291,6 +312,58 @@ def kvlm_serialize(kvlm: collections.OrderedDict) -> bytes:
     return ret
 
 
+def tree_parse_one(raw: bytes, start=0) -> Tuple[int, GitTreeLeaf]:
+    # find the space terminator for the mode
+    x = raw.find(b' ', start)
+    assert(x-start == 5 or x-start == 6)
+
+    mode = raw[start:x]
+
+    # find the null terminator for the path
+    y = raw.find(b'\x00', x)
+
+    path = raw[x+1:y]
+
+    sha = hex(int.from_bytes(raw[y+1:y+21], "big"))[2:]
+
+    return y+21, GitTreeLeaf(mode, path, sha)
+
+
+def tree_parse(raw: bytes) -> List[GitTreeLeaf]:
+    pos = 0
+    max = len(raw)
+    ret = list()
+
+    while pos < max:
+        pos, data = tree_parse_one(raw, pos)
+        ret.append(data)
+    return ret
+
+
+def tree_serialize(obj: GitTree) -> bytes:
+    ret = b''
+    for i in obj.items:
+        ret += i.mode
+        ret += b' '
+        ret += i.path
+        ret += b'\x00'
+        ret += int(i.sha, 16).to_bytes(20, byteorder="big")
+    return ret
+
+
+def tree_checkout(repo: Repository, tree: GitTree, path: bytes):
+    for item in tree.items:
+        obj = object_read(repo, item.sha)
+        dest = os.path.join(path, item.path)
+
+        if obj.fmt == b'tree':
+            os.mkdir(dest)
+            tree_checkout(repo, cast(GitTree, obj), dest)
+        elif obj.fmt == b'blob':
+            with open(dest, 'wb') as f:
+                f.write(cast(GitBlob, obj).blobdata)
+
+
 def create_repo(path: str):
     """Creates a new repository at path"""
     repo = Repository(path, True)
@@ -409,6 +482,47 @@ def cmd_log(args):
     print("}")
 
 
+def cmd_ls_tree(args):
+    repo = repo_find()
+    if not repo:
+        raise Exception("Not a git repository")
+
+    obj = object_read(repo, object_find(repo, args.object, fmt=b'tree'))
+    tree = cast(GitTree, obj)
+
+    for item in tree.items:
+        print("{0} {1} {2}\t{3}".format(
+            "0" * (6 - len(item.mode)) + item.mode.decode("ascii"),
+            # Git's ls-tree displays the type
+            # of the object pointed to.  We can do that too :)
+            object_read(repo, item.sha).fmt.decode("ascii"),
+            item.sha,
+            item.path.decode("ascii")))
+
+
+def cmd_checkout(args):
+    repo = repo_find()
+    if not repo:
+        raise Exception("Not a git repository")
+
+    obj = object_read(repo, object_find(repo, args.commit))
+
+    if obj.fmt == b'commit':
+        obj = cast(GitCommit, obj)
+        obj = object_read(repo, obj.kvlm[b'tree'].decode("ascii"))
+
+    if os.path.exists(args.path):
+        if not os.path.isdir(args.path):
+            raise Exception(f"Not a directory{args.path}")
+        if os.listdir(args.path):
+            raise Exception(f"Not empty{args.path}")
+    else:
+        os.makedirs(args.path)
+
+    tree_checkout(repo, cast(GitTree, obj),
+                  os.path.realpath(args.path).encode())
+
+
 def main(argv=sys.argv[1:]):
     args = argparser.parse_args(argv)
 
@@ -420,3 +534,7 @@ def main(argv=sys.argv[1:]):
         cmd_hash_object(args)
     elif args.command == "log":
         cmd_log(args)
+    elif args.command == "ls-tree":
+        cmd_ls_tree(args)
+    elif args.command == "checkout":
+        cmd_checkout(args)
