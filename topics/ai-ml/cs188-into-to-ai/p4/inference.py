@@ -178,11 +178,12 @@ class InferenceModule:
         """
         Return the probability P(noisyDistance | pacmanPosition, ghostPosition).
         """
-        if not noisyDistance:
-            if ghostPosition == jailPosition:
-                return 1
+        # need to explicity check None because 0 is falsy
+        if noisyDistance == None and ghostPosition == jailPosition:
+            return 1
+        elif noisyDistance == None and ghostPosition != jailPosition:
             return 0
-        elif ghostPosition == jailPosition:
+        elif noisyDistance != None and ghostPosition == jailPosition:
             return 0
 
         manDist = manhattanDistance(pacmanPosition, ghostPosition)
@@ -293,9 +294,10 @@ class ExactInference(InferenceModule):
         current position. However, this is not a problem, as Pacman's current
         position is known.
         """
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
-
+        pacmanPos = gameState.getPacmanPosition()
+        jailPos = self.getJailPosition()
+        for pos in self.allPositions:
+            self.beliefs[pos] = self.beliefs[pos] * self.getObservationProb(observation, pacmanPos, pos, jailPos)
         self.beliefs.normalize()
 
     def elapseTime(self, gameState):
