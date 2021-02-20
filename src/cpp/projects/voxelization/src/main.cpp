@@ -51,7 +51,7 @@ public:
         auto aabb = tk::math::compute_aabb(renderer.geometry->positions);
         auto& transform =
             bunny_entity.get_component<tk::engine::TransformComponent>();
-        transform.transform = glm::translate(glm::mat4(1.0f), -aabb.centre());
+        transform.translation = -aabb.centre();
 
         tk::engine::RenderCommand::set_fill_mode(tk::engine::FillMode::Line);
         orthographic_camera->set_projection_from_box(aabb);

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 #include "toolkit/engine/models/geometry.h"
 #include "toolkit/engine/models/model.h"
 #include "toolkit/engine/rendering/defines.h"
@@ -23,15 +27,23 @@ namespace engine {
 
     struct TransformComponent
     {
-        glm::mat4 transform;
+        glm::vec3 translation;
+        glm::vec3 rotation;
+        glm::vec3 scale;
 
         TransformComponent()
-            : transform(1.0f)
+            : translation(0.0f)
+            , rotation(0.0f)
+            , scale(1.0f)
         {}
         TransformComponent(const TransformComponent&) = default;
 
-        glm::mat4& operator()() { return transform; }
-        const glm::mat4& operator()() const { return transform; }
+        glm::mat4 transform()
+        {
+            glm::mat4 r = glm::toMat4(glm::quat(rotation));
+            return glm::translate(glm::mat4(1.0f), translation) * r *
+                   glm::scale(glm::mat4(1.0f), scale);
+        }
     };
 
     struct ModelRendererComponent
@@ -54,5 +66,12 @@ namespace engine {
         MeshRendererComponent(const MeshRendererComponent&) = default;
     };
 
+    struct LightComponent
+    {
+        glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+
+        LightComponent() = default;
+        LightComponent(const LightComponent&) = default;
+    };
 }
 }

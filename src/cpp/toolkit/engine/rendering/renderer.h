@@ -42,6 +42,8 @@ namespace engine {
         struct SceneData
         {
             glm::mat4 view_projection;
+            glm::mat4 view;
+
             std::unordered_map<void*, std::shared_ptr<VertexArray>> va_map;
         };
 

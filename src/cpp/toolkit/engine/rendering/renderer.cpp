@@ -31,6 +31,7 @@ namespace engine {
     void Renderer::begin(const Camera& camera)
     {
         data_->view_projection = camera.view_projection();
+        data_->view = camera.view();
     }
 
     void Renderer::end() {}
@@ -50,6 +51,7 @@ namespace engine {
 
         shader->bind();
         shader->set_uniform_mat4("u_view_projection", data_->view_projection);
+        shader->set_uniform_mat4("u_model_view", data_->view * transform);
         shader->set_uniform_mat4("u_model", transform);
 
         vertex_array->bind();

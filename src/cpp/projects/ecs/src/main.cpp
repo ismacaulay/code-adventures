@@ -37,13 +37,24 @@ public:
         camera_controller_->select_camera(tk::engine::CameraType::Orthographic);
         camera_controller_->set_position({ 0.0f, 0.0f, 1.0f });
 
-        auto bunny_entity = scene_.create_entity();
+        auto bunny_entity = scene_.create_entity("bunny");
         auto& model_renderer =
             bunny_entity.add_component<tk::engine::ModelRendererComponent>();
         model_renderer.model = tk::engine::ModelLoader::load(BUNNY_MODEL_PATH);
         model_renderer.shader =
             tk::engine::Shader::from_file(BUNNY_SHADER_PATH);
-        model_renderer.fill_mode = tk::engine::FillMode::Line;
+        // model_renderer.fill_mode = tk::engine::FillMode::Line;
+
+        auto light1 = scene_.create_entity("light 1");
+        {
+            auto& light = light1.add_component<tk::engine::LightComponent>();
+            auto& light_transform =
+                light1.get_component<tk::engine::TransformComponent>();
+            light_transform.translation = { 1.2f, 1.0f, 2.0f };
+        }
+
+        orthographic_camera->set_projection_from_box(
+            model_renderer.model->bounding_box());
     }
 
     void detach(tk::engine::Engine& engine) override

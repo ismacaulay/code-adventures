@@ -6,6 +6,7 @@
 
 namespace tk {
 namespace engine {
+    class Shader;
 
     class Scene
     {
@@ -16,6 +17,9 @@ namespace engine {
         Entity create_entity(const std::string& name = "Entity");
 
         void update(float delta);
+
+    private:
+        void add_lights_to_shader(std::shared_ptr<Shader>& shader);
 
     private:
         entt::registry registry_;
