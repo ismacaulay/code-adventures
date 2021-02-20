@@ -28,6 +28,7 @@
 #include "toolkit/engine/models/model_loader.h"
 
 #include "toolkit/engine/rendering/defines.h"
+#include "toolkit/engine/rendering/framebuffer.h"
 #include "toolkit/engine/rendering/index_buffer.h"
 #include "toolkit/engine/rendering/render_command.h"
 #include "toolkit/engine/rendering/renderer.h"

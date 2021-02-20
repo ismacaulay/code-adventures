@@ -21,6 +21,7 @@ set(TOOLKIT_SRC_FILES
     engine/models/model_loader.cpp
 
     engine/rendering/buffer_layout.cpp
+    engine/rendering/framebuffer.cpp
     engine/rendering/index_buffer.cpp
     engine/rendering/opengl_renderer.cpp
     engine/rendering/render_command.cpp
