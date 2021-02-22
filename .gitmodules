@@ -1,12 +1,3 @@
-[submodule "src/cpp/vendor/spdlog"]
-	path = src/cpp/vendor/spdlog
-	url = https://github.com/gabime/spdlog.git
-[submodule "src/cpp/vendor/glm"]
-	path = src/cpp/vendor/glm
-	url = https://github.com/g-truc/glm.git
-[submodule "src/cpp/vendor/assimp"]
-	path = src/cpp/vendor/assimp
-	url = https://github.com/assimp/assimp.git
 [submodule "src/cpp/vendor/imgui"]
 	path = src/cpp/vendor/imgui
 	url = https://github.com/ocornut/imgui.git

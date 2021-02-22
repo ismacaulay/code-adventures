@@ -1,30 +1,8 @@
 #
-# assimp
-#
-SET(BUILD_SHARED_LIBS OFF CACHE BOOL "Build assimp static libs")
-SET(_LIB_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR})
-SET(_INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
-SET(_BIN_INSTALL_DIR ${CMAKE_INSTALL_BINDIR})
-SET(CMAKE_INSTALL_LIBDIR ${CMAKE_SOURCE_DIR}/vendor/assimp/lib)
-SET(CMAKE_INSTALL_INCLUDEDIR ${CMAKE_SOURCE_DIR}/vendor/assimp/include)
-SET(CMAKE_INSTALL_BINDIR ${CMAKE_SOURCE_DIR}/vendor/assimp/bin)
-add_subdirectory(assimp)
-UNSET(BUILD_SHARED_LIBS)
-SET(CMAKE_INSTALL_LIBDIR ${_LIB_INSTALL_DIR})
-SET(CMAKE_INSTALL_INCLUDEDIR ${_INCLUDE_INSTALL_DIR})
-SET(CMAKE_INSTALL_BINDIR ${_BIN_INSTALL_DIR})
-
-#
 # catch
 #
 add_library(catch2 INTERFACE)
 target_include_directories(catch2 INTERFACE catch/include)
-
-#
-# entt
-#
-add_library(entt INTERFACE)
-target_include_directories(entt INTERFACE entt/include)
 
 #
 # FastNoise
@@ -40,11 +18,6 @@ target_include_directories(glad PUBLIC glad/include)
 target_link_libraries(glad PUBLIC dl)
 target_compile_features(glad PUBLIC cxx_std_17)
 set_target_properties(glad PROPERTIES CXX_EXTENSIONS OFF)
-
-#
-# glm
-#
-add_subdirectory(glm)
 
 #
 # imgui
@@ -64,11 +37,6 @@ target_include_directories(imgui PUBLIC imgui)
 target_include_directories(imgui PUBLIC imgui/backends)
 target_compile_features(imgui PUBLIC cxx_std_17)
 set_target_properties(imgui PROPERTIES CXX_EXTENSIONS OFF)
-
-#
-# spdlog
-#
-add_subdirectory(spdlog)
 
 #
 # stb

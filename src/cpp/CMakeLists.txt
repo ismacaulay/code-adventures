@@ -19,6 +19,10 @@ if (APPLE)
     find_package(OpenGL REQUIRED)
 endif()
 
+# conan package setup
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
 # set(THREADS_PREFER_THREAD_FLAG ON)
 # find_package(Threads REQUIRED)
 

@@ -6,5 +6,5 @@ set(TEST_SRC_FILES
 )
 
 add_executable(cpp_tests ${TEST_SRC_FILES})
-target_link_libraries(cpp_tests PRIVATE catch2 glm::glm toolkit)
+target_link_libraries(cpp_tests PRIVATE catch2 toolkit)
 add_test(NAME cpp COMMAND cpp_tests)
