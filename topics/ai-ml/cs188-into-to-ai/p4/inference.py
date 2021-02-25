@@ -297,7 +297,9 @@ class ExactInference(InferenceModule):
         pacmanPos = gameState.getPacmanPosition()
         jailPos = self.getJailPosition()
         for pos in self.allPositions:
+            # observation update: B proportionally= P * B'
             self.beliefs[pos] = self.beliefs[pos] * self.getObservationProb(observation, pacmanPos, pos, jailPos)
+        # normalize since its proportionally equal
         self.beliefs.normalize()
 
     def elapseTime(self, gameState):
@@ -309,8 +311,19 @@ class ExactInference(InferenceModule):
         Pacman's current position. However, this is not a problem, as Pacman's
         current position is known.
         """
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        # need to use a tmp variable so that we dont write to self.beliefs
+        # while we are iterating throught it!
+        tmp = DiscreteDistribution()
+
+        # Use the beliefs keys so that we dont loop through all positions
+        for oldPos in self.beliefs.keys():
+            newPosDist = self.getPositionDistribution(gameState, oldPos)
+            for pos in newPosDist.keys():
+                # passage of time update: B' = sum(P * B)
+                tmp[pos] += self.beliefs[oldPos] * newPosDist[pos]
+
+        # assign our new beleifs and normalize
+        self.beliefs = tmp
 
     def getBeliefDistribution(self):
         return self.beliefs
