@@ -349,8 +349,8 @@ class ParticleFilter(InferenceModule):
         self.particles for the list of particles.
         """
         self.particles = []
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        for i in range(0, self.numParticles):
+            self.particles.append(self.legalPositions[i % len(self.legalPositions)])
 
     def observeUpdate(self, observation, gameState):
         """
@@ -364,16 +364,33 @@ class ParticleFilter(InferenceModule):
         be reinitialized by calling initializeUniformly. The total method of
         the DiscreteDistribution may be useful.
         """
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        pacmanPos = gameState.getPacmanPosition()
+        jailPos = self.getJailPosition()
+
+        # build the distribution checking each particle
+        dist = DiscreteDistribution()
+        for pos in self.particles:
+            dist[pos] += self.getObservationProb(observation, pacmanPos, pos, jailPos)
+
+        # handle special case, otherwise resample
+        if dist.total() == 0:
+            self.initializeUniformly(gameState)
+        else:
+            self.particles = [dist.sample() for _ in range(self.numParticles)]
+
 
     def elapseTime(self, gameState):
         """
         Sample each particle's next state based on its current state and the
         gameState.
         """
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        newParticles = []
+        for p in self.particles:
+            newPosDist = self.getPositionDistribution(gameState, p)
+            # x' = sample(P(X'|x))
+            newParticles.append(newPosDist.sample())
+        self.particles = newParticles
+
 
     def getBeliefDistribution(self):
         """
@@ -383,8 +400,11 @@ class ParticleFilter(InferenceModule):
 
         This function should return a normalized distribution.
         """
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        dist = DiscreteDistribution()
+        for p in self.particles:
+            dist[p] += 1
+        dist.normalize()
+        return dist
 
 
 class JointParticleFilter(ParticleFilter):
