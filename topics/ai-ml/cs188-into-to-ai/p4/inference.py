@@ -430,9 +430,9 @@ class JointParticleFilter(ParticleFilter):
         should be evenly distributed across positions in order to ensure a
         uniform prior.
         """
-        self.particles = []
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        self.particles = list(itertools.product(self.legalPositions, repeat=self.numGhosts))
+        random.shuffle(self.particles)
+
 
     def addGhostAgent(self, agent):
         """
@@ -464,8 +464,22 @@ class JointParticleFilter(ParticleFilter):
         be reinitialized by calling initializeUniformly. The total method of
         the DiscreteDistribution may be useful.
         """
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        pacmanPos = gameState.getPacmanPosition()
+
+        dist = DiscreteDistribution()
+        for p in self.particles:
+            # build the distribution checking each particle
+            n = 1.0
+            for i in range(self.numGhosts):
+                jailPos = self.getJailPosition(i)
+                n *= self.getObservationProb(observation[i], pacmanPos, p[i], jailPos)
+            dist[p] += n
+
+        # handle special case, otherwise resample
+        if dist.total() == 0:
+            self.initializeUniformly(gameState)
+        else:
+            self.particles = [dist.sample() for _ in range(self.numParticles)]
 
     def elapseTime(self, gameState):
         """
@@ -478,8 +492,9 @@ class JointParticleFilter(ParticleFilter):
 
             # now loop through and update each entry in newParticle...
             "*** YOUR CODE HERE ***"
-            raiseNotDefined()
-
+            for i in range(self.numGhosts):
+                newPosDist = self.getPositionDistribution(gameState, newParticle, i, self.ghostAgents[i])
+                newParticle[i] = newPosDist.sample()
             """*** END YOUR CODE HERE ***"""
             newParticles.append(tuple(newParticle))
         self.particles = newParticles
