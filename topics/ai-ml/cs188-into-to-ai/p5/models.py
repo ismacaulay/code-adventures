@@ -59,7 +59,23 @@ class RegressionModel(object):
     """
     def __init__(self):
         # Initialize your model parameters here
-        "*** YOUR CODE HERE ***"
+        self.w1 = nn.Parameter(1, 50)
+        self.b1 = nn.Parameter(1, 50)
+        self.w2 = nn.Parameter(50, 1)
+        self.b2 = nn.Parameter(1, 1)
+        self.learningRate = 0.005
+        self.trainEndLoss = 0.015
+        self.params = [self.w1, self.b1, self.w2, self.b2]
+
+
+        # self.w1 = nn.Parameter(1, 128)
+        # self.b1 = nn.Parameter(1, 128)
+        # self.w2 = nn.Parameter(128, 64)
+        # self.b2 = nn.Parameter(1, 64)
+        # self.w3 = nn.Parameter(64, 1)
+        # self.b3 = nn.Parameter(1, 1)
+        # self.learningRate = 0.01
+        # self.params = [self.w1, self.b1, self.w2, self.b2, self.w3, self.b3]
 
     def run(self, x):
         """
@@ -70,7 +86,20 @@ class RegressionModel(object):
         Returns:
             A node with shape (batch_size x 1) containing predicted y-values
         """
-        "*** YOUR CODE HERE ***"
+        layer = None
+        layerCount = int(len(self.params) / 2)
+        for i in range(layerCount):
+            w = self.params[i * 2 + 0]
+            b = self.params[i * 2 + 1]
+            if layer == None:
+                layer = nn.AddBias(nn.Linear(x, w), b)
+            else:
+                layer = nn.AddBias(nn.Linear(layer, w), b)
+
+            if i < layerCount - 1:
+                layer = nn.ReLU(layer)
+
+        return layer
 
     def get_loss(self, x, y):
         """
@@ -82,13 +111,22 @@ class RegressionModel(object):
                 to be used for training
         Returns: a loss node
         """
-        "*** YOUR CODE HERE ***"
+        return nn.SquareLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** YOUR CODE HERE ***"
+        batch_size = 50
+        loss = None
+        while True:
+            for x, y in dataset.iterate_once(batch_size):
+                loss = self.get_loss(x, y)
+                gradient = nn.gradients(loss, self.params)
+                for i in range(len(self.params)):
+                    self.params[i].update(gradient[i], -self.learningRate)
+            if loss and nn.as_scalar(loss) < self.trainEndLoss:
+                break
 
 class DigitClassificationModel(object):
     """
