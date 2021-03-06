@@ -29,6 +29,7 @@ const PROJECTS = [
     'hello-three',
     'rotation-camera-controls',
     'orbit-camera-controls',
+    'world-camera'
 ];
 
 module.exports = (env, argv) => {
