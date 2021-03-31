@@ -31,8 +31,3 @@ the components in future projects without having to manage multiple repositories
 - [orbit-camera-controls](https://github.com/ismacaulay/code-adventures/tree/main/src/web/projects/orbit-camera-controls):
   A demo application showing how orbit based camera controls change the view fustrum
 
-## Topics
-
-### AI/ML
-
-- [CS188 - Introduction to Artificial Intelligence](https://github.com/ismacaulay/code-adventures/tree/main/topics/ai-ml/cs188-into-to-ai)
