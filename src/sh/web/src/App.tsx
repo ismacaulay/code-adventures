@@ -1,20 +1,23 @@
 import { useState } from 'react';
 import './App.css';
-
-import { requestShortUrl } from './network';
+import Message, { MessageType } from './components/Message';
+import RadioButton from './components/RadioButton';
 import { Duration } from './types';
-import { validateUrl } from './utils';
+import { requestShortUrl } from './utils/network';
+import { validateURL } from './utils/url';
 
 function App() {
     const [duration, setDuration] = useState(Duration.Single);
     const [long, setLong] = useState('');
-    const [shortened, setShortened] = useState<string | undefined>(undefined);
+
+    const [urlErr, setUrlErr] = useState(false);
+    const [message, setMessage] = useState<
+        { value: string; type: MessageType } | undefined
+    >(undefined);
 
     function onInputChange(e: any) {
-        if (shortened) {
-            setShortened(undefined);
-        }
-
+        setUrlErr(false);
+        setMessage(undefined);
         setLong(e.target.value);
     }
 
@@ -22,23 +25,45 @@ function App() {
         e.preventDefault();
 
         if (!long) {
-            // TODO: handle error
+            setUrlErr(true);
+            setMessage({
+                type: MessageType.Err,
+                value: 'Please specify a url.',
+            });
+            return;
         }
 
-        if (!validateUrl(long)) {
-            // TODO: handle error
+        const url = validateURL(long);
+        if (!url) {
+            setUrlErr(true);
+            setMessage({
+                type: MessageType.Err,
+                value: 'Invalid url, please try another.',
+            });
+            return;
         }
 
-        requestShortUrl(long, duration)
+        setUrlErr(false);
+        setMessage(undefined);
+        requestShortUrl(url, duration)
             .then((short) => {
-                setShortened(short);
+                setMessage({
+                    type: MessageType.Url,
+                    value: short,
+                });
             })
             .catch(() => {
-                // TODO: handle errors
+                setMessage({
+                    type: MessageType.Err,
+                    value:
+                        'An error occured creating the short url. Please try again.',
+                });
             });
     }
 
     function onDurationChange(e: any) {
+        setUrlErr(false);
+        setMessage(undefined);
         setDuration(e.target.value);
     }
 
@@ -49,7 +74,9 @@ function App() {
                 <div className="form-container">
                     <form onSubmit={onSubmit}>
                         <input
-                            className="input-lng"
+                            className={
+                                urlErr ? 'input-lng input-err' : 'input-lng'
+                            }
                             type="text"
                             onChange={onInputChange}
                         />
@@ -57,43 +84,36 @@ function App() {
                             shorten
                         </button>
                         <div className="radio-container">
-                            <label className="radio-grp">
-                                <input
-                                    type="radio"
-                                    name="duration"
-                                    value={Duration.Single}
-                                    onChange={onDurationChange}
-                                    checked={duration === Duration.Single}
-                                />
+                            <RadioButton
+                                name="duration"
+                                value={Duration.Single}
+                                onChange={onDurationChange}
+                                checked={duration === Duration.Single}
+                            >
                                 single use
-                            </label>
-                            <label className="radio-grp">
-                                <input
-                                    type="radio"
-                                    name="duration"
-                                    value={Duration.Hour}
-                                    onChange={onDurationChange}
-                                    checked={duration === Duration.Hour}
-                                />
+                            </RadioButton>
+                            <RadioButton
+                                name="duration"
+                                value={Duration.Hour}
+                                onChange={onDurationChange}
+                                checked={duration === Duration.Hour}
+                            >
                                 one hour
-                            </label>
-                            <label className="radio-grp">
-                                <input
-                                    type="radio"
-                                    name="duration"
-                                    value={Duration.Day}
-                                    onChange={onDurationChange}
-                                    checked={duration === Duration.Day}
-                                />
+                            </RadioButton>
+                            <RadioButton
+                                name="duration"
+                                value={Duration.Day}
+                                onChange={onDurationChange}
+                                checked={duration === Duration.Day}
+                            >
                                 one day
-                            </label>
+                            </RadioButton>
                         </div>
                     </form>
                 </div>
-                {shortened && (
-                    <a className="url-link" href={shortened}>
-                        <h3 className="url">{shortened}</h3>
-                    </a>
+
+                {message && (
+                    <Message type={message.type} value={message.value} />
                 )}
             </div>
         </div>
