@@ -89,17 +89,18 @@ func main() {
 			return
 		}
 
-		entry := DbEntry{Url: *request.Url, Single: strings.Compare(*request.Duration, "single") == 0}
-		log.Println(entry)
-		data, err := json.Marshal(entry)
+		duration, err := durationForDuration(*request.Duration)
 		if err != nil {
-			log.Fatal(err)
+			respondWithError(w, http.StatusUnprocessableEntity, "Invalid duration")
+			log.Println(err)
 			return
 		}
 
-		duration, err := durationForDuration(*request.Duration)
+		entry := DbEntry{Url: *request.Url, Single: strings.Compare(*request.Duration, "single") == 0}
+		data, err := json.Marshal(entry)
 		if err != nil {
-			log.Fatal(err)
+			respondWithError(w, http.StatusUnprocessableEntity, "Failed to marshal data")
+			log.Println(err)
 			return
 		}
 
@@ -114,7 +115,8 @@ func main() {
 			if _, err := db.Get(ctx, shortId).Result(); err != nil {
 				err = db.Set(ctx, shortId, data, duration).Err()
 				if err != nil {
-					log.Fatal(err)
+					respondWithError(w, http.StatusUnprocessableEntity, "Failed to save entry")
+					log.Println(err)
 					return
 				}
 				builder.WriteString(shortId)
@@ -134,13 +136,14 @@ func main() {
 				var entry DbEntry
 				err := json.Unmarshal([]byte(data), &entry)
 				if err != nil {
-					log.Fatal(err)
+					http.NotFound(w, r)
+					log.Println("Failed to unmarshall data: " + err.Error())
 					return
 				}
 
 				if entry.Single {
 					if err = db.Del(ctx, shortId).Err(); err != nil {
-						log.Fatal(err)
+						log.Println("Failed to del: " + err.Error())
 						return
 					}
 				}
