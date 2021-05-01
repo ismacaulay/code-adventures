@@ -14,7 +14,7 @@ export default function Message({
 }) {
     if (type === MessageType.Url) {
         return (
-            <a href={value}>
+            <a href={value} target="_blank">
                 <h3 className={`${styles.h3} ${styles.url}`}>{value}</h3>
             </a>
         );

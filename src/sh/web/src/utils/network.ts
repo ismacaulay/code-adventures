@@ -1,11 +1,23 @@
 import { Duration } from '../types';
 
-const PLACEHOLDER_URL = 'https://ismacaul.dev/sh/ABC1234';
+const API_URL = '/api';
 
-export function requestShortUrl(
+export async function requestShortUrl(
     long: string,
     duration: Duration,
 ): Promise<string> {
-    console.log('requesting: ', long, duration);
-    return Promise.resolve(PLACEHOLDER_URL);
+    return fetch(API_URL, {
+        method: 'POST',
+        // mode: 'cors',
+        body: JSON.stringify({ url: long, duration }),
+    })
+        .then((resp) => {
+            if (resp.ok) {
+                return resp.json();
+            }
+            return Promise.reject(resp.status);
+        })
+        .then(({ short_url }: { short_url: string }) => {
+            return short_url;
+        });
 }

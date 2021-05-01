@@ -8,10 +8,13 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/go-redis/redis/v8"
 )
 
@@ -59,17 +62,26 @@ type DbEntry struct {
 
 func main() {
 	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"http://localhost:5000*"},
+		AllowedMethods: []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders: []string{"Content-Type"},
+		MaxAge:         3600,
+	}))
+
+	redisAddr := os.Getenv("REDIS_ADDR")
+	redisPw := os.Getenv("REDIS_PW")
 
 	ctx := context.Background()
 	db := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
+		Addr:     redisAddr,
+		Password: redisPw,
 		DB:       0,
 	})
 	defer db.Close()
 
-	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
-
+	r.Post("/api", func(w http.ResponseWriter, r *http.Request) {
 		var request struct {
 			Url      *string `json:"url,omitempty"`
 			Duration *string `json:"duration,omitempty"`
@@ -156,5 +168,5 @@ func main() {
 	})
 
 	log.Println("Starting server...")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(":80", r))
 }

@@ -10,13 +10,13 @@ function App() {
     const [duration, setDuration] = useState(Duration.Single);
     const [long, setLong] = useState('');
 
-    const [urlErr, setUrlErr] = useState(false);
+    const [inputErr, setInputErr] = useState(false);
     const [message, setMessage] = useState<
         { value: string; type: MessageType } | undefined
     >(undefined);
 
     function onInputChange(e: any) {
-        setUrlErr(false);
+        setInputErr(false);
         setMessage(undefined);
         setLong(e.target.value);
     }
@@ -25,7 +25,7 @@ function App() {
         e.preventDefault();
 
         if (!long) {
-            setUrlErr(true);
+            setInputErr(true);
             setMessage({
                 type: MessageType.Err,
                 value: 'Please specify a url.',
@@ -35,7 +35,7 @@ function App() {
 
         const url = validateURL(long);
         if (!url) {
-            setUrlErr(true);
+            setInputErr(true);
             setMessage({
                 type: MessageType.Err,
                 value: 'Invalid url, please try another.',
@@ -43,7 +43,7 @@ function App() {
             return;
         }
 
-        setUrlErr(false);
+        setInputErr(false);
         setMessage(undefined);
         requestShortUrl(url, duration)
             .then((short) => {
@@ -56,13 +56,13 @@ function App() {
                 setMessage({
                     type: MessageType.Err,
                     value:
-                        'An error occured creating the short url. Please try again.',
+                        'An error occurred creating the short url. Please try again.',
                 });
             });
     }
 
     function onDurationChange(e: any) {
-        setUrlErr(false);
+        setInputErr(false);
         setMessage(undefined);
         setDuration(e.target.value);
     }
@@ -75,7 +75,7 @@ function App() {
                     <form onSubmit={onSubmit}>
                         <input
                             className={
-                                urlErr ? 'input-lng input-err' : 'input-lng'
+                                inputErr ? 'input-lng input-err' : 'input-lng'
                             }
                             type="text"
                             onChange={onInputChange}

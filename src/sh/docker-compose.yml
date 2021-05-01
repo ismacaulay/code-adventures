@@ -2,5 +2,20 @@ version: "3"
 services:
   redis:
     image: redis
+  api:
+    image: ismacaulay/sh-api
+    depends_on:
+      - redis
+    environment:
+      REDIS_ADDR: "redis:6379"
+      REDIS_PW: ""
+  web:
+    image: ismacaulay/sh-web
+  proxy:
+    build: ./proxy
+    restart: always
     ports:
-      - 6379:6379
+      - 5000:80
+    depends_on:
+      - api
+      - web
