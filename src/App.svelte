@@ -21,13 +21,14 @@
     segments: SegmentDescriptor[];
   }
 
+  let container: HTMLDivElement;
   let canvas: HTMLCanvasElement;
   setSeed(42);
 
   onMount(() => {
     const renderer = createRenderer2D(canvas);
 
-    const pointsCount = 10;
+    const pointsCount = 25;
     const pointsRange = {
       x: [-10, 10] as [number, number],
       y: [-10, 10] as [number, number],
@@ -247,8 +248,16 @@
       needsUpdate = true;
     });
 
+    // TODO: Try a ResizeObserver on the actual element
+    function handleResize() {
+      renderer.resize();
+      needsUpdate = true;
+    }
+    window.addEventListener("resize", handleResize);
+
     return () => {
       cancelAnimationFrame(frameId);
+      window.removeEventListener("resize", handleResize);
 
       renderer.destroy();
     };
@@ -259,7 +268,7 @@
   <title>Covex Hull 2D</title>
 </svelte:head>
 
-<div class="container">
+<div class="container" bind:this={container}>
   <canvas bind:this={canvas} />
 </div>
 

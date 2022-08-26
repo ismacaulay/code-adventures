@@ -18,8 +18,8 @@ export function createRenderer2D(canvas: HTMLCanvasElement) {
   const startRangeX: [number, number] = [-15, 15];
   const startRangeY: [number, number] = [-15, 15];
 
-  const endRangeX: [number, number] = [0, canvas.width];
-  const endRangeY: [number, number] = [0, canvas.height];
+  let endRangeX: [number, number] = [0, canvas.width];
+  let endRangeY: [number, number] = [0, canvas.height];
 
   function transformVec2(v: vec2): [number, number] {
     return [
@@ -107,6 +107,14 @@ export function createRenderer2D(canvas: HTMLCanvasElement) {
 
     destroy() {
       canvas.removeEventListener("wheel", handleWheelEvent);
+    },
+
+    resize() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+
+      endRangeX = [0, canvas.width];
+      endRangeY = [0, canvas.height];
     },
   };
 }
