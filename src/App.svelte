@@ -1,9 +1,25 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { setSeed, randomIntInRangeInclusive } from "./math/random";
+  import { setSeed, generate2DPoints } from "./math/random";
   import { createRenderer2D } from "./renderer2D";
   import { Pane } from "tweakpane";
   import { vec2 } from "gl-matrix";
+  import { cloneDeep } from "lodash";
+  import type { Point2D, SegmentDescriptor } from "./types/points";
+
+  enum AlgorithmState {
+    Initial,
+    Sorting,
+    AddPoint,
+    CheckTurn,
+    Discard,
+    Done,
+  }
+
+  interface HullState {
+    points: Point2D[];
+    segments: SegmentDescriptor[];
+  }
 
   let canvas: HTMLCanvasElement;
   setSeed(42);
@@ -11,68 +27,11 @@
   onMount(() => {
     const renderer = createRenderer2D(canvas);
 
-    function generate2DPoints(
-      count: number,
-      range: { x: [number, number]; y: [number, number] }
-    ) {
-      const points = new Int32Array(count * 2);
-      const seen = new Set<string>();
-      let found = false;
-      let x: number;
-      let y: number;
-      let key: string;
-
-      for (let i = 0; i < count; ++i) {
-        found = false;
-        while (!found) {
-          x = randomIntInRangeInclusive(range.x);
-          y = randomIntInRangeInclusive(range.y);
-
-          key = JSON.stringify([x, y]);
-          if (!seen.has(key)) {
-            seen.add(key);
-
-            points[i * 2] = x;
-            points[i * 2 + 1] = y;
-            found = true;
-          }
-        }
-      }
-
-      return points;
-    }
-
     const pointsCount = 10;
     const pointsRange = {
       x: [-10, 10] as [number, number],
       y: [-10, 10] as [number, number],
     };
-    const points = {
-      vertices: generate2DPoints(pointsCount, pointsRange),
-      radius: 0.2,
-    };
-
-    const lineStrip = {
-      vertices: undefined,
-    };
-
-    let needsUpdate = true;
-    let frameId = -1;
-    function animate() {
-      frameId = requestAnimationFrame(animate);
-
-      if (needsUpdate) {
-        renderer.clear();
-
-        if (lineStrip.vertices) {
-          renderer.drawLinesStrip(lineStrip);
-        }
-        renderer.drawPoints(points);
-
-        needsUpdate = false;
-      }
-    }
-    animate();
 
     const p01 = vec2.create();
     const p02 = vec2.create();
@@ -82,74 +41,209 @@
       return p01[0] * p02[1] - p01[1] * p02[0] > 0;
     }
 
-    function computeConvexHull2D(vertices: Int32Array) {
-      // sort the points in the x coordinate
-      const sorted = [];
-      const count = vertices.length / 2;
+    function generatePoints(
+      count: number,
+      range: { x: [number, number]; y: [number, number] }
+    ) {
+      const vertices = generate2DPoints(count, range);
+
+      const points = [];
       for (let i = 0; i < count; ++i) {
-        sorted.push([vertices[i * 2], vertices[i * 2 + 1]]);
+        points.push({
+          position: [vertices[i * 2], vertices[i * 2 + 1]],
+          color: "black",
+          radius: 0.2,
+        });
       }
-      sorted.sort((p1, p2) => {
-        const xDiff = p1[0] - p2[0];
-        if (xDiff !== 0) {
-          return xDiff;
-        }
 
-        return p1[1] - p2[1];
-      });
+      return points;
+    }
 
-      const upper = [];
-      upper.push(sorted[0], sorted[1]);
-      for (let i = 2; i < count; ++i) {
-        upper.push(sorted[i]);
+    function generateInitialState() {
+      return {
+        points: generatePoints(pointsCount, pointsRange),
+        hull: {
+          points: [],
+          segments: [],
+        },
+        idx: 0,
+        direction: 1,
+      };
+    }
 
-        while (upper.length > 2) {
-          const p0 = upper[upper.length - 3];
-          const p1 = upper[upper.length - 2];
-          const p2 = upper[upper.length - 1];
+    function renderState({
+      points,
+      hull,
+    }: {
+      points: Point2D[];
+      hull: HullState;
+    }) {
+      const lineStrip = hull.points.reduce(
+        (acc, cur, idx) => {
+          acc.vertices.push(cur.position);
+          if (idx != 0) {
+            acc.dash.push(hull.segments[idx - 1].dash);
+            acc.color.push(hull.segments[idx - 1].color);
+          }
+          return acc;
+        },
+        { vertices: [], color: [], dash: [] }
+      );
+      renderer.drawLinesStrip(lineStrip);
 
-          if (isRightTurn(p0, p1, p2)) {
-            break;
+      renderer.drawPoints(points);
+    }
+
+    const initialState = generateInitialState();
+    const state = [initialState];
+    let currentState = 0;
+
+    let needsUpdate = true;
+    let frameId = -1;
+    function animate() {
+      frameId = requestAnimationFrame(animate);
+
+      if (needsUpdate) {
+        renderer.clear();
+        renderState(state[currentState]);
+
+        needsUpdate = false;
+      }
+    }
+    animate();
+
+    let algorthimState = AlgorithmState.Initial;
+    function generateNextState() {
+      if (algorthimState === AlgorithmState.Done) {
+        return false;
+      }
+
+      const nextState = cloneDeep(state[currentState]);
+      if (algorthimState === AlgorithmState.Initial) {
+        algorthimState = AlgorithmState.Sorting;
+
+        nextState.points = cloneDeep(nextState.points).sort((p1, p2) => {
+          const xDiff = p1.position[0] - p2.position[0];
+          if (xDiff !== 0) {
+            return xDiff;
           }
 
-          upper.splice(upper.length - 2, 1);
-        }
-      }
+          return p1.position[1] - p2.position[1];
+        });
+      } else if (algorthimState === AlgorithmState.Sorting) {
+        algorthimState = AlgorithmState.AddPoint;
 
-      const lower = [];
-      lower.push(sorted[sorted.length - 1], sorted[sorted.length - 2]);
-      for (let i = sorted.length - 3; i >= 0; --i) {
-        lower.push(sorted[i]);
+        nextState.hull.points = [nextState.points[0], nextState.points[1]];
+        nextState.hull.points.forEach((p) => (p.color = "green"));
+        nextState.hull.segments = [{ dash: [], color: "black" }];
+        nextState.idx = 2;
+      } else if (algorthimState === AlgorithmState.AddPoint) {
+        if (nextState.idx < 0) {
+          nextState.hull.segments.forEach((s) => {
+            s.dash = [];
+            s.color = "green";
+          });
+          algorthimState = AlgorithmState.Done;
+        } else {
+          algorthimState = AlgorithmState.CheckTurn;
 
-        while (lower.length > 2) {
-          const p0 = lower[lower.length - 3];
-          const p1 = lower[lower.length - 2];
-          const p2 = lower[lower.length - 1];
-
-          if (isRightTurn(p0, p1, p2)) {
-            break;
+          if (nextState.idx > nextState.points.length - 1) {
+            nextState.direction = -1;
+            nextState.idx = nextState.points.length - 2;
           }
-          lower.splice(lower.length - 2, 1);
+
+          const point = nextState.points[nextState.idx];
+          point.color = "green";
+
+          nextState.hull.points.push(point);
+
+          const segments = nextState.hull.segments;
+          segments.forEach((s) => {
+            s.dash = [];
+            s.color = "black";
+          });
+          segments.push({ dash: [5, 5], color: "black" });
+          if (segments.length > 1) {
+            segments[segments.length - 2].color = "black";
+            segments[segments.length - 2].dash = [5, 5];
+          }
+
+          nextState.idx += nextState.direction;
         }
+      } else if (algorthimState === AlgorithmState.CheckTurn) {
+        const hull = nextState.hull;
+        const points = hull.points;
+        const segments = hull.segments;
+        const p0 = points[points.length - 3];
+        const p1 = points[points.length - 2];
+        const p2 = points[points.length - 1];
+        let color = "green";
+        if (isRightTurn(p0.position, p1.position, p2.position)) {
+          algorthimState = AlgorithmState.AddPoint;
+        } else {
+          color = "red";
+          algorthimState = AlgorithmState.Discard;
+        }
+        p0.color = color;
+        p1.color = color;
+        p2.color = color;
+        const s0 = segments[segments.length - 2];
+        s0.color = color;
+        const s1 = segments[segments.length - 1];
+        s1.color = color;
+      } else if (algorthimState === AlgorithmState.Discard) {
+        const hull = nextState.hull;
+        const points = hull.points;
+        const p0 = points[points.length - 3];
+        const p1 = points[points.length - 2];
+        const p2 = points[points.length - 1];
+        p0.color = "green";
+        p1.color = "black";
+        p2.color = "green";
+        points.splice(points.length - 2, 1);
+        points.forEach((p) => (p.color = "green"));
+
+        const segments = hull.segments;
+        segments.splice(segments.length - 1, 1);
+        segments[segments.length - 1].color = "black";
+        segments[segments.length - 1].dash = [5, 5];
+
+        if (points.length < 3) {
+          algorthimState = AlgorithmState.AddPoint;
+          segments.forEach((s) => {
+            s.dash = [];
+            s.color = "black";
+          });
+        } else {
+          algorthimState = AlgorithmState.CheckTurn;
+          segments[segments.length - 2].color = "black";
+          segments[segments.length - 2].dash = [5, 5];
+        }
+      } else {
+        console.warn("State:", algorthimState, "not handled yet");
       }
 
-      lower.splice(0, 1);
-      lower.splice(lower.length - 1, 1);
-      return upper.concat(lower);
+      state.push(nextState);
+      return true;
     }
 
     const pane = new Pane();
-    pane.addButton({ title: "randomize points" }).on("click", () => {
-      points.vertices = generate2DPoints(pointsCount, pointsRange);
-      lineStrip.vertices = undefined;
+    const folder = pane.addFolder({
+      title: "animation controls",
+      expanded: true,
+    });
+    folder.addButton({ title: "forward" }).on("click", () => {
+      if (currentState == state.length - 1 && generateNextState()) {
+        currentState++;
+      }
 
       needsUpdate = true;
     });
-    pane.addButton({ title: "compute convex hull" }).on("click", () => {
-      const hull = computeConvexHull2D(points.vertices);
-      hull.push(hull[0]);
 
-      lineStrip.vertices = new Float32Array(hull.flat());
+    folder.addButton({ title: "backward" }).on("click", () => {
+      if (currentState !== 0) {
+        currentState--;
+      }
       needsUpdate = true;
     });
 

@@ -1,5 +1,8 @@
+import type { vec2 } from "gl-matrix";
 import { transformValueToRange } from "./math/range";
-import type { PointSet2D } from "./types/points";
+import type { LineStrip, Point2D, PointSet2D } from "./types/points";
+
+const TWO_PI = 2 * Math.PI;
 
 export function createRenderer2D(canvas: HTMLCanvasElement) {
   function handleWheelEvent(e: MouseEvent) {
@@ -18,11 +21,26 @@ export function createRenderer2D(canvas: HTMLCanvasElement) {
   const endRangeX: [number, number] = [0, canvas.width];
   const endRangeY: [number, number] = [0, canvas.height];
 
-  function translatePoint(x: number, y: number): [number, number] {
+  function transformVec2(v: vec2): [number, number] {
     return [
-      transformValueToRange(x, startRangeX, endRangeX),
-      transformValueToRange(y, startRangeY, endRangeY),
+      transformValueToRange(v[0], startRangeX, endRangeX),
+      transformValueToRange(v[1], startRangeY, endRangeY),
     ];
+  }
+
+  function transformRadius(radius: number) {
+    return transformValueToRange(
+      startRangeX[0] + radius,
+      startRangeX,
+      endRangeX
+    );
+  }
+
+  function isArrayOfArrays<T>(arr: T[] | T[][]): arr is T[][] {
+    if (arr.length > 0) {
+      return Array.isArray(arr[0]);
+    }
+    return false;
   }
 
   return {
@@ -30,45 +48,61 @@ export function createRenderer2D(canvas: HTMLCanvasElement) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     },
 
-    drawPoints({ vertices, radius }: PointSet2D) {
-      const count = vertices.length / 2;
-      let translatedR = transformValueToRange(
-        startRangeX[0] + radius,
-        startRangeX,
-        endRangeX
-      );
+    drawPoints(points: PointSet2D) {
+      const count = points.length;
 
-      const TWO_PI = 2 * Math.PI;
-      ctx.fillStyle = "green";
-
+      let point: Point2D;
       for (let i = 0; i < count; ++i) {
+        point = points[i];
+
         ctx.beginPath();
+        ctx.fillStyle = point.color;
 
         ctx.arc(
-          ...translatePoint(vertices[i * 2], vertices[i * 2 + 1]),
-          translatedR,
+          ...transformVec2(point.position),
+          transformRadius(point.radius),
           0,
           TWO_PI
         );
-
         ctx.fill();
+        ctx.closePath();
       }
     },
 
-    drawLinesStrip({ vertices }: { vertices: Float32Array }) {
-      const numVerts = vertices.length / 2;
-      if (numVerts < 1) {
+    drawLinesStrip({ vertices, dash, color }: LineStrip) {
+      if (vertices.length < 2) {
         return;
       }
 
-      ctx.beginPath();
-
-      ctx.moveTo(...translatePoint(vertices[0], vertices[1]));
-      for (let i = 1; i < numVerts; ++i) {
-        ctx.lineTo(...translatePoint(vertices[i * 2], vertices[i * 2 + 1]));
+      let segmentDashes: number[][];
+      if (!isArrayOfArrays(dash)) {
+        ctx.setLineDash(dash);
+      } else {
+        segmentDashes = dash;
       }
 
-      ctx.stroke();
+      let segmentColors: string[];
+      if (!Array.isArray(color)) {
+        ctx.strokeStyle = color;
+      } else {
+        segmentColors = color;
+      }
+
+      ctx.lineWidth = 2;
+      for (let i = 0; i < vertices.length - 1; ++i) {
+        ctx.beginPath();
+        ctx.moveTo(...transformVec2(vertices[i]));
+        if (segmentDashes) {
+          ctx.setLineDash(segmentDashes[i]);
+        }
+
+        if (segmentColors) {
+          ctx.strokeStyle = segmentColors[i];
+        }
+        ctx.lineTo(...transformVec2(vertices[i + 1]));
+        ctx.stroke();
+        ctx.closePath();
+      }
     },
 
     destroy() {
