@@ -3,20 +3,28 @@ lockfileVersion: 5.4
 specifiers:
   '@sveltejs/vite-plugin-svelte': ^1.0.1
   '@tsconfig/svelte': ^3.0.0
+  '@tweakpane/core': ^1.1.0
+  '@types/seedrandom': ^3.0.2
   gl-matrix: ^3.4.3
+  seedrandom: ^3.0.5
   svelte: ^3.49.0
   svelte-check: ^2.8.0
   svelte-preprocess: ^4.10.7
   tslib: ^2.4.0
+  tweakpane: ^3.1.0
   typescript: ^4.6.4
   vite: ^3.0.7
 
 dependencies:
   gl-matrix: 3.4.3
+  tweakpane: 3.1.0
 
 devDependencies:
   '@sveltejs/vite-plugin-svelte': 1.0.1_svelte@3.49.0+vite@3.0.9
   '@tsconfig/svelte': 3.0.0
+  '@tweakpane/core': 1.1.0
+  '@types/seedrandom': 3.0.2
+  seedrandom: 3.0.5
   svelte: 3.49.0
   svelte-check: 2.8.1_svelte@3.49.0
   svelte-preprocess: 4.10.7_uslzfc62di2n2otc2tvfklnwji
@@ -107,6 +115,10 @@ packages:
     resolution: {integrity: sha512-pYrtLtOwku/7r1i9AMONsJMVYAtk3hzOfiGNekhtq5tYBGA7unMve8RvUclKLMT3PrihvJqUmzsRGh0RP84hKg==}
     dev: true
 
+  /@tweakpane/core/1.1.0:
+    resolution: {integrity: sha512-vbbiQb+aoFI13lIbE7DJvhHZVE1YlUpGoaAamSpU6wLp2jA3VowS1wfRJBBB8IBCYm7nF6ULl7zfJKxl1XdyfA==}
+    dev: true
+
   /@types/node/18.7.8:
     resolution: {integrity: sha512-/YP55EMK2341JkODUb8DM9O0x1SIz2aBvyF33Uf1c76St3VpsMXEIW0nxuKkq/5cxnbz0RD9cfwNZHEAZQD3ag==}
     dev: true
@@ -119,6 +131,10 @@ packages:
     resolution: {integrity: sha512-BPdoIt1lfJ6B7rw35ncdwBZrAssjcwzI5LByIrYs+tpXlj/CAkuVdRsgZDdP4lq5EjyWzwxZCqAoFyHKFwp32g==}
     dependencies:
       '@types/node': 18.7.8
+    dev: true
+
+  /@types/seedrandom/3.0.2:
+    resolution: {integrity: sha512-YPLqEOo0/X8JU3rdiq+RgUKtQhQtrppE766y7vMTu8dGML7TVtZNiiiaC/hhU9Zqw9UYopXxhuWWENclMVBwKQ==}
     dev: true
 
   /anymatch/3.1.2:
@@ -721,6 +737,10 @@ packages:
       rimraf: 2.7.1
     dev: true
 
+  /seedrandom/3.0.5:
+    resolution: {integrity: sha512-8OwmbklUNzwezjGInmZ+2clQmExQPvomqjL7LFqOYqtmuxRgQYqOD3mHaU+MvZn5FLUeVxVfQjwLZW/n/JFuqg==}
+    dev: true
+
   /sorcery/0.10.0:
     resolution: {integrity: sha512-R5ocFmKZQFfSTstfOtHjJuAwbpGyf9qjQa1egyhvXSbM7emjrtLXtGdZsDJDABC85YBfVvrOiGWKSYXPKdvP1g==}
     hasBin: true
@@ -855,6 +875,10 @@ packages:
   /tslib/2.4.0:
     resolution: {integrity: sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==}
     dev: true
+
+  /tweakpane/3.1.0:
+    resolution: {integrity: sha512-PGAp/LPQdHwzL7/iAW4lV1p9iPQTti7YMjMWO48CoYjvZRS59RmgQnhEGzKzqST1JnmOYmQUjTe8bdhlZRJs5A==}
+    dev: false
 
   /typescript/4.7.4:
     resolution: {integrity: sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==}

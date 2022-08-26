@@ -1,86 +1,26 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { setSeed, randomIntInRangeInclusive } from "./math/random";
+  import { createRenderer2D } from "./renderer2D";
+  import { Pane } from "tweakpane";
+  import { vec2 } from "gl-matrix";
 
   let canvas: HTMLCanvasElement;
+  setSeed(42);
 
   onMount(() => {
-    const ctx = canvas.getContext("2d");
-
-    function handleWheelEvent(e: MouseEvent) {
-      e.preventDefault();
-    }
-    canvas.addEventListener("wheel", handleWheelEvent);
-
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
-
-    const startRangeX: [number, number] = [-15, 15];
-    const endRangeX: [number, number] = [0, canvas.width];
-    const startRangeY: [number, number] = [-15, 15];
-    const endRangeY: [number, number] = [0, canvas.height];
-
-    function transformValueToRange(
-      value: number,
-      oldRange: [number, number],
-      newRange: [number, number]
-    ) {
-      const oldDiff = oldRange[1] - oldRange[0];
-      if (oldDiff === 0) {
-        return newRange[0];
-      }
-
-      return (
-        ((value - oldRange[0]) * (newRange[1] - newRange[0])) / oldDiff +
-        newRange[0]
-      );
-    }
-
-    function drawPoints(points: Int32Array, radius: number) {
-      const count = points.length / 2;
-      let translatedX: number, translatedY: number;
-      let translatedR = transformValueToRange(
-        startRangeX[0] + radius,
-        startRangeX,
-        endRangeX
-      );
-
-      const TWO_PI = 2 * Math.PI;
-      ctx.fillStyle = "green";
-
-      for (let i = 0; i < count; ++i) {
-        ctx.beginPath();
-
-        translatedX = transformValueToRange(
-          points[i * 2],
-          startRangeX,
-          endRangeX
-        );
-        translatedY = transformValueToRange(
-          points[i * 2 + 1],
-          startRangeY,
-          endRangeY
-        );
-        ctx.arc(translatedX, translatedY, translatedR, 0, TWO_PI);
-
-        ctx.fill();
-      }
-    }
-
-    function randomIntInRangeInclusive([min, max]: [number, number]) {
-      min = Math.ceil(min);
-      max = Math.floor(max);
-      return Math.floor(Math.random() * (max - min + 1) + min);
-    }
+    const renderer = createRenderer2D(canvas);
 
     function generate2DPoints(
       count: number,
       range: { x: [number, number]; y: [number, number] }
     ) {
       const points = new Int32Array(count * 2);
-      const seen = new Set<[number, number]>();
+      const seen = new Set<string>();
       let found = false;
       let x: number;
       let y: number;
+      let key: string;
 
       for (let i = 0; i < count; ++i) {
         found = false;
@@ -88,8 +28,9 @@
           x = randomIntInRangeInclusive(range.x);
           y = randomIntInRangeInclusive(range.y);
 
-          if (!seen.has([x, y])) {
-            seen.add([x, y]);
+          key = JSON.stringify([x, y]);
+          if (!seen.has(key)) {
+            seen.add(key);
 
             points[i * 2] = x;
             points[i * 2 + 1] = y;
@@ -101,11 +42,121 @@
       return points;
     }
 
-    const points = generate2DPoints(10, { x: [-10, 10], y: [-10, 10] });
-    drawPoints(points, 0.25);
+    const pointsCount = 10;
+    const pointsRange = {
+      x: [-10, 10] as [number, number],
+      y: [-10, 10] as [number, number],
+    };
+    const points = {
+      vertices: generate2DPoints(pointsCount, pointsRange),
+      radius: 0.2,
+    };
+
+    const lineStrip = {
+      vertices: undefined,
+    };
+
+    let needsUpdate = true;
+    let frameId = -1;
+    function animate() {
+      frameId = requestAnimationFrame(animate);
+
+      if (needsUpdate) {
+        renderer.clear();
+
+        if (lineStrip.vertices) {
+          renderer.drawLinesStrip(lineStrip);
+        }
+        renderer.drawPoints(points);
+
+        needsUpdate = false;
+      }
+    }
+    animate();
+
+    const p01 = vec2.create();
+    const p02 = vec2.create();
+    function isRightTurn(p0: vec2, p1: vec2, p2: vec2) {
+      vec2.sub(p01, p1, p0);
+      vec2.sub(p02, p2, p0);
+      return p01[0] * p02[1] - p01[1] * p02[0] > 0;
+    }
+
+    function computeConvexHull2D(vertices: Int32Array) {
+      // sort the points in the x coordinate
+      const sorted = [];
+      const count = vertices.length / 2;
+      for (let i = 0; i < count; ++i) {
+        sorted.push([vertices[i * 2], vertices[i * 2 + 1]]);
+      }
+      sorted.sort((p1, p2) => {
+        const xDiff = p1[0] - p2[0];
+        if (xDiff !== 0) {
+          return xDiff;
+        }
+
+        return p1[1] - p2[1];
+      });
+
+      const upper = [];
+      upper.push(sorted[0], sorted[1]);
+      for (let i = 2; i < count; ++i) {
+        upper.push(sorted[i]);
+
+        while (upper.length > 2) {
+          const p0 = upper[upper.length - 3];
+          const p1 = upper[upper.length - 2];
+          const p2 = upper[upper.length - 1];
+
+          if (isRightTurn(p0, p1, p2)) {
+            break;
+          }
+
+          upper.splice(upper.length - 2, 1);
+        }
+      }
+
+      const lower = [];
+      lower.push(sorted[sorted.length - 1], sorted[sorted.length - 2]);
+      for (let i = sorted.length - 3; i >= 0; --i) {
+        lower.push(sorted[i]);
+
+        while (lower.length > 2) {
+          const p0 = lower[lower.length - 3];
+          const p1 = lower[lower.length - 2];
+          const p2 = lower[lower.length - 1];
+
+          if (isRightTurn(p0, p1, p2)) {
+            break;
+          }
+          lower.splice(lower.length - 2, 1);
+        }
+      }
+
+      lower.splice(0, 1);
+      lower.splice(lower.length - 1, 1);
+      return upper.concat(lower);
+    }
+
+    const pane = new Pane();
+    pane.addButton({ title: "randomize points" }).on("click", () => {
+      points.vertices = generate2DPoints(pointsCount, pointsRange);
+      lineStrip.vertices = undefined;
+
+      needsUpdate = true;
+    });
+    pane.addButton({ title: "compute convex hull" }).on("click", () => {
+      const hull = computeConvexHull2D(points.vertices);
+      hull.push(hull[0]);
+
+      lineStrip.vertices = new Float32Array(hull.flat());
+      needsUpdate = true;
+    });
 
     return () => {
-      canvas.removeEventListener("wheel", handleWheelEvent);
+      cancelAnimationFrame(frameId);
+
+      renderer.destroy();
     };
   });
 </script>
@@ -129,4 +180,3 @@
     height: 100%;
   }
 </style>
-

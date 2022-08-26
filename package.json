@@ -12,6 +12,9 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.1",
     "@tsconfig/svelte": "^3.0.0",
+    "@tweakpane/core": "^1.1.0",
+    "@types/seedrandom": "^3.0.2",
+    "seedrandom": "^3.0.5",
     "svelte": "^3.49.0",
     "svelte-check": "^2.8.0",
     "svelte-preprocess": "^4.10.7",
@@ -20,6 +23,7 @@
     "vite": "^3.0.7"
   },
   "dependencies": {
-    "gl-matrix": "^3.4.3"
+    "gl-matrix": "^3.4.3",
+    "tweakpane": "^3.1.0"
   }
 }
