@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { setSeed, generate2DPoints } from "./math/random";
   import { createRenderer2D } from "./renderer2D";
-  import { Pane } from "tweakpane";
+  import { ButtonApi, Pane } from "tweakpane";
   import { vec2 } from "gl-matrix";
   import { cloneDeep } from "lodash";
   import type { Point2D, SegmentDescriptor } from "./types/points";
@@ -233,15 +233,62 @@
       title: "animation controls",
       expanded: true,
     });
-    folder.addButton({ title: "forward" }).on("click", () => {
-      if (currentState == state.length - 1 && generateNextState()) {
-        currentState++;
+
+    let playBtn: ButtonApi;
+    let stopBtn: ButtonApi;
+    let forwardBtn: ButtonApi;
+    let backwardBtn: ButtonApi;
+
+    function stepAnimation() {
+      if (currentState < state.length) {
+        if (currentState === state.length - 1 && generateNextState()) {
+          currentState++;
+        } else if (currentState < state.length - 1) {
+          currentState++;
+        }
       }
 
       needsUpdate = true;
+    }
+
+    let start: number;
+    const params = { duration: 500 };
+    let animationId = -1;
+    function runAnimation(current: number) {
+      if (start === undefined) {
+        start = current;
+      }
+
+      if (current - start >= params.duration) {
+        start = current;
+        stepAnimation();
+      }
+
+      animationId = requestAnimationFrame(runAnimation);
+    }
+
+    folder.addInput(params, "duration", { min: 0, max: 1000, step: 100 });
+    playBtn = folder.addButton({ title: "play" }).on("click", () => {
+      playBtn.disabled = true;
+      forwardBtn.disabled = true;
+      backwardBtn.disabled = true;
+
+      animationId = requestAnimationFrame(runAnimation);
     });
 
-    folder.addButton({ title: "backward" }).on("click", () => {
+    stopBtn = folder.addButton({ title: "stop" }).on("click", () => {
+      playBtn.disabled = false;
+      forwardBtn.disabled = false;
+      backwardBtn.disabled = false;
+
+      cancelAnimationFrame(animationId);
+    });
+
+    forwardBtn = folder
+      .addButton({ title: "forward" })
+      .on("click", stepAnimation);
+
+    backwardBtn = folder.addButton({ title: "backward" }).on("click", () => {
       if (currentState !== 0) {
         currentState--;
       }
