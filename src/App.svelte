@@ -6,6 +6,7 @@
   import { vec2 } from "gl-matrix";
   import { cloneDeep } from "lodash";
   import type { Point2D, SegmentDescriptor } from "./types/points";
+  import { createStateMachine } from "./toolkit/stateMachine";
 
   enum AlgorithmState {
     Initial,
@@ -21,7 +22,6 @@
     segments: SegmentDescriptor[];
   }
 
-  let container: HTMLDivElement;
   let canvas: HTMLCanvasElement;
   setSeed(42);
 
@@ -113,40 +113,45 @@
     }
     animate();
 
-    let algorthimState = AlgorithmState.Initial;
-    function generateNextState() {
-      if (algorthimState === AlgorithmState.Done) {
-        return false;
-      }
+    const stateMachine = createStateMachine<AlgorithmState>(
+      AlgorithmState.Initial,
+      {
+        [AlgorithmState.Initial]: () => {
+          const nextState = cloneDeep(state[currentState]);
+          state.push(nextState);
 
-      const nextState = cloneDeep(state[currentState]);
-      if (algorthimState === AlgorithmState.Initial) {
-        algorthimState = AlgorithmState.Sorting;
+          nextState.points = cloneDeep(nextState.points).sort((p1, p2) => {
+            const xDiff = p1.position[0] - p2.position[0];
+            if (xDiff !== 0) {
+              return xDiff;
+            }
 
-        nextState.points = cloneDeep(nextState.points).sort((p1, p2) => {
-          const xDiff = p1.position[0] - p2.position[0];
-          if (xDiff !== 0) {
-            return xDiff;
-          }
-
-          return p1.position[1] - p2.position[1];
-        });
-      } else if (algorthimState === AlgorithmState.Sorting) {
-        algorthimState = AlgorithmState.AddPoint;
-
-        nextState.hull.points = [nextState.points[0], nextState.points[1]];
-        nextState.hull.points.forEach((p) => (p.color = "green"));
-        nextState.hull.segments = [{ dash: [], color: "black" }];
-        nextState.idx = 2;
-      } else if (algorthimState === AlgorithmState.AddPoint) {
-        if (nextState.idx < 0) {
-          nextState.hull.segments.forEach((s) => {
-            s.dash = [];
-            s.color = "green";
+            return p1.position[1] - p2.position[1];
           });
-          algorthimState = AlgorithmState.Done;
-        } else {
-          algorthimState = AlgorithmState.CheckTurn;
+
+          return AlgorithmState.Sorting;
+        },
+        [AlgorithmState.Sorting]: () => {
+          const nextState = cloneDeep(state[currentState]);
+          state.push(nextState);
+
+          nextState.hull.points = [nextState.points[0], nextState.points[1]];
+          nextState.hull.points.forEach((p) => (p.color = "green"));
+          nextState.hull.segments = [{ dash: [], color: "black" }];
+          nextState.idx = 2;
+          return AlgorithmState.AddPoint;
+        },
+        [AlgorithmState.AddPoint]: () => {
+          const nextState = cloneDeep(state[currentState]);
+          state.push(nextState);
+
+          if (nextState.idx < 0) {
+            nextState.hull.segments.forEach((s) => {
+              s.dash = [];
+              s.color = "green";
+            });
+            return AlgorithmState.Done;
+          }
 
           if (nextState.idx > nextState.points.length - 1) {
             nextState.direction = -1;
@@ -170,63 +175,73 @@
           }
 
           nextState.idx += nextState.direction;
-        }
-      } else if (algorthimState === AlgorithmState.CheckTurn) {
-        const hull = nextState.hull;
-        const points = hull.points;
-        const segments = hull.segments;
-        const p0 = points[points.length - 3];
-        const p1 = points[points.length - 2];
-        const p2 = points[points.length - 1];
-        let color = "green";
-        if (isRightTurn(p0.position, p1.position, p2.position)) {
-          algorthimState = AlgorithmState.AddPoint;
-        } else {
-          color = "red";
-          algorthimState = AlgorithmState.Discard;
-        }
-        p0.color = color;
-        p1.color = color;
-        p2.color = color;
-        const s0 = segments[segments.length - 2];
-        s0.color = color;
-        const s1 = segments[segments.length - 1];
-        s1.color = color;
-      } else if (algorthimState === AlgorithmState.Discard) {
-        const hull = nextState.hull;
-        const points = hull.points;
-        const p0 = points[points.length - 3];
-        const p1 = points[points.length - 2];
-        const p2 = points[points.length - 1];
-        p0.color = "green";
-        p1.color = "black";
-        p2.color = "green";
-        points.splice(points.length - 2, 1);
-        points.forEach((p) => (p.color = "green"));
 
-        const segments = hull.segments;
-        segments.splice(segments.length - 1, 1);
-        segments[segments.length - 1].color = "black";
-        segments[segments.length - 1].dash = [5, 5];
+          return AlgorithmState.CheckTurn;
+        },
+        [AlgorithmState.CheckTurn]: () => {
+          const nextState = cloneDeep(state[currentState]);
+          state.push(nextState);
 
-        if (points.length < 3) {
-          algorthimState = AlgorithmState.AddPoint;
-          segments.forEach((s) => {
-            s.dash = [];
-            s.color = "black";
-          });
-        } else {
-          algorthimState = AlgorithmState.CheckTurn;
+          const hull = nextState.hull;
+          const points = hull.points;
+          const segments = hull.segments;
+          const p0 = points[points.length - 3];
+          const p1 = points[points.length - 2];
+          const p2 = points[points.length - 1];
+          let color = "green";
+          let result = AlgorithmState.AddPoint;
+          if (!isRightTurn(p0.position, p1.position, p2.position)) {
+            color = "red";
+            result = AlgorithmState.Discard;
+          }
+          p0.color = color;
+          p1.color = color;
+          p2.color = color;
+          const s0 = segments[segments.length - 2];
+          s0.color = color;
+          const s1 = segments[segments.length - 1];
+          s1.color = color;
+
+          return result;
+        },
+        [AlgorithmState.Discard]: () => {
+          const nextState = cloneDeep(state[currentState]);
+          state.push(nextState);
+
+          const hull = nextState.hull;
+          const points = hull.points;
+          const p0 = points[points.length - 3];
+          const p1 = points[points.length - 2];
+          const p2 = points[points.length - 1];
+          p0.color = "green";
+          p1.color = "black";
+          p2.color = "green";
+          points.splice(points.length - 2, 1);
+          points.forEach((p) => (p.color = "green"));
+
+          const segments = hull.segments;
+          segments.splice(segments.length - 1, 1);
+          segments[segments.length - 1].color = "black";
+          segments[segments.length - 1].dash = [5, 5];
+
+          if (points.length < 3) {
+            segments.forEach((s) => {
+              s.dash = [];
+              s.color = "black";
+            });
+            return AlgorithmState.AddPoint;
+          }
+
           segments[segments.length - 2].color = "black";
           segments[segments.length - 2].dash = [5, 5];
-        }
-      } else {
-        console.warn("State:", algorthimState, "not handled yet");
-      }
 
-      state.push(nextState);
-      return true;
-    }
+          return AlgorithmState.CheckTurn;
+        },
+        [AlgorithmState.Done]: () => {
+          return AlgorithmState.Done;
+        },
+      }
+    );
 
     const pane = new Pane();
     const folder = pane.addFolder({
@@ -235,14 +250,15 @@
     });
 
     let playBtn: ButtonApi;
-    let stopBtn: ButtonApi;
     let forwardBtn: ButtonApi;
     let backwardBtn: ButtonApi;
 
     function stepAnimation() {
       if (currentState < state.length) {
-        if (currentState === state.length - 1 && generateNextState()) {
-          currentState++;
+        if (currentState === state.length - 1) {
+          if (stateMachine.step() !== AlgorithmState.Done) {
+            currentState++;
+          }
         } else if (currentState < state.length - 1) {
           currentState++;
         }
@@ -276,7 +292,7 @@
       animationId = requestAnimationFrame(runAnimation);
     });
 
-    stopBtn = folder.addButton({ title: "stop" }).on("click", () => {
+    folder.addButton({ title: "stop" }).on("click", () => {
       playBtn.disabled = false;
       forwardBtn.disabled = false;
       backwardBtn.disabled = false;
@@ -315,7 +331,7 @@
   <title>Covex Hull 2D</title>
 </svelte:head>
 
-<div class="container" bind:this={container}>
+<div class="container">
   <canvas bind:this={canvas} />
 </div>
 
