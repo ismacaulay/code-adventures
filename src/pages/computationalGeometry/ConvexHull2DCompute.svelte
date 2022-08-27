@@ -76,6 +76,7 @@
 
     return () => {
       cancelAnimationFrame(frameId);
+      pane.dispose();
 
       renderer.destroy();
     };

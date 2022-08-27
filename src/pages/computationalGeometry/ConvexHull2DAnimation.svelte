@@ -4,7 +4,11 @@
   import { createRenderer2D } from "../../renderer2D";
   import { ButtonApi, Pane } from "tweakpane";
   import { cloneDeep } from "lodash";
-  import type { Point2D, PointSet2D, SegmentDescriptor } from "../../types/points";
+  import type {
+    Point2D,
+    PointSet2D,
+    SegmentDescriptor,
+  } from "../../types/points";
   import { createStateMachine } from "../../toolkit/stateMachine";
   import { isRightTurn } from "../../math/vec2";
 

@@ -16,12 +16,11 @@
   }
 
   addRoutes(computationalGeometry);
-
   router.start();
 </script>
 
 <svelte:head>
-  <title>webgpu adventures</title>
+  <title>code adventures</title>
 </svelte:head>
 
 <div class="container">
