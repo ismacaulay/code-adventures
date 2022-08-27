@@ -1,8 +1,12 @@
 import seedrandom from "seedrandom";
 
-let prng = Math.random;
+let prng = seedrandom();
 export function setSeed(seed: number) {
   prng = seedrandom(`${seed}`);
+}
+
+export function randomInt32() {
+  return prng.int32();
 }
 
 export function randomIntInRangeInclusive([min, max]: [number, number]) {
