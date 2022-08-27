@@ -1,8 +1,8 @@
 <script>
-  import Section from "../components/Section.svelte";
-  import pages from "./pages";
+  import Section from '../components/Section.svelte';
+  import pages from './pages';
 
-  const title = "Computational Geometry";
+  const title = 'Computational Geometry';
 </script>
 
 <Section {title} {pages}>

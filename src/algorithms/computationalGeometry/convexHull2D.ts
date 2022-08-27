@@ -1,4 +1,4 @@
-import { isRightTurn } from "../../math/vec2";
+import { isRightTurn } from '../../math/vec2';
 
 export function computeConvexHull2D(vertices: Int32Array) {
   // sort the points in the x coordinate

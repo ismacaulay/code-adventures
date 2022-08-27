@@ -1,4 +1,4 @@
-import { vec2 } from "gl-matrix";
+import { vec2 } from 'gl-matrix';
 
 export function isRightTurn(p0: vec2, p1: vec2, p2: vec2) {
   const p01 = vec2.create();

@@ -1,17 +1,9 @@
 <script>
-  import PageList from "./PageList.svelte";
+  import PageList from './PageList.svelte';
 
   export let title;
   export let pages;
 </script>
-
-<div class="container">
-  <h2>{title}</h2>
-
-  <slot />
-
-  <PageList {pages} />
-</div>
 
 <style>
   .container {
@@ -24,3 +16,11 @@
     /* color: #6c757d; */
   }
 </style>
+
+<div class="container">
+  <h2>{title}</h2>
+
+  <slot />
+
+  <PageList {pages} />
+</div>

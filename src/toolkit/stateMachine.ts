@@ -1,6 +1,6 @@
 export function createStateMachine<T extends number | string>(
   initialState: T,
-  states: { [key in T]: () => T }
+  states: { [key in T]: () => T },
 ) {
   let currentState = initialState;
 

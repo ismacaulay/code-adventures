@@ -1,10 +1,6 @@
 <script>
-  import ComputationalGeometry from "./computationalGeometry/index.svelte";
+  import ComputationalGeometry from './computationalGeometry/index.svelte';
 </script>
-
-<div class="container">
-  <ComputationalGeometry />
-</div>
 
 <style>
   h1 {
@@ -23,3 +19,7 @@
     text-align: center;
   }
 </style>
+
+<div class="container">
+  <ComputationalGeometry />
+</div>

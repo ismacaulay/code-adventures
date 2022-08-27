@@ -1,10 +1,10 @@
 <script>
-  import router from "page";
-  import Home from "./pages/Home.svelte";
-  import computationalGeometry from "./pages/computationalGeometry/pages";
+  import router from 'page';
+  import Home from './pages/Home.svelte';
+  import computationalGeometry from './pages/computationalGeometry/pages';
 
   let component;
-  let base = "";
+  let base = '';
 
   router(`${base}/`, () => (component = Home));
 
@@ -19,6 +19,13 @@
   router.start();
 </script>
 
+<style>
+  .container {
+    width: 100vw;
+    height: 100vh;
+  }
+</style>
+
 <svelte:head>
   <title>code adventures</title>
 </svelte:head>
@@ -26,10 +33,3 @@
 <div class="container">
   <svelte:component this={component} />
 </div>
-
-<style>
-  .container {
-    width: 100vw;
-    height: 100vh;
-  }
-</style>

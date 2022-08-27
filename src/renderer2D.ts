@@ -1,6 +1,6 @@
-import type { vec2 } from "gl-matrix";
-import { transformValueToRange } from "./math/range";
-import type { LineStrip, Point2D, PointSet2D } from "./types/points";
+import type { vec2 } from 'gl-matrix';
+import { transformValueToRange } from './math/range';
+import type { LineStrip, Point2D, PointSet2D } from './types/points';
 
 const TWO_PI = 2 * Math.PI;
 
@@ -8,9 +8,9 @@ export function createRenderer2D(canvas: HTMLCanvasElement) {
   function handleWheelEvent(e: MouseEvent) {
     e.preventDefault();
   }
-  canvas.addEventListener("wheel", handleWheelEvent);
+  canvas.addEventListener('wheel', handleWheelEvent);
 
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext('2d');
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 
@@ -29,11 +29,7 @@ export function createRenderer2D(canvas: HTMLCanvasElement) {
   }
 
   function transformRadius(radius: number) {
-    return transformValueToRange(
-      startRangeX[0] + radius,
-      startRangeX,
-      endRangeX
-    );
+    return transformValueToRange(startRangeX[0] + radius, startRangeX, endRangeX);
   }
 
   function isArrayOfArrays<T>(arr: T[] | T[][]): arr is T[][] {
@@ -58,12 +54,7 @@ export function createRenderer2D(canvas: HTMLCanvasElement) {
         ctx.beginPath();
         ctx.fillStyle = point.color;
 
-        ctx.arc(
-          ...transformVec2(point.position),
-          transformRadius(point.radius),
-          0,
-          TWO_PI
-        );
+        ctx.arc(...transformVec2(point.position), transformRadius(point.radius), 0, TWO_PI);
         ctx.fill();
         ctx.closePath();
       }
@@ -106,7 +97,7 @@ export function createRenderer2D(canvas: HTMLCanvasElement) {
     },
 
     destroy() {
-      canvas.removeEventListener("wheel", handleWheelEvent);
+      canvas.removeEventListener('wheel', handleWheelEvent);
     },
 
     resize() {

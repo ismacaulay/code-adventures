@@ -1,4 +1,4 @@
-import seedrandom from "seedrandom";
+import seedrandom from 'seedrandom';
 
 let prng = seedrandom();
 export function setSeed(seed: number) {
@@ -17,7 +17,7 @@ export function randomIntInRangeInclusive([min, max]: [number, number]) {
 
 export function generate2DPoints(
   count: number,
-  range: { x: [number, number]; y: [number, number] }
+  range: { x: [number, number]; y: [number, number] },
 ) {
   const points = new Int32Array(count * 2);
   const seen = new Set<string>();
