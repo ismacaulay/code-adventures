@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Pane } from 'tweakpane';
-  import { setSeed, generate2DPoints } from '../../math/random';
-  import { createRenderer2D } from '../../renderer2D';
-  import type { PointSet2D } from '../../types/points';
-  import { computeConvexHull2D } from '../../algorithms/computationalGeometry/convexHull2D';
+  import { setSeed, generate2DPoints } from 'toolkit/math/random';
+  import { createRenderer2D } from 'toolkit/rendering/renderer2D';
+  import type { PointSet2D } from 'types/points';
+  import { computeConvexHull2D } from 'algorithms/computationalGeometry/convexHull2D';
 
   let canvas: HTMLCanvasElement;
 

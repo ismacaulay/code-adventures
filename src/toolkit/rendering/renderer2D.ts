@@ -1,6 +1,6 @@
 import type { vec2 } from 'gl-matrix';
-import { transformValueToRange } from './math/range';
-import type { LineStrip, Point2D, PointSet2D } from './types/points';
+import type { LineStrip, Point2D, PointSet2D } from 'types/points';
+import { transformValueToRange } from 'toolkit/math/range';
 
 const TWO_PI = 2 * Math.PI;
 

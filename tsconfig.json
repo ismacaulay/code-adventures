@@ -8,13 +8,10 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      // "components": ["./src/components"],
-      "toolkit": ["./src/toolkit"],
-      // "rendering": ["./src/rendering"],
-      "algorithms": ["./src/algorithms"],
-      "math": ["./src/math"],
-      "types": ["./src/types"],
-      "pages": ["./src/pages"]
+      "algorithms/*": ["./src/algorithms/*"],
+      "toolkit/*": ["./src/toolkit/*"],
+      "types/*": ["./src/types/*"],
+      "pages/*": ["./src/pages/*"]
     },
     /**
      * Typecheck JS in `.svelte` and `.js` files by default.

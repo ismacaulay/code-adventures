@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { setSeed, generate2DPoints, randomInt32 } from '../../math/random';
-  import { createRenderer2D } from '../../renderer2D';
-  import { ButtonApi, Pane } from 'tweakpane';
   import { cloneDeep } from 'lodash';
-  import type { Point2D, PointSet2D, SegmentDescriptor } from '../../types/points';
-  import { createStateMachine } from '../../toolkit/stateMachine';
-  import { isRightTurn } from '../../math/vec2';
+  import { ButtonApi, Pane } from 'tweakpane';
+  import { setSeed, generate2DPoints, randomInt32 } from 'toolkit/math/random';
+  import { createStateMachine } from 'toolkit/stateMachine';
+  import { isRightTurn } from 'toolkit/math/vec2';
+  import type { Point2D, PointSet2D, SegmentDescriptor } from 'types/points';
+  import { createRenderer2D } from 'toolkit/rendering/renderer2D';
 
   enum AlgorithmState {
     Initial,
