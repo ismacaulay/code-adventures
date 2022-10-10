@@ -125,7 +125,7 @@
     }
     animate();
 
-    const stateMachine = createStateMachine<AlgorithmState>(AlgorithmState.Initial, {
+    const stateMachine = createStateMachine(AlgorithmState.Initial, {
       [AlgorithmState.Initial]: () => {
         const nextState = cloneDeep(state[currentState]);
         state.push(nextState);

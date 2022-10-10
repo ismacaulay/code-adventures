@@ -22,5 +22,5 @@
 </style>
 
 {#each pages as page}
-  <a class="nav-link" href="/{page.title}">{page.title}</a>
+  <a class="nav-link" href="/{page.url}">{page.title}</a>
 {/each}

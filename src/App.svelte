@@ -11,7 +11,7 @@
   function addRoutes(pages) {
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i];
-      router(`${base}/${page.title}`, () => (component = page.component));
+      router(`${base}/${page.url}`, () => (component = page.component));
     }
   }
 
