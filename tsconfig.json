@@ -9,9 +9,10 @@
     "baseUrl": ".",
     "paths": {
       "algorithms/*": ["./src/algorithms/*"],
+      "components/*": ["./src/components/*"],
+      "pages/*": ["./src/pages/*"],
       "toolkit/*": ["./src/toolkit/*"],
-      "types/*": ["./src/types/*"],
-      "pages/*": ["./src/pages/*"]
+      "types/*": ["./src/types/*"]
     },
     /**
      * Typecheck JS in `.svelte` and `.js` files by default.
