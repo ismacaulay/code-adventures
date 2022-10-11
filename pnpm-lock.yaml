@@ -5,6 +5,7 @@ specifiers:
   '@tsconfig/svelte': ^3.0.0
   '@tweakpane/core': ^1.1.0
   '@types/lodash': ^4.14.184
+  '@types/page': ^1.11.5
   '@types/seedrandom': ^3.0.2
   gl-matrix: ^3.4.3
   lodash: ^4.17.21
@@ -31,6 +32,7 @@ devDependencies:
   '@tsconfig/svelte': 3.0.0
   '@tweakpane/core': 1.1.0
   '@types/lodash': 4.14.184
+  '@types/page': 1.11.5
   '@types/seedrandom': 3.0.2
   lodash: 4.17.21
   prettier: 2.7.1
@@ -137,6 +139,10 @@ packages:
 
   /@types/node/18.7.8:
     resolution: {integrity: sha512-/YP55EMK2341JkODUb8DM9O0x1SIz2aBvyF33Uf1c76St3VpsMXEIW0nxuKkq/5cxnbz0RD9cfwNZHEAZQD3ag==}
+    dev: true
+
+  /@types/page/1.11.5:
+    resolution: {integrity: sha512-v0uoRBrJOnYWI/HcqmhLFbkWPW6tF183FdorVLYsep+HKxW1vFT/G+yaUymvS26uL8NPKj8hit4QEtphGDTwxA==}
     dev: true
 
   /@types/pug/2.0.6:

@@ -1,0 +1,34 @@
+{
+  "version": 1,
+
+  "camera": {
+    "type": "orthographic",
+    "target": [0, 0, 0],
+    "position": [0, 0, 5],
+    "up": [0, 1, 0]
+  },
+
+  "root": [
+    {
+      "entity": "bunny"
+    }
+  ],
+
+  "entities": {
+    "bunny": {
+      "transform": {
+        "position": [0, 0, 0],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "geometry": {
+        "type": "obj",
+        "location": "/data/models/bunny.obj"
+      },
+      "material": {
+        "type": "MeshBasicMaterial",
+        "color": [252, 148, 3]
+      }
+    }
+  }
+}
