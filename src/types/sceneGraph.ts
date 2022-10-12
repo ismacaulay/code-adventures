@@ -1,24 +1,24 @@
-export interface ReadOnlySceneGraphNode {
+export interface ReadonlySceneGraphNode {
   readonly uid: string;
 
-  readonly children: readonly ReadOnlySceneGraphNode[];
+  readonly children: readonly ReadonlySceneGraphNode[];
   onChange(cb: () => void): () => void;
 }
 
-export interface SceneGraphNode extends ReadOnlySceneGraphNode {
+export interface SceneGraphNode extends ReadonlySceneGraphNode {
   children: readonly SceneGraphNode[];
 
   add(child: SceneGraphNode): void;
   remove(child: SceneGraphNode): void;
 }
 
-export interface ReadOnlySceneGraph {
-  readonly root: ReadOnlySceneGraphNode;
+export interface ReadonlySceneGraph {
+  readonly root: ReadonlySceneGraphNode;
 
   onChange(cb: () => void): () => void;
 }
 
-export interface SceneGraph extends ReadOnlySceneGraph {
+export interface SceneGraph extends ReadonlySceneGraph {
   readonly root: SceneGraphNode;
 
   clear(): void;

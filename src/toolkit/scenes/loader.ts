@@ -1,5 +1,7 @@
+import { createTransformComponent } from 'toolkit/ecs/components/transform';
 import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
-import type { ReadOnlySceneGraphNode, SceneGraph, SceneGraphNode } from 'types/sceneGraph';
+import type { EntityManager } from 'types/ecs/entity';
+import type { ReadonlySceneGraphNode, SceneGraph, SceneGraphNode } from 'types/sceneGraph';
 import type { EntityV1 } from 'types/scenes/v1/entity';
 import type { SceneV1 } from 'types/scenes/v1/scene';
 import type { SceneGraphDescriptorV1 } from 'types/scenes/v1/sceneGraph';
@@ -8,7 +10,13 @@ function isSceneV1(scene: any): scene is SceneV1 {
   return scene?.version === 1;
 }
 
-export function createSceneLoader({ sceneGraph }: { sceneGraph: SceneGraph }) {
+export function createSceneLoader({
+  entityManager,
+  sceneGraph,
+}: {
+  entityManager: EntityManager;
+  sceneGraph: SceneGraph;
+}) {
   return {
     async load(url: string) {
       const scene = await fetch(url).then((r) => r.json());
@@ -21,6 +29,14 @@ export function createSceneLoader({ sceneGraph }: { sceneGraph: SceneGraph }) {
       // const { target, position, up } = camera;
       // camera.update({ target, position, up });
 
+      Object.entries(scene.entities).forEach(([uid, state]) => {
+        entityManager.add(uid);
+
+        const { transform } = state;
+
+        entityManager.addComponent(uid, createTransformComponent({ ...transform }));
+      });
+
       function addToSceneGraph(node: SceneGraphNode, { entity, children }: SceneGraphDescriptorV1) {
         const childNode = createSceneGraphNode({ uid: entity });
         node.add(childNode);
@@ -32,14 +48,6 @@ export function createSceneLoader({ sceneGraph }: { sceneGraph: SceneGraph }) {
 
       scene.root.forEach((entry) => {
         addToSceneGraph(sceneGraph.root, entry);
-      });
-
-      Object.entries(scene.entities).forEach(([uid, state]) => {
-        // const entity = entityManager.createEntity(uid);
-        // const { transform, geometry, material } = state;
-        // const { position, rotation, scale } = transform;
-        // const createTransformComponent;
-        // entityManager.addComponent(createTransformComponent(position, rotation, scale));
       });
     },
   };

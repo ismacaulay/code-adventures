@@ -1,7 +1,7 @@
-import type { ReadOnlySceneGraph } from 'types/sceneGraph';
+import type { ReadonlySceneGraph } from 'types/sceneGraph';
 
 export interface WebGPUApplication {
-  readonly sceneGraph: ReadOnlySceneGraph;
+  readonly sceneGraph: ReadonlySceneGraph;
 
   loadScene(url: string): Promise<void>;
 

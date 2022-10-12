@@ -6,19 +6,21 @@
   import { onMount } from 'svelte';
   import { createWebGPUApplication } from 'toolkit/application/webgpu';
   import type { TreeViewNode } from 'types/components/tree';
-  import type { ReadOnlySceneGraphNode } from 'types/sceneGraph';
+  import type { ReadonlySceneGraphNode } from 'types/sceneGraph';
 
   let canvas: HTMLCanvasElement;
   let tree: TreeViewNode[] = [];
 
+  function handleTreeItemSelected(uid: string) {
+    console.log('[handleTreeItemSelected]', uid);
+  }
+
   onMount(() => {
     const app = createWebGPUApplication(canvas);
 
-    app.loadScene('/scenes/bunny.json');
-
     const unsubscribers = [];
 
-    function processSceneGraphNode(node: ReadOnlySceneGraphNode) {
+    function processSceneGraphNode(node: ReadonlySceneGraphNode) {
       return node.children.reduce((acc, cur) => {
         acc.push({ uid: cur.uid, children: cur.children.map(processSceneGraphNode) });
         return acc;
@@ -33,6 +35,8 @@
     }
 
     unsubscribers.push(app.sceneGraph.onChange(handleSceneGraphChanged));
+
+    app.loadScene('/scenes/bunny.json');
 
     return () => {
       unsubscribers.forEach((unsub) => unsub());
@@ -73,7 +77,7 @@
   <div class="split-view-container">
     <div class="horizontal-split-view-container" style:width="25%">
       <div style:height="50%">
-        <TreeView title="Scene" {tree} />
+        <TreeView title="Scene" {tree} onSelected={handleTreeItemSelected} />
       </div>
 
       <Resizer direction="vertical" />
