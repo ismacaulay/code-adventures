@@ -20,5 +20,6 @@ export function createWebGPUApplication(_canvas: HTMLCanvasElement): WebGPUAppli
     destroy() {},
 
     sceneGraph,
+    entityManager,
   };
 }

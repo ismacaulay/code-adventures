@@ -21,5 +21,14 @@ export function createEntityManager(): EntityManager {
 
       components.set(component.type, component);
     },
+
+    getComponent(uid: string, type: ComponentType) {
+      const components = entities.get(uid);
+      if (!components) {
+        throw new Error(`[EntityManager::addComponent] unknown entity: ${uid}`);
+      }
+
+      return components.get(type) as Maybe<any>;
+    },
   };
 }

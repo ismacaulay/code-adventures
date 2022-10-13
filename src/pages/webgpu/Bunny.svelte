@@ -5,42 +5,52 @@
 
   import { onMount } from 'svelte';
   import { createWebGPUApplication } from 'toolkit/application/webgpu';
+  import type { WebGPUApplication } from 'types/application/WebGPUApplication';
   import type { TreeViewNode } from 'types/components/tree';
+  import { ComponentType } from 'types/ecs/component';
   import type { ReadonlySceneGraphNode } from 'types/sceneGraph';
 
+  let app: Maybe<WebGPUApplication>;
   let canvas: HTMLCanvasElement;
-  let tree: TreeViewNode[] = [];
+  let tree: Maybe<TreeViewNode>;
 
   function handleTreeItemSelected(uid: string) {
+    if (!app) {
+      return;
+    }
+
     console.log('[handleTreeItemSelected]', uid);
+    const transform = app.entityManager.getComponent(uid, ComponentType.Transform);
+    if (transform) {
+    }
+  }
+
+  function processSceneGraphNode(node: ReadonlySceneGraphNode): TreeViewNode {
+    return {
+      uid: node.uid,
+      children: node.children.map(processSceneGraphNode),
+    };
+  }
+
+  function handleSceneGraphChanged() {
+    if (!app) {
+      return;
+    }
+
+    tree = processSceneGraphNode(app.sceneGraph.root);
   }
 
   onMount(() => {
-    const app = createWebGPUApplication(canvas);
+    app = createWebGPUApplication(canvas);
 
-    const unsubscribers = [];
-
-    function processSceneGraphNode(node: ReadonlySceneGraphNode) {
-      return node.children.reduce((acc, cur) => {
-        acc.push({ uid: cur.uid, children: cur.children.map(processSceneGraphNode) });
-        return acc;
-      }, []);
-    }
-
-    function handleSceneGraphChanged() {
-      console.log('scene graph changed');
-
-      tree = processSceneGraphNode(app.sceneGraph.root);
-      console.log(tree);
-    }
+    const unsubscribers: Unsubscriber[] = [];
 
     unsubscribers.push(app.sceneGraph.onChange(handleSceneGraphChanged));
-
     app.loadScene('/scenes/bunny.json');
 
     return () => {
       unsubscribers.forEach((unsub) => unsub());
-      app.destroy();
+      app?.destroy();
     };
   });
 </script>
