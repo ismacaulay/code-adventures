@@ -4,14 +4,19 @@
   export let direction: 'vertical' | 'horizontal';
 
   let dragElement: HTMLDivElement;
-
   let prevSibling: HTMLElement;
   let nextSibling: HTMLElement;
-  let prevSiblingHeight = 0;
-  let prevSiblingWidth = 0;
 
   let x: number;
   let y: number;
+
+  function getParentBoundingClientRect() {
+    if (!dragElement.parentElement) {
+      throw new Error('Resizer has no parent');
+    }
+
+    return dragElement.parentElement.getBoundingClientRect();
+  }
 
   function handleMouseMove(e: MouseEvent) {
     const dx = e.clientX - x;
@@ -19,18 +24,22 @@
 
     switch (direction) {
       case 'vertical':
-        const h =
-          ((prevSiblingHeight + dy) * 100) /
-          dragElement.parentElement.getBoundingClientRect().height;
+        const prevSiblingHeight = prevSibling.getBoundingClientRect().height;
+        const h = ((prevSiblingHeight + dy) * 100) / getParentBoundingClientRect().height;
         prevSibling.style.height = `${h}%`;
+        console.log('parent:', getParentBoundingClientRect().height);
+        console.log('prev:', prevSiblingHeight);
         break;
-      case 'horizontal':
-      default:
-        const w =
-          ((prevSiblingWidth + dx) * 100) / dragElement.parentElement.getBoundingClientRect().width;
+      case 'horizontal': {
+        const prevSiblingWidth = prevSibling.getBoundingClientRect().width;
+        const w = ((prevSiblingWidth + dx) * 100) / getParentBoundingClientRect().width;
         prevSibling.style.width = `${w}%`;
         break;
+      }
     }
+
+    x = e.clientX;
+    y = e.clientY;
 
     const cursor = direction === 'horizontal' ? 'col-resize' : 'row-resize';
     dragElement.style.cursor = cursor;
@@ -60,10 +69,6 @@
   function handleMouseDown(e: MouseEvent) {
     x = e.clientX;
     y = e.clientY;
-
-    const rect = prevSibling.getBoundingClientRect();
-    prevSiblingHeight = rect.height;
-    prevSiblingWidth = rect.width;
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);

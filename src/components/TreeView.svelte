@@ -10,18 +10,24 @@
 
   function handleSelected(uid: string) {
     selected = uid;
-    onSelected(uid);
+    onSelected(selected);
   }
 
   function handleClick(e: Event) {
     e.stopPropagation();
     e.preventDefault();
 
-    selected = '';
+    /* handleSelected(''); */
   }
 </script>
 
-<div style:height="100%" on:click={handleClick}>
+<style>
+  .container {
+    height: 100%;
+  }
+</style>
+
+<div class="container noselect" on:click={handleClick}>
   <span>{title}</span>
   {#if tree}
     {#each tree.children as node}

@@ -8,20 +8,30 @@
   import type { WebGPUApplication } from 'types/application/WebGPUApplication';
   import type { TreeViewNode } from 'types/components/tree';
   import { ComponentType } from 'types/ecs/component';
+  import type { Component } from 'types/ecs/component';
+
   import type { ReadonlySceneGraphNode } from 'types/sceneGraph';
+  import TransformEditor from 'components/TransformEditor.svelte';
 
   let app: Maybe<WebGPUApplication>;
   let canvas: HTMLCanvasElement;
   let tree: Maybe<TreeViewNode>;
+  let selectedComponents: Component[] = [];
 
   function handleTreeItemSelected(uid: string) {
     if (!app) {
       return;
     }
 
-    console.log('[handleTreeItemSelected]', uid);
+    selectedComponents = [];
+
+    if (!uid) {
+      return;
+    }
+
     const transform = app.entityManager.getComponent(uid, ComponentType.Transform);
     if (transform) {
+      selectedComponents.push(transform);
     }
   }
 
@@ -61,16 +71,41 @@
     height: 100vh;
   }
 
-  .split-view-container {
+  .horizontal-split-view-container {
     height: 100vh;
     display: flex;
     flex-direction: row;
   }
 
-  .horizontal-split-view-container {
+  .left-split-view-container {
     height: 100vh;
+    width: 25%;
+    min-width: min-content;
+  }
+
+  .right-split-view-container {
+    flex: 1 1 0%;
+  }
+
+  .vertical-split-view-container {
+    height: 100%;
+    min-width: 250px;
     display: flex;
     flex-direction: column;
+  }
+
+  .top-split-view-container {
+    height: 50%;
+    min-height: 10%;
+    max-height: 90%;
+    overflow: auto;
+    margin: 3px;
+  }
+
+  .bottom-split-view-container {
+    flex: 1 1 0%;
+    min-height: min-content;
+    margin: 3px;
   }
 
   canvas {
@@ -84,22 +119,32 @@
 </svelte:head>
 
 <div class="container">
-  <div class="split-view-container">
-    <div class="horizontal-split-view-container" style:width="25%">
-      <div style:height="50%">
-        <TreeView title="Scene" {tree} onSelected={handleTreeItemSelected} />
-      </div>
+  <div class="horizontal-split-view-container">
+    <div class="left-split-view-container">
+      <div class="vertical-split-view-container">
+        <div class="top-split-view-container">
+          <TreeView title="Scene" {tree} onSelected={handleTreeItemSelected} />
+        </div>
 
-      <Resizer direction="vertical" />
+        <Resizer direction="vertical" />
 
-      <div style="flex: 1 1 0%;">
-        <span>Properties</span>
+        <div class="bottom-split-view-container">
+          <div class="noselect" style:display="flex" style:flex-direction="column">
+            <span>Components</span>
+
+            {#each selectedComponents as component}
+              {#if component.type === ComponentType.Transform}
+                <TransformEditor {component} />
+              {/if}
+            {/each}
+          </div>
+        </div>
       </div>
     </div>
 
     <Resizer direction="horizontal" />
 
-    <div style="flex: 1 1 0%;">
+    <div class="right-split-view-container">
       <canvas bind:this={canvas} />
     </div>
   </div>
