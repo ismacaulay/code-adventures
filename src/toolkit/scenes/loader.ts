@@ -1,9 +1,10 @@
+import { createMeshGeometryComponent } from 'toolkit/ecs/components/geometry';
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
 import { loadObj } from 'toolkit/loaders/objLoader';
 import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
+import { BufferAttributeFormat } from 'types/ecs/component';
 import type { EntityManager } from 'types/ecs/entity';
-import type { ReadonlySceneGraphNode, SceneGraph, SceneGraphNode } from 'types/sceneGraph';
-import type { EntityV1 } from 'types/scenes/v1/entity';
+import type { SceneGraph, SceneGraphNode } from 'types/sceneGraph';
 import { GeometryComponentTypeV1 } from 'types/scenes/v1/geometry';
 import type { SceneV1 } from 'types/scenes/v1/scene';
 import type { SceneGraphDescriptorV1 } from 'types/scenes/v1/sceneGraph';
@@ -31,20 +32,38 @@ export function createSceneLoader({
       // const { target, position, up } = camera;
       // camera.update({ target, position, up });
 
-      Object.entries(scene.entities).forEach(([uid, state]) => {
-        entityManager.add(uid);
+      await Promise.all(
+        Object.entries(scene.entities).map(async ([uid, state]) => {
+          entityManager.add(uid);
 
-        const { transform, geometry } = state;
+          const { transform, geometry } = state;
 
-        entityManager.addComponent(uid, createTransformComponent({ ...transform }));
+          entityManager.addComponent(uid, createTransformComponent({ ...transform }));
 
-        if (geometry.type === GeometryComponentTypeV1.Obj) {
-          loadObj(geometry.location).then(({ vertices, faces }) => {
-            console.log(vertices);
-            console.log(faces);
-          });
-        }
-      });
+          if (geometry.type === GeometryComponentTypeV1.Obj) {
+            const { vertices, faces } = await loadObj(geometry.location);
+
+            entityManager.addComponent(
+              uid,
+              createMeshGeometryComponent({
+                count: faces.length,
+                indices: faces,
+                buffers: [
+                  {
+                    array: vertices,
+                    attributes: [
+                      {
+                        format: BufferAttributeFormat.Float32x3,
+                        location: 0,
+                      },
+                    ],
+                  },
+                ],
+              }),
+            );
+          }
+        }),
+      );
 
       function addToSceneGraph(node: SceneGraphNode, { entity, children }: SceneGraphDescriptorV1) {
         const childNode = createSceneGraphNode({ uid: entity });

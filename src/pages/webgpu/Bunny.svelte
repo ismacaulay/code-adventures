@@ -12,6 +12,7 @@
 
   import type { ReadonlySceneGraphNode } from 'types/sceneGraph';
   import TransformEditor from 'components/TransformEditor.svelte';
+  import GeometryComponent from 'components/GeometryComponent.svelte';
 
   let app: Maybe<WebGPUApplication>;
   let canvas: HTMLCanvasElement;
@@ -29,9 +30,16 @@
       return;
     }
 
-    const transform = app.entityManager.getComponent(uid, ComponentType.Transform);
+    const entityManager = app.entityManager;
+
+    const transform = entityManager.getComponent(uid, ComponentType.Transform);
     if (transform) {
       selectedComponents.push(transform);
+    }
+
+    const geometry = entityManager.getComponent(uid, ComponentType.Geometry);
+    if (geometry) {
+      selectedComponents.push(geometry);
     }
   }
 
@@ -135,6 +143,8 @@
             {#each selectedComponents as component}
               {#if component.type === ComponentType.Transform}
                 <TransformEditor {component} />
+              {:else if component.type === ComponentType.Geometry}
+                <GeometryComponent {component} />
               {/if}
             {/each}
           </div>
