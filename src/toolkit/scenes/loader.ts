@@ -1,8 +1,10 @@
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
+import { loadObj } from 'toolkit/loaders/objLoader';
 import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
 import type { EntityManager } from 'types/ecs/entity';
 import type { ReadonlySceneGraphNode, SceneGraph, SceneGraphNode } from 'types/sceneGraph';
 import type { EntityV1 } from 'types/scenes/v1/entity';
+import { GeometryComponentTypeV1 } from 'types/scenes/v1/geometry';
 import type { SceneV1 } from 'types/scenes/v1/scene';
 import type { SceneGraphDescriptorV1 } from 'types/scenes/v1/sceneGraph';
 
@@ -32,9 +34,16 @@ export function createSceneLoader({
       Object.entries(scene.entities).forEach(([uid, state]) => {
         entityManager.add(uid);
 
-        const { transform } = state;
+        const { transform, geometry } = state;
 
         entityManager.addComponent(uid, createTransformComponent({ ...transform }));
+
+        if (geometry.type === GeometryComponentTypeV1.Obj) {
+          loadObj(geometry.location).then(({ vertices, faces }) => {
+            console.log(vertices);
+            console.log(faces);
+          });
+        }
       });
 
       function addToSceneGraph(node: SceneGraphNode, { entity, children }: SceneGraphDescriptorV1) {
