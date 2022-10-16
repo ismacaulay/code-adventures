@@ -27,8 +27,6 @@
         const prevSiblingHeight = prevSibling.getBoundingClientRect().height;
         const h = ((prevSiblingHeight + dy) * 100) / getParentBoundingClientRect().height;
         prevSibling.style.height = `${h}%`;
-        console.log('parent:', getParentBoundingClientRect().height);
-        console.log('prev:', prevSiblingHeight);
         break;
       case 'horizontal': {
         const prevSiblingWidth = prevSibling.getBoundingClientRect().width;

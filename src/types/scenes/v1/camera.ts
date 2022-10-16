@@ -1,9 +1,5 @@
 import type { vec3 } from 'gl-matrix';
-
-export enum CameraType {
-  Orthographic = 'orthographic',
-  Perspective = 'perspective',
-}
+import type { CameraType } from 'toolkit/camera/camera';
 
 export interface CameraV1 {
   type: CameraType;

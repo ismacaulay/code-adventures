@@ -1,23 +1,21 @@
 <script lang="ts">
   import Resizer from 'components/Resizer.svelte';
-
   import TreeView from 'components/TreeView.svelte';
-
-  import { onMount } from 'svelte';
-  import { createWebGPUApplication } from 'toolkit/application/webgpu';
-  import type { WebGPUApplication } from 'types/application/WebGPUApplication';
-  import type { TreeViewNode } from 'types/components/tree';
-  import { ComponentType } from 'types/ecs/component';
-  import type { Component } from 'types/ecs/component';
-
-  import type { ReadonlySceneGraphNode } from 'types/sceneGraph';
   import TransformEditor from 'components/TransformEditor.svelte';
   import GeometryComponent from 'components/GeometryComponent.svelte';
+
+  import { onMount } from 'svelte';
+  import { createWebGPUApplication, type WebGPUApplication } from 'toolkit/application/webgpu';
+  import type { TreeViewNode } from 'types/components/tree';
+  import { type Component, ComponentType } from 'types/ecs/component';
+  import type { ReadonlySceneGraphNode } from 'types/sceneGraph';
+  import { CameraType, type Camera } from 'toolkit/camera/camera';
+  import OrthographicCameraEditor from 'components/OrthographicCameraEditor.svelte';
 
   let app: Maybe<WebGPUApplication>;
   let canvas: HTMLCanvasElement;
   let tree: Maybe<TreeViewNode>;
-  let selectedComponents: Component[] = [];
+  let selectedComponents: (Camera | Component)[] = [];
 
   function handleTreeItemSelected(uid: string) {
     if (!app) {
@@ -30,16 +28,20 @@
       return;
     }
 
-    const entityManager = app.entityManager;
+    if (uid === 'camera') {
+      selectedComponents.push(app.camera);
+    } else {
+      const entityManager = app.entityManager;
 
-    const transform = entityManager.getComponent(uid, ComponentType.Transform);
-    if (transform) {
-      selectedComponents.push(transform);
-    }
+      const transform = entityManager.getComponent(uid, ComponentType.Transform);
+      if (transform) {
+        selectedComponents.push(transform);
+      }
 
-    const geometry = entityManager.getComponent(uid, ComponentType.Geometry);
-    if (geometry) {
-      selectedComponents.push(geometry);
+      const geometry = entityManager.getComponent(uid, ComponentType.Geometry);
+      if (geometry) {
+        selectedComponents.push(geometry);
+      }
     }
   }
 
@@ -138,10 +140,10 @@
 
         <div class="bottom-split-view-container">
           <div class="noselect" style:display="flex" style:flex-direction="column">
-            <span>Components</span>
-
             {#each selectedComponents as component}
-              {#if component.type === ComponentType.Transform}
+              {#if component.type === CameraType.Orthographic}
+                <OrthographicCameraEditor camera={component} />
+              {:else if component.type === ComponentType.Transform}
                 <TransformEditor {component} />
               {:else if component.type === ComponentType.Geometry}
                 <GeometryComponent {component} />

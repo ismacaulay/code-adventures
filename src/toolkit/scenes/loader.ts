@@ -1,3 +1,6 @@
+import { vec3 } from 'gl-matrix';
+import type { Camera } from 'toolkit/camera/camera';
+import { createOrthographicCamera } from 'toolkit/camera/orthographic';
 import { createMeshGeometryComponent } from 'toolkit/ecs/components/geometry';
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
 import { loadObj } from 'toolkit/loaders/objLoader';
@@ -16,9 +19,11 @@ function isSceneV1(scene: any): scene is SceneV1 {
 export function createSceneLoader({
   entityManager,
   sceneGraph,
+  camera,
 }: {
   entityManager: EntityManager;
   sceneGraph: SceneGraph;
+  camera: Camera;
 }) {
   return {
     async load(url: string) {
@@ -29,8 +34,13 @@ export function createSceneLoader({
         throw new Error('Unkown scene version');
       }
 
-      // const { target, position, up } = camera;
-      // camera.update({ target, position, up });
+      const { target, position, up } = scene.camera;
+      vec3.copy(camera.target, target);
+      vec3.copy(camera.position, position);
+      vec3.copy(camera.up, up);
+      camera.updateViewMatrix();
+      camera.updateProjectionMatrix();
+      sceneGraph.root.add(createSceneGraphNode({ uid: 'camera' }));
 
       await Promise.all(
         Object.entries(scene.entities).map(async ([uid, state]) => {
