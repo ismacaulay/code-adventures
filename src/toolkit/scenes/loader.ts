@@ -1,7 +1,7 @@
 import { vec3 } from 'gl-matrix';
 import type { Camera } from 'toolkit/camera/camera';
-import { createOrthographicCamera } from 'toolkit/camera/orthographic';
 import { createMeshGeometryComponent } from 'toolkit/ecs/components/geometry';
+import { createBasicMaterialComponent } from 'toolkit/ecs/components/material';
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
 import { loadObj } from 'toolkit/loaders/objLoader';
 import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
@@ -9,6 +9,7 @@ import { BufferAttributeFormat } from 'types/ecs/component';
 import type { EntityManager } from 'types/ecs/entity';
 import type { SceneGraph, SceneGraphNode } from 'types/sceneGraph';
 import { GeometryComponentTypeV1 } from 'types/scenes/v1/geometry';
+import { MaterialComponentTypeV1 } from 'types/scenes/v1/material';
 import type { SceneV1 } from 'types/scenes/v1/scene';
 import type { SceneGraphDescriptorV1 } from 'types/scenes/v1/sceneGraph';
 
@@ -40,13 +41,12 @@ export function createSceneLoader({
       vec3.copy(camera.up, up);
       camera.updateViewMatrix();
       camera.updateProjectionMatrix();
-      sceneGraph.root.add(createSceneGraphNode({ uid: 'camera' }));
 
       await Promise.all(
         Object.entries(scene.entities).map(async ([uid, state]) => {
           entityManager.add(uid);
 
-          const { transform, geometry } = state;
+          const { transform, geometry, material } = state;
 
           entityManager.addComponent(uid, createTransformComponent({ ...transform }));
 
@@ -70,6 +70,36 @@ export function createSceneLoader({
                   },
                 ],
               }),
+            );
+          } else if (geometry.type === GeometryComponentTypeV1.Mesh) {
+            const { vertices, triangles } = geometry;
+
+            const vertBuf = new Float64Array(vertices);
+            const triBuf = new Uint32Array(triangles);
+            entityManager.addComponent(
+              uid,
+              createMeshGeometryComponent({
+                count: triBuf.length,
+                indices: triBuf,
+                buffers: [
+                  {
+                    array: vertBuf,
+                    attributes: [
+                      {
+                        format: BufferAttributeFormat.Float32x3,
+                        location: 0,
+                      },
+                    ],
+                  },
+                ],
+              }),
+            );
+          }
+
+          if (material.type === MaterialComponentTypeV1.MeshBasicMaterial) {
+            entityManager.addComponent(
+              uid,
+              createBasicMaterialComponent({ colour: material.colour }),
             );
           }
         }),

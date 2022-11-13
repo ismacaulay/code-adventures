@@ -10,20 +10,21 @@
 
   "root": [
     {
-      "entity": "bunny"
+      "entity": "triangle"
     }
   ],
 
   "entities": {
-    "bunny": {
+    "triangle": {
       "transform": {
         "position": [0, 0, 0],
         "rotation": [0, 0, 0],
         "scale": [1, 1, 1]
       },
       "geometry": {
-        "type": "obj",
-        "location": "/models/bunny.obj"
+        "type": "mesh",
+        "vertices": [-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, 0.0],
+        "triangles": [0, 1, 2]
       },
       "material": {
         "type": "MeshBasicMaterial",

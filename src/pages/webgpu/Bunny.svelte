@@ -61,12 +61,15 @@
   }
 
   onMount(() => {
-    app = createWebGPUApplication(canvas);
-
     const unsubscribers: Unsubscriber[] = [];
 
-    unsubscribers.push(app.sceneGraph.onChange(handleSceneGraphChanged));
-    app.loadScene('/scenes/bunny.json');
+    (async () => {
+      app = await createWebGPUApplication(canvas);
+      unsubscribers.push(app.sceneGraph.onChange(handleSceneGraphChanged));
+      await app.loadScene('/scenes/triangle.json');
+
+      app.start();
+    })();
 
     return () => {
       unsubscribers.forEach((unsub) => unsub());
@@ -118,7 +121,12 @@
     margin: 3px;
   }
 
+  .canvas-container {
+    height: 100%;
+  }
+
   canvas {
+    display: block;
     width: 100%;
     height: 100%;
   }
@@ -127,7 +135,6 @@
 <svelte:head>
   <title>Bunny</title>
 </svelte:head>
-
 <div class="container">
   <div class="horizontal-split-view-container">
     <div class="left-split-view-container">
@@ -157,7 +164,9 @@
     <Resizer direction="horizontal" />
 
     <div class="right-split-view-container">
-      <canvas bind:this={canvas} />
+      <div class="canvas-container">
+        <canvas bind:this={canvas} />
+      </div>
     </div>
   </div>
 </div>

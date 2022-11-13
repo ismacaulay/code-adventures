@@ -1,8 +1,11 @@
-import type { vec3 } from 'gl-matrix';
+import type { mat4, vec3 } from 'gl-matrix';
+import type { UniformDictionary } from 'toolkit/rendering/buffers/uniformBuffer';
+import type { ShaderDescriptor } from 'toolkit/rendering/shader';
 
 export enum ComponentType {
   Transform = 1,
   Geometry = 2,
+  Material = 4,
 }
 
 export interface BaseComponent {
@@ -18,6 +21,8 @@ export interface TransformComponent extends BaseComponent {
   position: vec3;
   rotation: vec3;
   scale: vec3;
+
+  readonly matrix: mat4;
 }
 
 /**
@@ -58,4 +63,16 @@ export interface MeshGeometryComponent extends BaseGeometryComponent {
 
 export type GeometryComponent = MeshGeometryComponent;
 
-export type Component = TransformComponent | GeometryComponent;
+/**
+ * Material
+ */
+export interface BasicMaterialComponent extends BaseComponent {
+  type: ComponentType.Material;
+
+  shader: ShaderDescriptor;
+  uniforms: UniformDictionary;
+}
+
+export type MaterialComponent = BasicMaterialComponent;
+
+export type Component = TransformComponent | GeometryComponent | MaterialComponent;

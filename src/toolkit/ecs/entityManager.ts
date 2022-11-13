@@ -25,7 +25,7 @@ export function createEntityManager(): EntityManager {
     getComponent(uid: string, type: ComponentType) {
       const components = entities.get(uid);
       if (!components) {
-        throw new Error(`[EntityManager::addComponent] unknown entity: ${uid}`);
+        throw new Error(`[EntityManager::getComponent] unknown entity: ${uid}`);
       }
 
       return components.get(type) as Maybe<any>;
