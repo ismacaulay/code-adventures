@@ -11,6 +11,7 @@
   import type { ReadonlySceneGraphNode } from 'types/sceneGraph';
   import { CameraType, type Camera } from 'toolkit/camera/camera';
   import OrthographicCameraEditor from 'components/OrthographicCameraEditor.svelte';
+  import MaterialEditor from 'components/MaterialEditor.svelte';
 
   let app: Maybe<WebGPUApplication>;
   let canvas: HTMLCanvasElement;
@@ -41,6 +42,11 @@
       const geometry = entityManager.getComponent(uid, ComponentType.Geometry);
       if (geometry) {
         selectedComponents.push(geometry);
+      }
+
+      const material = entityManager.getComponent(uid, ComponentType.Material);
+      if (material) {
+        selectedComponents.push(material);
       }
     }
   }
@@ -154,6 +160,8 @@
                 <TransformEditor {component} />
               {:else if component.type === ComponentType.Geometry}
                 <GeometryComponent {component} />
+              {:else if component.type === ComponentType.Material}
+                <MaterialEditor {component} />
               {/if}
             {/each}
           </div>

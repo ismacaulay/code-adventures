@@ -4,7 +4,7 @@ import { createOrthographicCamera } from 'toolkit/camera/orthographic';
 import { createPerspectiveCamera } from 'toolkit/camera/perspective';
 import { createBufferManager, DefaultBuffers } from 'toolkit/ecs/bufferManager';
 import { createEntityManager } from 'toolkit/ecs/entityManager';
-import { createShaderManager } from 'toolkit/ecs/shaderManager';
+import { createShaderManager, DefaultShaders } from 'toolkit/ecs/shaderManager';
 import type { IndexBuffer } from 'toolkit/rendering/buffers/indexBuffer';
 import type { UniformBuffer } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { VertexBuffer } from 'toolkit/rendering/buffers/vertexBuffer';
@@ -13,7 +13,7 @@ import type { Shader } from 'toolkit/rendering/shader';
 import { createWebGPURenderer } from 'toolkit/rendering/webgpuRenderer';
 import { createSceneGraph } from 'toolkit/sceneGraph';
 import { createSceneLoader } from 'toolkit/scenes/loader';
-import { ComponentType } from 'types/ecs/component';
+import { ComponentType, MaterialComponentType } from 'types/ecs/component';
 
 import type { EntityManager } from 'types/ecs/entity';
 import type { ReadonlySceneGraph, SceneGraphNode } from 'types/sceneGraph';
@@ -109,13 +109,20 @@ export async function createWebGPUApplication(
         indices = bufferManager.get<IndexBuffer>(geometry.indices.id);
       }
 
-      if (material.shader.id === undefined) {
-        material.shader.id = shaderManager.create(material.shader);
+      if (material.shader === undefined) {
+        if (material.subtype === MaterialComponentType.MeshBasic) {
+          material.shader = shaderManager.create(DefaultShaders.MeshBasic);
+        } else {
+          throw new Error('Unknown MaterialComponentType');
+        }
       }
 
-      const shader = shaderManager.get<Shader>(material.shader.id);
+      const shader = shaderManager.get<Shader>(material.shader);
       shader.update({ model: transform.matrix });
-      shader.update(material.uniforms ?? {});
+
+      if (material.subtype === MaterialComponentType.MeshBasic) {
+        shader.update({ colour: material.colour.map((c) => c / 255.0) });
+      }
       shader.buffers.forEach((buf) => {
         renderer.submit({
           type: CommandType.WriteBuffer,

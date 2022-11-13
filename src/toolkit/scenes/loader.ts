@@ -1,7 +1,10 @@
 import { vec3 } from 'gl-matrix';
 import type { Camera } from 'toolkit/camera/camera';
 import { createMeshGeometryComponent } from 'toolkit/ecs/components/geometry';
-import { createBasicMaterialComponent } from 'toolkit/ecs/components/material';
+import {
+  createBasicMaterialComponent,
+  createMeshBasicMaterialComponent,
+} from 'toolkit/ecs/components/material';
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
 import { loadObj } from 'toolkit/loaders/objLoader';
 import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
@@ -100,7 +103,7 @@ export function createSceneLoader({
           if (material.type === MaterialComponentTypeV1.MeshBasicMaterial) {
             entityManager.addComponent(
               uid,
-              createBasicMaterialComponent({ colour: material.colour }),
+              createMeshBasicMaterialComponent({ colour: material.colour }),
             );
           }
         }),

@@ -74,6 +74,23 @@ export interface BasicMaterialComponent extends BaseComponent {
   uniforms: UniformDictionary;
 }
 
-export type MaterialComponent = BasicMaterialComponent;
+export enum MaterialComponentType {
+  MeshBasic,
+}
+
+interface BaseMaterialComponent extends BaseComponent {
+  type: ComponentType.Material;
+  subtype: MaterialComponentType;
+}
+
+export interface MeshBasicMaterialComponent extends BaseMaterialComponent {
+  type: ComponentType.Material;
+  subtype: MaterialComponentType.MeshBasic;
+
+  shader?: number;
+  colour: vec3;
+}
+
+export type MaterialComponent = MeshBasicMaterialComponent;
 
 export type Component = TransformComponent | GeometryComponent | MaterialComponent;

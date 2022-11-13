@@ -1,4 +1,4 @@
-import type { UniformBuffer } from 'toolkit/rendering/buffers/uniformBuffer';
+import { UniformType, type UniformBuffer } from 'toolkit/rendering/buffers/uniformBuffer';
 import {
   cloneShader,
   createShader,
@@ -9,9 +9,18 @@ import {
 } from 'toolkit/rendering/shader';
 import { DefaultBuffers, type BufferManager } from './bufferManager';
 
+export enum DefaultShaders {
+  MeshBasic = 0,
+
+  Count,
+}
+
 export interface ShaderManager {
   get<T extends Shader>(id: number): T;
+
+  create(id: DefaultShaders): number;
   create(descriptor: ShaderDescriptor): number;
+
   clone(id: number, bindings: ShaderBindingDescriptor[]): number;
   destroy(): void;
 }
@@ -21,23 +30,38 @@ export function createShaderManager(
   { bufferManager }: { bufferManager: BufferManager },
 ): ShaderManager {
   let storage: GenericObject<Shader> = {};
-  let next = 0;
+  let next = DefaultShaders.Count;
+
+  function create(id: DefaultShaders): number;
+  function create(descriptor: ShaderDescriptor): number;
+  function create(param: DefaultShaders | ShaderDescriptor): number {
+    let descriptor: Maybe<ShaderDescriptor>;
+    if (typeof param === 'number') {
+      descriptor = getMeshBasicShaderDescriptor();
+    } else {
+      descriptor = param;
+    }
+
+    if ('bindings' in descriptor) {
+      const { bindings, uniformBuffers } = processBindings(descriptor.bindings, {
+        bufferManager,
+      });
+
+      storage[next] = createShader(next, device, descriptor, bindings, uniformBuffers);
+    }
+    return next++;
+  }
 
   return {
-    create(descriptor: ShaderDescriptor) {
-      if ('bindings' in descriptor) {
-        const { bindings, uniformBuffers } = processBindings(descriptor.bindings, {
-          bufferManager,
-        });
-
-        storage[next] = createShader(next, device, descriptor, bindings, uniformBuffers);
-      }
-      return next++;
-    },
+    create,
 
     get<T extends Shader>(id: number) {
       const shader = storage[id];
       if (!shader) {
+        if (id === DefaultShaders.MeshBasic) {
+          // storage[id] = c;
+        }
+
         throw new Error(`Unknown shader id: ${id}`);
       }
 
@@ -103,4 +127,66 @@ function processBindings(
   ];
 
   return { bindings: processed, uniformBuffers };
+}
+
+function getMeshBasicShaderDescriptor(): ShaderDescriptor {
+  const shaderSource = `
+struct UBO {
+  model: mat4x4<f32>,
+  colour: vec3<f32>,
+}
+
+struct Matrices {
+  view: mat4x4<f32>,
+  projection: mat4x4<f32>,
+}
+
+@group(0) @binding(0)
+var<uniform> ubo: UBO;
+@group(0) @binding(1)
+var<uniform> matrices: Matrices;
+
+struct VertexOutput {
+  @builtin(position) position: vec4<f32>,
+}
+
+@vertex
+fn vertex_main(@location(0) position: vec3<f32>) -> VertexOutput {
+  var output : VertexOutput;
+  output.position = matrices.projection * matrices.view * ubo.model * vec4<f32>(position, 1.0);
+  return output;
+}
+
+@fragment
+fn fragment_main() -> @location(0) vec4<f32> {
+  return vec4<f32>(ubo.colour, 1.0);
+}
+`;
+
+  return {
+    source: shaderSource,
+    vertex: {
+      entryPoint: 'vertex_main',
+    },
+    fragment: {
+      entryPoint: 'fragment_main',
+    },
+    bindings: [
+      {
+        type: ShaderBindingType.UniformBuffer,
+        descriptor: {
+          model: UniformType.Mat4,
+          colour: UniformType.Vec3,
+        },
+      },
+      {
+        type: ShaderBindingType.UniformBuffer,
+        resource: DefaultBuffers.ViewProjection,
+        descriptor: {
+          view: UniformType.Mat4,
+          projection: UniformType.Mat4,
+        },
+      },
+    ],
+  };
 }

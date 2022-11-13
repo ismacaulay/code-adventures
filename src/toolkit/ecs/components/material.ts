@@ -1,7 +1,12 @@
 import type { vec3 } from 'gl-matrix';
 import { UniformType } from 'toolkit/rendering/buffers/uniformBuffer';
 import { ShaderBindingType } from 'toolkit/rendering/shader';
-import { ComponentType, type BasicMaterialComponent } from 'types/ecs/component';
+import {
+  ComponentType,
+  MaterialComponentType,
+  type BasicMaterialComponent,
+  type MeshBasicMaterialComponent,
+} from 'types/ecs/component';
 import { DefaultBuffers } from '../bufferManager';
 
 const shaderSource = `
@@ -71,5 +76,18 @@ export function createBasicMaterialComponent({ colour }: { colour: vec3 }): Basi
     uniforms: {
       colour: colour.map((c) => c / 255.0),
     },
+  };
+}
+
+export function createMeshBasicMaterialComponent({
+  colour,
+}: {
+  colour: vec3;
+}): MeshBasicMaterialComponent {
+  return {
+    type: ComponentType.Material,
+    subtype: MaterialComponentType.MeshBasic,
+
+    colour,
   };
 }
