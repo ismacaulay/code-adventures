@@ -22,6 +22,7 @@ export interface TransformComponent extends BaseComponent {
   rotation: vec3;
   scale: vec3;
 
+  updateMatrix(): void;
   readonly matrix: mat4;
 }
 

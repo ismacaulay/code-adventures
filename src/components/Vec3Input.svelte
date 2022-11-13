@@ -1,14 +1,18 @@
 <script lang="ts">
+  import type { vec3 } from 'gl-matrix';
+
   export let label = '';
+  export let value: vec3;
+  export let labels: [string, string, string] = ['x', 'y', 'z'];
+  export let onChange: (v: vec3) => void = () => {};
 
-  export let xLabel = 'x';
-  export let xValue: number;
+  let xValue = value[0];
+  let yValue = value[1];
+  let zValue = value[2];
 
-  export let yLabel = 'y';
-  export let yValue: number;
-
-  export let zLabel = 'z';
-  export let zValue: number;
+  function handleValueChanged() {
+    onChange([xValue, yValue, zValue]);
+  }
 </script>
 
 <style>
@@ -38,12 +42,27 @@
 <div class="container">
   <span class="label">{label}:</span>
   <div class="inputContainer">
-    <span>{xLabel}:</span><input class="input" type="number" value={xValue} />
+    <span>{labels[0]}:</span><input
+      class="input"
+      type="number"
+      bind:value={xValue}
+      on:input={handleValueChanged}
+    />
   </div>
   <div class="inputContainer">
-    <span>{yLabel}:</span><input class="input" type="number" value={yValue} />
+    <span>{labels[1]}:</span><input
+      class="input"
+      type="number"
+      bind:value={yValue}
+      on:input={handleValueChanged}
+    />
   </div>
   <div class="inputContainer">
-    <span>{zLabel}:</span><input class="input" type="number" value={zValue} />
+    <span>{labels[2]}:</span><input
+      class="input"
+      type="number"
+      bind:value={zValue}
+      on:input={handleValueChanged}
+    />
   </div>
 </div>

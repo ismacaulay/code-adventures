@@ -35,6 +35,7 @@ export function createSceneLoader({
         throw new Error('Unkown scene version');
       }
 
+      // TODO: handle camera type
       const { target, position, up } = scene.camera;
       vec3.copy(camera.target, target);
       vec3.copy(camera.position, position);

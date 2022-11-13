@@ -1,3 +1,11 @@
+export async function loadObj(url: string) {
+  return fetch(url).then(async (resp) => {
+    return resp.text().then((data) => {
+      return process(data);
+    });
+  });
+}
+
 /*
  *   A WIP obj loader based on OBJLoader from threejs
  *
@@ -26,11 +34,12 @@ function process(text: string) {
     firstChar = line.charAt(0);
     if (firstChar === '#') continue;
 
+    // TODO: is it better to check chars over whole strings?
     const data = line.split(/\s+/);
-    if (firstChar === 'v') {
+    if (data[0] === 'v') {
       vertices.push(parseFloat(data[1]), parseFloat(data[2]), parseFloat(data[3]));
-    } else if (firstChar === 'f') {
-      faces.push(parseInt(data[1], 10), parseInt(data[2], 10), parseInt(data[3], 10));
+    } else if (data[0] === 'f') {
+      faces.push(parseFace(data[1]).face, parseFace(data[2]).face, parseFace(data[3]).face);
     }
   }
 
@@ -40,10 +49,12 @@ function process(text: string) {
   };
 }
 
-export async function loadObj(url: string) {
-  return fetch(url).then(async (resp) => {
-    return resp.text().then((data) => {
-      return process(data);
-    });
-  });
+function parseFace(face: string) {
+  const [f, t, n] = face.split('/');
+
+  return {
+    face: parseInt(f, 10) - 1,
+    uv: parseInt(t, 10) - 1,
+    normal: parseInt(n, 10) - 1,
+  };
 }

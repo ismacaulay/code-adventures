@@ -41,7 +41,6 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
   let draws: DrawCommand[] = [];
   let commands: WriteBufferCommand[] = [];
 
-  console.log(presentationSize);
   return {
     device,
 
@@ -158,7 +157,6 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
             });
           });
           bindGroupCache[shader.id] = groups;
-          console.log(shader.bindings);
         }
         groups.forEach((group: any, idx: number) => {
           passEncoder.setBindGroup(idx, group);

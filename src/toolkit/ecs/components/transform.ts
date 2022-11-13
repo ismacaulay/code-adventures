@@ -32,6 +32,8 @@ export function createTransformComponent({
     rotation,
     scale,
 
+    updateMatrix,
+
     get matrix() {
       return matrix;
     },

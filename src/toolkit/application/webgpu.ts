@@ -1,5 +1,7 @@
 import type { Camera } from 'toolkit/camera/camera';
+import { createOrbitControls } from 'toolkit/camera/orbitControls';
 import { createOrthographicCamera } from 'toolkit/camera/orthographic';
+import { createPerspectiveCamera } from 'toolkit/camera/perspective';
 import { createBufferManager, DefaultBuffers } from 'toolkit/ecs/bufferManager';
 import { createEntityManager } from 'toolkit/ecs/entityManager';
 import { createShaderManager } from 'toolkit/ecs/shaderManager';
@@ -38,17 +40,25 @@ export async function createWebGPUApplication(
   const height = canvas.clientHeight;
   const aspect = width / height;
 
-  const camera = createOrthographicCamera({
+  // const camera = createOrthographicCamera({
+  //   aspect,
+
+  //   left: -2.5,
+  //   right: 2.5,
+  //   top: 2.5,
+  //   bottom: -2.5,
+
+  //   znear: 0.1,
+  //   zfar: 1000,
+  // });
+
+  const camera = createPerspectiveCamera({
     aspect,
-
-    left: -2.5,
-    right: 2.5,
-    top: 2.5,
-    bottom: -2.5,
-
+    fov: 45,
     znear: 0.1,
     zfar: 1000,
   });
+  const controls = createOrbitControls(canvas, { camera });
 
   const renderer = await createWebGPURenderer(canvas);
 
@@ -124,6 +134,7 @@ export async function createWebGPUApplication(
   let frameId = -1;
   function render() {
     frameId = requestAnimationFrame(render);
+    controls.update(0);
 
     renderer.begin();
 
@@ -134,7 +145,6 @@ export async function createWebGPUApplication(
       projection: camera.projection,
     });
 
-    // console.log('vp:', matricesBuffer.data);
     renderer.submit({
       type: CommandType.WriteBuffer,
       src: matricesBuffer.data,
