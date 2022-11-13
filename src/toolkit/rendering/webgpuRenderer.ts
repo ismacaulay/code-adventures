@@ -55,6 +55,7 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
     },
 
     end() {
+      // handle resize if necessary
       if (canvas.clientWidth !== size[0] || canvas.clientHeight !== size[1]) {
         size = [canvas.clientWidth, canvas.clientHeight];
         presentationSize = [size[0] * devicePixelRatio, size[1] * devicePixelRatio];
@@ -73,7 +74,7 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
         colorAttachments: [
           {
             view: context.getCurrentTexture().createView(),
-            clearValue: [0, 0, 0, 1],
+            clearValue: [1, 1, 1, 1],
             loadOp: 'clear',
             storeOp: 'store',
           },
@@ -167,6 +168,7 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
           passEncoder.setVertexBuffer(idx, buf.buffer);
         });
 
+        // draw
         if (indices) {
           passEncoder.setIndexBuffer(indices.buffer, indices.format);
           passEncoder.drawIndexed(count, instances, 0, 0, 0);

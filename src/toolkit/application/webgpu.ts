@@ -60,6 +60,12 @@ export async function createWebGPUApplication(
   });
   const controls = createOrbitControls(canvas, { camera });
 
+  const resizer = new ResizeObserver(() => {
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+  });
+  resizer.observe(canvas);
+
   const renderer = await createWebGPURenderer(canvas);
 
   const entityManager = createEntityManager();
@@ -168,6 +174,8 @@ export async function createWebGPUApplication(
     destroy() {
       cancelAnimationFrame(frameId);
       frameId = -1;
+
+      resizer.unobserve(canvas);
     },
 
     camera,

@@ -66,7 +66,7 @@
     (async () => {
       app = await createWebGPUApplication(canvas);
       unsubscribers.push(app.sceneGraph.onChange(handleSceneGraphChanged));
-      await app.loadScene('/scenes/triangle.json');
+      await app.loadScene('/scenes/bunny.json');
 
       app.start();
     })();
