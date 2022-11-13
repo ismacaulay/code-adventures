@@ -8,12 +8,6 @@
     "up": [0, 1, 0]
   },
 
-  "root": [
-    {
-      "entity": "bunny"
-    }
-  ],
-
   "entities": {
     "bunny": {
       "transform": {
@@ -26,9 +20,15 @@
         "location": "/models/bunny.obj"
       },
       "material": {
-        "type": "MeshBasicMaterial",
+        "type": "MeshDiffuseMaterial",
         "colour": [252, 148, 3]
       }
     }
-  }
+  },
+
+  "root": [
+    {
+      "entity": "bunny"
+    }
+  ]
 }

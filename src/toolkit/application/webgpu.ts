@@ -51,6 +51,8 @@ export async function createWebGPUApplication(
   //   znear: 0.1,
   //   zfar: 1000,
   // });
+  // camera.zoom = 10;
+  // camera.updateProjectionMatrix();
 
   const camera = createPerspectiveCamera({
     aspect,
@@ -112,6 +114,8 @@ export async function createWebGPUApplication(
       if (material.shader === undefined) {
         if (material.subtype === MaterialComponentType.MeshBasic) {
           material.shader = shaderManager.create(DefaultShaders.MeshBasic);
+        } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
+          material.shader = shaderManager.create(DefaultShaders.MeshDiffuse);
         } else {
           throw new Error('Unknown MaterialComponentType');
         }
@@ -121,6 +125,8 @@ export async function createWebGPUApplication(
       shader.update({ model: transform.matrix });
 
       if (material.subtype === MaterialComponentType.MeshBasic) {
+        shader.update({ colour: material.colour.map((c) => c / 255.0) });
+      } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
         shader.update({ colour: material.colour.map((c) => c / 255.0) });
       }
       shader.buffers.forEach((buf) => {

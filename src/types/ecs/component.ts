@@ -76,6 +76,7 @@ export interface BasicMaterialComponent extends BaseComponent {
 
 export enum MaterialComponentType {
   MeshBasic,
+  MeshDiffuse,
 }
 
 interface BaseMaterialComponent extends BaseComponent {
@@ -84,13 +85,19 @@ interface BaseMaterialComponent extends BaseComponent {
 }
 
 export interface MeshBasicMaterialComponent extends BaseMaterialComponent {
-  type: ComponentType.Material;
   subtype: MaterialComponentType.MeshBasic;
 
   shader?: number;
   colour: vec3;
 }
 
-export type MaterialComponent = MeshBasicMaterialComponent;
+export interface MeshDiffuseMaterialComponent extends BaseMaterialComponent {
+  subtype: MaterialComponentType.MeshDiffuse;
+
+  shader?: number;
+  colour: vec3;
+}
+
+export type MaterialComponent = MeshBasicMaterialComponent | MeshDiffuseMaterialComponent;
 
 export type Component = TransformComponent | GeometryComponent | MaterialComponent;

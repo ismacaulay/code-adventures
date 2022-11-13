@@ -136,6 +136,7 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
 
             depthStencil: {
               depthWriteEnabled: true,
+              depthCompare: 'less',
               format: 'depth24plus',
             },
           });

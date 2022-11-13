@@ -4,7 +4,7 @@
   "camera": {
     "type": "orthographic",
     "target": [0, 0, 0],
-    "position": [0, 0, 10],
+    "position": [0, 0, 5],
     "up": [0, 1, 0]
   },
 
@@ -26,7 +26,7 @@
         "location": "/models/cube.obj"
       },
       "material": {
-        "type": "MeshBasicMaterial",
+        "type": "MeshDiffuseMaterial",
         "colour": [252, 148, 3]
       }
     }

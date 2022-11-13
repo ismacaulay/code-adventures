@@ -2,8 +2,8 @@ import { vec3 } from 'gl-matrix';
 import type { Camera } from 'toolkit/camera/camera';
 import { createMeshGeometryComponent } from 'toolkit/ecs/components/geometry';
 import {
-  createBasicMaterialComponent,
   createMeshBasicMaterialComponent,
+  createMeshDiffuseMaterialComponent,
 } from 'toolkit/ecs/components/material';
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
 import { loadObj } from 'toolkit/loaders/objLoader';
@@ -104,6 +104,11 @@ export function createSceneLoader({
             entityManager.addComponent(
               uid,
               createMeshBasicMaterialComponent({ colour: material.colour }),
+            );
+          } else if (material.type === MaterialComponentTypeV1.MeshDiffuseMaterial) {
+            entityManager.addComponent(
+              uid,
+              createMeshDiffuseMaterialComponent({ colour: material.colour }),
             );
           }
         }),
