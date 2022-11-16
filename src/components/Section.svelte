@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
   import PageList from './PageList.svelte';
 
-  export let title;
-  export let pages;
+  export let title: string;
+  export let pages: any;
 </script>
 
 <style>

@@ -4,6 +4,7 @@ import { createMeshGeometryComponent } from 'toolkit/ecs/components/geometry';
 import {
   createMeshBasicMaterialComponent,
   createMeshDiffuseMaterialComponent,
+  createRawShaderMaterialComponent,
 } from 'toolkit/ecs/components/material';
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
 import { loadObj } from 'toolkit/loaders/objLoader';
@@ -76,7 +77,7 @@ export function createSceneLoader({
               }),
             );
           } else if (geometry.type === GeometryComponentTypeV1.Mesh) {
-            const { vertices, triangles } = geometry;
+            const { vertices, triangles, attributes = [] } = geometry;
 
             const vertBuf = new Float64Array(vertices);
             const triBuf = new Uint32Array(triangles);
@@ -95,6 +96,17 @@ export function createSceneLoader({
                       },
                     ],
                   },
+                  ...attributes.map((attr, idx) => {
+                    return {
+                      array: new Float64Array(attr.array),
+                      attributes: [
+                        {
+                          format: attr.format,
+                          location: idx + 1,
+                        },
+                      ],
+                    };
+                  }),
                 ],
               }),
             );
@@ -110,6 +122,20 @@ export function createSceneLoader({
               uid,
               createMeshDiffuseMaterialComponent({ colour: material.colour }),
             );
+          } else if (material.type === MaterialComponentTypeV1.RawShaderMaterial) {
+            // TODO: handle multi source, and move this check into function
+            if ('source' in material) {
+              const source = await fetch(material.source).then((resp) => resp.text());
+              entityManager.addComponent(
+                uid,
+                createRawShaderMaterialComponent({
+                  source,
+                  vertex: { entryPoint: material.vertex.entryPoint },
+                  fragment: { entryPoint: material.fragment.entryPoint },
+                  uniforms: material.uniforms,
+                }),
+              );
+            }
           }
         }),
       );

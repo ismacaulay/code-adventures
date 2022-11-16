@@ -5,6 +5,7 @@
   import webgpu from './pages/webgpu/pages';
 
   let component: any;
+  let params: any;
   let base = '';
 
   router(`${base}/`, () => (component = Home));
@@ -12,7 +13,15 @@
   function addRoutes(pages: any) {
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i];
-      router(`${base}/${page.url}`, () => (component = page.component));
+
+      if (page.section) {
+        addRoutes(page.pages);
+      } else if (page.url) {
+        router(`${base}/${page.url}`, () => {
+          component = page.component;
+          params = page.params ?? {};
+        });
+      }
     }
   }
 
@@ -33,5 +42,5 @@
 </svelte:head>
 
 <div class="container">
-  <svelte:component this={component} />
+  <svelte:component this={component} {...params} />
 </div>

@@ -1,0 +1,49 @@
+{
+  "version": 1,
+
+  "camera": {
+    "type": "orthographic",
+    "target": [0, 0, 0],
+    "position": [0, 0, 5],
+    "up": [0, 1, 0]
+  },
+
+  "root": [
+    {
+      "entity": "triangle"
+    }
+  ],
+
+  "entities": {
+    "triangle": {
+      "transform": {
+        "position": [0, 0, 0],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "geometry": {
+        "type": "mesh",
+        "vertices": [-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, 0.0, 1.0, 0.0],
+        "triangles": [0, 1, 2],
+        "attributes": [
+          {
+            "array": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+            "format": "float32x3"
+          }
+        ]
+      },
+      "material": {
+        "type": "RawShaderMaterial",
+
+        "source": "/shaders/learnOpenGL/triangle.wgsl",
+        "vertex": {
+          "entryPoint": "vertex_main"
+        },
+        "fragment": {
+          "entryPoint": "fragment_main"
+        },
+        "uniforms": {}
+      }
+    }
+  }
+}

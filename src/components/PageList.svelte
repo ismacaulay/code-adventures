@@ -1,5 +1,5 @@
-<script>
-  export let pages;
+<script lang="ts">
+  export let pages: any;
 </script>
 
 <style>
@@ -22,5 +22,13 @@
 </style>
 
 {#each pages as page}
-  <a class="nav-link" href="/{page.url}">{page.title}</a>
+  {#if page.section}
+    <h3>{page.section}</h3>
+    {#if page.description}
+      <p>{page.description}</p>
+    {/if}
+    <svelte:self pages={page.pages} />
+  {:else if page.url}
+    <a class="nav-link" href="/{page.url}">{page.title}</a>
+  {/if}
 {/each}

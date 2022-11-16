@@ -116,18 +116,21 @@ export async function createWebGPUApplication(
           material.shader = shaderManager.create(DefaultShaders.MeshBasic);
         } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
           material.shader = shaderManager.create(DefaultShaders.MeshDiffuse);
+        } else if (material.subtype === MaterialComponentType.RawShader) {
+          material.shader = shaderManager.create(material.descriptor);
         } else {
           throw new Error('Unknown MaterialComponentType');
         }
       }
 
       const shader = shaderManager.get<Shader>(material.shader);
-      shader.update({ model: transform.matrix });
 
       if (material.subtype === MaterialComponentType.MeshBasic) {
-        shader.update({ colour: material.colour.map((c) => c / 255.0) });
+        shader.update({ model: transform.matrix, colour: material.colour.map((c) => c / 255.0) });
       } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
-        shader.update({ colour: material.colour.map((c) => c / 255.0) });
+        shader.update({ model: transform.matrix, colour: material.colour.map((c) => c / 255.0) });
+      } else if (material.subtype === MaterialComponentType.RawShader) {
+        shader.update(material.uniforms);
       }
       shader.buffers.forEach((buf) => {
         renderer.submit({
