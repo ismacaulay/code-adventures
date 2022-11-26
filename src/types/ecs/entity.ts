@@ -19,4 +19,6 @@ export interface EntityManager {
   addComponent(uid: string, component: Component): void;
 
   getComponent<T extends ComponentType>(uid: string, type: T): GetComponentReturnType<T>;
+
+  destroy(): void;
 }

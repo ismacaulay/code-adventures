@@ -3,6 +3,17 @@ function toUrl(path: string) {
   return `webgpu/${path}`;
 }
 
+function learnOpenGLPage(uid: string) {
+  return {
+    url: toUrl(`learnOpenGL/${uid}`),
+    title: uid,
+    component: WebGPUScene,
+    params: {
+      scene: `/scenes/learnOpenGL/${uid}.json`,
+    },
+  };
+}
+
 export default [
   {
     section: 'Learn OpenGL',
@@ -13,30 +24,10 @@ export default [
       of WebGPU.
     `,
     pages: [
-      {
-        url: toUrl('learnOpenGL/triangle'),
-        title: 'Triangle',
-        component: WebGPUScene,
-        params: {
-          scene: '/scenes/learnOpenGL/1-triangle.json',
-        },
-      },
-      {
-        url: toUrl('learnOpenGL/textures'),
-        title: 'Textures',
-        component: WebGPUScene,
-        params: {
-          scene: '/scenes/learnOpenGL/2-textures.json',
-        },
-      },
-      {
-        url: toUrl('learnOpenGL/instancing'),
-        title: 'Coordinates',
-        component: WebGPUScene,
-        params: {
-          scene: '/scenes/learnOpenGL/3-coordinates.json',
-        },
-      },
+      learnOpenGLPage('1-triangle'),
+      learnOpenGLPage('2-textures'),
+      learnOpenGLPage('3-coordinates'),
+      learnOpenGLPage('4-camera'),
     ],
   },
   {

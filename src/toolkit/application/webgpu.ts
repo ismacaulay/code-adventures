@@ -1,5 +1,6 @@
 import { mat4 } from 'gl-matrix';
-import type { Camera } from 'toolkit/camera/camera';
+import { CameraType, type Camera } from 'toolkit/camera/camera';
+import { createCameraController } from 'toolkit/camera/cameraController';
 import { createOrbitControls } from 'toolkit/camera/orbitControls';
 import { createOrthographicCamera } from 'toolkit/camera/orthographic';
 import { createPerspectiveCamera } from 'toolkit/camera/perspective';
@@ -38,36 +39,10 @@ export async function createWebGPUApplication(
   console.log('creating webgpu application');
 
   const sceneGraph = createSceneGraph();
-
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  const aspect = width / height;
-
-  // const camera = createOrthographicCamera({
-  //   aspect,
-
-  //   left: -2.5,
-  //   right: 2.5,
-  //   top: 2.5,
-  //   bottom: -2.5,
-
-  //   znear: 0.1,
-  //   zfar: 1000,
-  // });
-  // camera.zoom = 10;
-  // camera.updateProjectionMatrix();
-
-  const camera = createPerspectiveCamera({
-    aspect,
-    fov: 45,
-    znear: 0.1,
-    zfar: 1000,
-  });
-  const controls = createOrbitControls(canvas, { camera });
+  const cameraController = createCameraController(canvas);
 
   const resizer = new ResizeObserver(() => {
-    camera.aspect = canvas.clientWidth / canvas.clientHeight;
-    camera.updateProjectionMatrix();
+    cameraController.setAspect(canvas.clientWidth / canvas.clientHeight);
   });
   resizer.observe(canvas);
 
@@ -80,11 +55,11 @@ export async function createWebGPUApplication(
   const componentManager = createComponentManager();
 
   const sceneLoader = createSceneLoader({
+    cameraController,
     entityManager,
     textureManager,
     componentManager,
     sceneGraph,
-    camera,
   });
 
   function renderNode(node: SceneGraphNode) {
@@ -148,11 +123,11 @@ export async function createWebGPUApplication(
           }
 
           if ('view' in material.uniforms) {
-            mat4.copy(material.uniforms.view as mat4, camera.view);
+            mat4.copy(material.uniforms.view as mat4, cameraController.camera.view);
           }
 
           if ('projection' in material.uniforms) {
-            mat4.copy(material.uniforms.projection as mat4, camera.projection);
+            mat4.copy(material.uniforms.projection as mat4, cameraController.camera.projection);
           }
 
           shader.update(material.uniforms);
@@ -187,18 +162,26 @@ export async function createWebGPUApplication(
     children.forEach(renderNode);
   }
 
+  // TODO: implement a needs update system so that it only rerenders
+  // as necessary
   let frameId = -1;
+  let frameTime = 0;
+  let lastFrameTime = performance.now();
+  let dt = 0;
   function render() {
-    frameId = requestAnimationFrame(render);
-    controls.update(0);
+    frameTime = performance.now();
+    dt = (frameTime - lastFrameTime) / 1000;
+    lastFrameTime = frameTime;
+
+    cameraController.update(dt);
 
     renderer.begin();
 
     // TODO: only write if the buffer is dirty
     const matricesBuffer = bufferManager.get<UniformBuffer>(DefaultBuffers.ViewProjection);
     matricesBuffer.updateUniforms({
-      view: camera.view,
-      projection: camera.projection,
+      view: cameraController.camera.view,
+      projection: cameraController.camera.projection,
     });
 
     renderer.submit({
@@ -210,6 +193,8 @@ export async function createWebGPUApplication(
     sceneGraph.root.children.forEach(renderNode);
 
     renderer.end();
+
+    frameId = requestAnimationFrame(render);
   }
 
   return {
@@ -225,10 +210,18 @@ export async function createWebGPUApplication(
       cancelAnimationFrame(frameId);
       frameId = -1;
 
+      console.log('destroying webgpu application');
+      componentManager.destroy();
+      shaderManager.destroy();
+      textureManager.destroy();
+      bufferManager.destroy();
+      entityManager.destroy();
+      cameraController.destroy();
+
       resizer.unobserve(canvas);
     },
 
-    camera,
+    camera: cameraController.camera,
     sceneGraph,
     entityManager,
   };

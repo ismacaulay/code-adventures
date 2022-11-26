@@ -1,6 +1,7 @@
 import { vec3 } from 'gl-matrix';
 import { radians } from 'toolkit/math';
 import type { Camera } from './camera';
+import { CameraControlType, type CameraControls } from './controls';
 
 const W_KEY_BIT = 1 << 1;
 const A_KEY_BIT = 1 << 2;
@@ -15,7 +16,9 @@ function directionValue(keys: number, negBit: number, posBit: number) {
 
 export function createFreeControls(
   canvas: HTMLElement,
-  camera: Camera,
+  initial: {
+    camera: Camera;
+  },
   options: {
     mouseSensitivity: number;
     moveSensitivity: number;
@@ -23,8 +26,10 @@ export function createFreeControls(
     mouseSensitivity: 0.1,
     moveSensitivity: 2.5,
   },
-) {
+): CameraControls {
   const { mouseSensitivity, moveSensitivity } = options;
+
+  let camera: Camera = initial.camera;
 
   let keys = 0;
   let locked = false;
@@ -157,6 +162,13 @@ export function createFreeControls(
   const dir = vec3.create();
 
   return {
+    type: CameraControlType.Free,
+
+    set camera(value: Camera) {
+      camera = value;
+    },
+
+    // TODO: dt is always 0
     update(dt: number) {
       if (!locked) return;
 

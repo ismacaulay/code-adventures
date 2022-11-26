@@ -1,5 +1,6 @@
 import { quat, vec2, vec3 } from 'gl-matrix';
 import { type Camera, CameraType } from './camera';
+import { CameraControlType, type CameraControls } from './controls';
 
 enum State {
   None,
@@ -14,9 +15,12 @@ enum MouseButton {
   Middle = 1,
 }
 
-export function createOrbitControls(element: HTMLElement, initialState: { camera: Camera }) {
+export function createOrbitControls(
+  element: HTMLElement,
+  initial: { camera: Camera },
+): CameraControls {
   let state = State.None;
-  let camera: Camera = initialState.camera;
+  let camera: Camera = initial.camera;
 
   const viewRight = vec3.create();
   const viewUp = vec3.create();
@@ -210,6 +214,8 @@ export function createOrbitControls(element: HTMLElement, initialState: { camera
   }
 
   return {
+    type: CameraControlType.Orbit,
+
     update,
 
     set camera(value: Camera) {

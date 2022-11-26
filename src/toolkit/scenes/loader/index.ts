@@ -1,14 +1,12 @@
-import { vec3 } from 'gl-matrix';
-import type { Camera } from 'toolkit/camera/camera';
+import type { CameraController } from 'toolkit/camera/cameraController';
 import type { ComponentManager } from 'toolkit/ecs/componentManager';
-import { isGeometryComponent, isMaterialComponent } from 'toolkit/ecs/components';
+import { isGeometryComponent } from 'toolkit/ecs/components';
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
 import type { TextureManager } from 'toolkit/ecs/textureManager';
 import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
 import type { Component } from 'types/ecs/component';
 import type { EntityManager } from 'types/ecs/entity';
 import type { SceneGraph, SceneGraphNode } from 'types/sceneGraph';
-import type { MaterialComponentV1 } from 'types/scenes/v1/material';
 import type { SceneV1 } from 'types/scenes/v1/scene';
 import type { SceneGraphDescriptorV1 } from 'types/scenes/v1/sceneGraph';
 import { isGeometryComponentV1, isMaterialComponentV1, type ComponentV1 } from '../component';
@@ -24,30 +22,32 @@ export function createSceneLoader({
   textureManager,
   componentManager,
   sceneGraph,
-  camera,
+  cameraController,
 }: {
   entityManager: EntityManager;
   textureManager: TextureManager;
   componentManager: ComponentManager;
   sceneGraph: SceneGraph;
-  camera: Camera;
+  cameraController: CameraController;
 }) {
   return {
     async load(url: string) {
       const scene = await fetch(url).then((r) => r.json());
+      console.log(`loaded scene: ${url}`);
       console.log(scene);
 
       if (!isSceneV1(scene)) {
         throw new Error('Unkown scene version');
       }
 
-      // TODO: handle camera type
-      const { target, position, up } = scene.camera;
-      vec3.copy(camera.target, target);
-      vec3.copy(camera.position, position);
-      vec3.copy(camera.up, up);
-      camera.updateViewMatrix();
-      camera.updateProjectionMatrix();
+      const { type, target, position, up, controls } = scene.camera;
+      cameraController.setCameraType(type);
+      if (controls) {
+        cameraController.setControlType(controls);
+      }
+      cameraController.setTarget(target);
+      cameraController.setPosition(position);
+      cameraController.setUp(up);
 
       if (scene.components) {
         await Promise.all(

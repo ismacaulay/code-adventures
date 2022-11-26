@@ -2,7 +2,7 @@ import type { Component, ComponentType } from 'types/ecs/component';
 import type { EntityManager } from 'types/ecs/entity';
 
 export function createEntityManager(): EntityManager {
-  const entities = new Map<string, Map<ComponentType, Component>>();
+  let entities = new Map<string, Map<ComponentType, Component>>();
 
   return {
     add(uid: string) {
@@ -29,6 +29,10 @@ export function createEntityManager(): EntityManager {
       }
 
       return components.get(type) as Maybe<any>;
+    },
+
+    destroy() {
+      entities.clear();
     },
   };
 }
