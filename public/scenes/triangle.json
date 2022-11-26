@@ -27,7 +27,7 @@
         "triangles": [0, 1, 2]
       },
       "material": {
-        "type": "MeshBasicMaterial",
+        "type": "basic",
         "colour": [252, 148, 3]
       }
     }

@@ -13,11 +13,10 @@
     onSelected(selected);
   }
 
+  // TODO: allow arrow key input
   function handleClick(e: Event) {
     e.stopPropagation();
     e.preventDefault();
-
-    /* handleSelected(''); */
   }
 </script>
 

@@ -1,3 +1,4 @@
+import type { ComponentV1 } from 'toolkit/scenes/component';
 import type { CameraV1 } from './camera';
 import type { EntityV1 } from './entity';
 import type { SceneGraphV1 } from './sceneGraph';
@@ -13,5 +14,8 @@ export interface SceneV1 extends BaseScene {
   root: SceneGraphV1;
   entities: {
     [key: string]: EntityV1;
+  };
+  components?: {
+    [key: string]: ComponentV1;
   };
 }

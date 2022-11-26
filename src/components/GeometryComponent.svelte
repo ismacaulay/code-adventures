@@ -14,11 +14,9 @@
 
 <Component title="Geometry">
   <div class="container">
-    {#if component.indices}
-      <span>
-        Triangles: {component.indices.array.length}
-      </span>
-    {/if}
+    <span>
+      Triangles: {component.count}
+    </span>
 
     <span>
       Buffers: {component.buffers.length}

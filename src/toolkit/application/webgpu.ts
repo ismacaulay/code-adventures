@@ -1,10 +1,13 @@
+import { mat4 } from 'gl-matrix';
 import type { Camera } from 'toolkit/camera/camera';
 import { createOrbitControls } from 'toolkit/camera/orbitControls';
 import { createOrthographicCamera } from 'toolkit/camera/orthographic';
 import { createPerspectiveCamera } from 'toolkit/camera/perspective';
 import { createBufferManager, DefaultBuffers } from 'toolkit/ecs/bufferManager';
+import { createComponentManager } from 'toolkit/ecs/componentManager';
 import { createEntityManager } from 'toolkit/ecs/entityManager';
 import { createShaderManager, DefaultShaders } from 'toolkit/ecs/shaderManager';
+import { createTextureManager } from 'toolkit/ecs/textureManager';
 import type { IndexBuffer } from 'toolkit/rendering/buffers/indexBuffer';
 import type { UniformBuffer } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { VertexBuffer } from 'toolkit/rendering/buffers/vertexBuffer';
@@ -72,8 +75,17 @@ export async function createWebGPUApplication(
 
   const entityManager = createEntityManager();
   const bufferManager = createBufferManager(renderer.device);
-  const shaderManager = createShaderManager(renderer.device, { bufferManager });
-  const sceneLoader = createSceneLoader({ entityManager, sceneGraph, camera });
+  const textureManager = createTextureManager(renderer.device);
+  const shaderManager = createShaderManager(renderer.device, { bufferManager, textureManager });
+  const componentManager = createComponentManager();
+
+  const sceneLoader = createSceneLoader({
+    entityManager,
+    textureManager,
+    componentManager,
+    sceneGraph,
+    camera,
+  });
 
   function renderNode(node: SceneGraphNode) {
     const { uid, children } = node;
@@ -130,13 +142,35 @@ export async function createWebGPUApplication(
       } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
         shader.update({ model: transform.matrix, colour: material.colour.map((c) => c / 255.0) });
       } else if (material.subtype === MaterialComponentType.RawShader) {
-        shader.update(material.uniforms);
+        if (material.uniforms) {
+          if ('model' in material.uniforms) {
+            mat4.copy(material.uniforms.model as mat4, transform.matrix);
+          }
+
+          if ('view' in material.uniforms) {
+            mat4.copy(material.uniforms.view as mat4, camera.view);
+          }
+
+          if ('projection' in material.uniforms) {
+            mat4.copy(material.uniforms.projection as mat4, camera.projection);
+          }
+
+          shader.update(material.uniforms);
+        }
       }
       shader.buffers.forEach((buf) => {
         renderer.submit({
           type: CommandType.WriteBuffer,
           src: buf.data,
           dst: buf.buffer,
+        });
+      });
+
+      shader.textures.forEach((texture) => {
+        renderer.submit({
+          type: CommandType.CopyToTexture,
+          src: texture.data,
+          dst: texture.texture,
         });
       });
 

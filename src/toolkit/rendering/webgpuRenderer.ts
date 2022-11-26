@@ -1,4 +1,9 @@
-import { CommandType, type DrawCommand, type WriteBufferCommand } from './commands';
+import {
+  CommandType,
+  type CopyToTextureCommand,
+  type DrawCommand,
+  type WriteBufferCommand,
+} from './commands';
 
 export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
   const gpu = navigator.gpu;
@@ -39,17 +44,19 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
   const bindGroupCache: GenericObject<any> = {};
 
   let draws: DrawCommand[] = [];
-  let commands: WriteBufferCommand[] = [];
+  let commands: (WriteBufferCommand | CopyToTextureCommand)[] = [];
 
   return {
     device,
 
     begin() {},
 
-    submit(command: DrawCommand | WriteBufferCommand) {
+    submit(command: DrawCommand | WriteBufferCommand | CopyToTextureCommand) {
       if (command.type === CommandType.Draw) {
         draws.push(command);
       } else if (command.type === CommandType.WriteBuffer) {
+        commands.push(command);
+      } else if (command.type === CommandType.CopyToTexture) {
         commands.push(command);
       }
     },
@@ -100,6 +107,31 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
             src = new Float32Array(src);
           }
           device.queue.writeBuffer(dst, 0, src.buffer, src.byteOffset, src.byteLength);
+        } else if (command.type === CommandType.CopyToTexture) {
+          let { dst, src } = command;
+
+          if (src instanceof ImageBitmap) {
+            device.queue.copyExternalImageToTexture({ source: src }, { texture: dst }, [
+              src.width,
+              src.height,
+            ]);
+          } else {
+            const {
+              buffer,
+              shape: [width, height],
+            } = src;
+            device.queue.writeTexture(
+              { texture: dst },
+              buffer,
+              {
+                bytesPerRow: width * 4,
+              },
+              {
+                width,
+                height,
+              },
+            );
+          }
         }
       }
       commands = [];

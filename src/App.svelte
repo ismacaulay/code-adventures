@@ -8,7 +8,10 @@
   let params: any;
   let base = '';
 
-  router(`${base}/`, () => (component = Home));
+  router(`${base}/`, () => {
+    component = Home;
+    params = {};
+  });
 
   function addRoutes(pages: any) {
     for (let i = 0; i < pages.length; i++) {

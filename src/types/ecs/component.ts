@@ -1,4 +1,5 @@
 import type { mat4, vec3 } from 'gl-matrix';
+import type { Rotation } from 'toolkit/math/rotation';
 import type { UniformDictionary } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { ShaderDescriptor } from 'toolkit/rendering/shader';
 
@@ -19,7 +20,7 @@ export interface TransformComponent extends BaseComponent {
   type: ComponentType.Transform;
 
   position: vec3;
-  rotation: vec3;
+  rotation: Rotation;
   scale: vec3;
 
   updateMatrix(): void;
@@ -104,7 +105,7 @@ export interface RawShaderMaterialComponent extends BaseMaterialComponent {
 
   shader?: number;
   descriptor: ShaderDescriptor;
-  uniforms: UniformDictionary;
+  uniforms?: UniformDictionary;
 }
 
 export type MaterialComponent =

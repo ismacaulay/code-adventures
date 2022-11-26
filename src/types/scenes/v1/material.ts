@@ -1,10 +1,11 @@
 import type { vec3 } from 'gl-matrix';
-import type { UniformDictionary } from 'toolkit/rendering/buffers/uniformBuffer';
+import type { UniformType, UniformValue } from 'toolkit/rendering/buffers/uniformBuffer';
+import type { TextureV1 } from 'toolkit/rendering/textures';
 
 export enum MaterialComponentTypeV1 {
-  MeshBasicMaterial = 'MeshBasicMaterial',
-  MeshDiffuseMaterial = 'MeshDiffuseMaterial',
-  RawShaderMaterial = 'RawShaderMaterial',
+  MeshBasicMaterial = 'basic',
+  MeshDiffuseMaterial = 'diffuse',
+  RawShaderMaterial = 'shader',
 }
 
 interface BaseMaterialComponentV1 {
@@ -21,10 +22,15 @@ export interface MeshDiffuseMaterialV1 extends BaseMaterialComponentV1 {
   colour: vec3;
 }
 
+interface UniformDictionaryV1 {
+  [key: string]: UniformType; //| UniformValue | UniformDictionaryV1;
+}
+
 interface BaseRawShaderMaterialV1 extends BaseMaterialComponentV1 {
   type: MaterialComponentTypeV1.RawShaderMaterial;
 
-  uniforms: UniformDictionary;
+  uniforms: UniformDictionaryV1;
+  textures: TextureV1[];
 }
 
 export interface SingleSourceRawShaderMaterialV1 extends BaseRawShaderMaterialV1 {

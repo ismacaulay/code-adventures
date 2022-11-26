@@ -1,3 +1,4 @@
+import type { Texture } from 'toolkit/ecs/textureManager';
 import type {
   UniformBuffer,
   UniformBufferDescriptor,
@@ -10,7 +11,18 @@ interface BufferBindGroupEntry {
   };
 }
 
-type ShaderBindGroupEntry = BufferBindGroupEntry;
+interface SamplerBindGroupEntry {
+  resource: GPUSampler;
+}
+
+interface TextureBindGroupEntry {
+  resource: GPUTextureView;
+}
+
+export type ShaderBindGroupEntry =
+  | BufferBindGroupEntry
+  | SamplerBindGroupEntry
+  | TextureBindGroupEntry;
 
 export interface ShaderBindGroupDescriptor {
   entries: ShaderBindGroupEntry[];
@@ -26,12 +38,14 @@ export interface Shader extends BaseShader {
 
   bindings: ShaderBindGroupDescriptor[];
   buffers: UniformBuffer[];
+  textures: Texture[];
 
   update(uniforms: UniformDictionary): void;
 }
 
 export enum ShaderBindingType {
   UniformBuffer,
+  Texture2D,
 }
 
 interface BaseShaderBindingDescriptor {
@@ -45,7 +59,11 @@ export interface UniformBufferBindingDescriptor extends BaseShaderBindingDescrip
   values?: UniformDictionary;
 }
 
-export type ShaderBindingDescriptor = UniformBufferBindingDescriptor;
+export interface Texture2DBindingDescriptor extends BaseShaderBindingDescriptor {
+  type: ShaderBindingType.Texture2D;
+}
+
+export type ShaderBindingDescriptor = UniformBufferBindingDescriptor | Texture2DBindingDescriptor;
 
 interface BaseShaderDescriptor {
   id?: number;
@@ -81,6 +99,7 @@ export function createShader(
   descriptor: ShaderDescriptor,
   bindings: ShaderBindGroupDescriptor[],
   buffers: UniformBuffer[],
+  textures: Texture[],
 ): Shader {
   let vertexModule: GPUShaderModule;
   let fragmentModule: GPUShaderModule;
@@ -113,17 +132,18 @@ export function createShader(
     entryPoint: descriptor.fragment.entryPoint,
   };
 
-  return buildShader({ id, vertex, fragment, bindings, buffers });
+  return buildShader({ id, vertex, fragment, bindings, buffers, textures });
 }
 
 export function cloneShader(
   shader: Shader,
   bindings: ShaderBindGroupDescriptor[],
   buffers: UniformBuffer[],
+  textures: Texture[],
 ): Shader {
   const { id, vertex, fragment } = shader;
 
-  return buildShader({ id, vertex, fragment, bindings, buffers });
+  return buildShader({ id, vertex, fragment, bindings, buffers, textures });
 }
 
 function buildShader({
@@ -132,12 +152,14 @@ function buildShader({
   fragment,
   bindings,
   buffers,
+  textures,
 }: {
   id: number;
   vertex: { module: GPUShaderModule; entryPoint: string };
   fragment: { module: GPUShaderModule; entryPoint: string };
   bindings: ShaderBindGroupDescriptor[];
   buffers: UniformBuffer[];
+  textures: Texture[];
 }): Shader {
   return {
     id,
@@ -145,6 +167,7 @@ function buildShader({
     fragment,
     bindings,
     buffers,
+    textures,
 
     update(uniforms: UniformDictionary) {
       updateBuffers(buffers, uniforms);

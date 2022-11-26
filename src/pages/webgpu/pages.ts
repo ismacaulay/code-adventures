@@ -6,13 +6,19 @@ function toUrl(path: string) {
 export default [
   {
     section: 'Learn OpenGL',
+    description: `
+      Implementation of the concepts taught by
+      <a href="https://www.learnopengl.com">Learn OpenGL</a>
+      as they provide a nice order to learn the basic concepts
+      of WebGPU.
+    `,
     pages: [
       {
         url: toUrl('learnOpenGL/triangle'),
         title: 'Triangle',
         component: WebGPUScene,
         params: {
-          scene: '/scenes/learnOpenGL/triangle.json',
+          scene: '/scenes/learnOpenGL/1-triangle.json',
         },
       },
       {
@@ -20,7 +26,15 @@ export default [
         title: 'Textures',
         component: WebGPUScene,
         params: {
-          scene: '/scenes/learnOpenGL/textures.json',
+          scene: '/scenes/learnOpenGL/2-textures.json',
+        },
+      },
+      {
+        url: toUrl('learnOpenGL/instancing'),
+        title: 'Coordinates',
+        component: WebGPUScene,
+        params: {
+          scene: '/scenes/learnOpenGL/3-coordinates.json',
         },
       },
     ],

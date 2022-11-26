@@ -1,6 +1,14 @@
 import type { vec3 } from 'gl-matrix';
-import type { UniformDictionary } from 'toolkit/rendering/buffers/uniformBuffer';
-import type { ShaderDescriptor } from 'toolkit/rendering/shader';
+import type {
+  UniformBufferDescriptor,
+  UniformDictionary,
+} from 'toolkit/rendering/buffers/uniformBuffer';
+import {
+  ShaderBindingType,
+  type ShaderBindingDescriptor,
+  type ShaderDescriptor,
+  type Texture2DBindingDescriptor,
+} from 'toolkit/rendering/shader';
 import {
   ComponentType,
   MaterialComponentType,
@@ -39,12 +47,14 @@ export function createRawShaderMaterialComponent(params: {
   source: string;
   vertex: { entryPoint: string };
   fragment: { entryPoint: string };
-  uniforms: UniformDictionary;
+  uniforms?: { descriptor: UniformBufferDescriptor; values: UniformDictionary };
+  textures?: number[];
 }): RawShaderMaterialComponent;
 export function createRawShaderMaterialComponent(params: {
   vertex: { source: string; entryPoint: string };
   fragment: { source: string; entryPoint: string };
-  uniforms: UniformDictionary;
+  uniforms?: { descriptor: UniformBufferDescriptor; values: UniformDictionary };
+  textures?: number[];
 }): RawShaderMaterialComponent;
 export function createRawShaderMaterialComponent(
   params:
@@ -52,29 +62,51 @@ export function createRawShaderMaterialComponent(
         source: string;
         vertex: { entryPoint: string };
         fragment: { entryPoint: string };
-        uniforms: UniformDictionary;
+        uniforms?: { descriptor: UniformBufferDescriptor; values: UniformDictionary };
+        textures?: number[];
       }
     | {
         vertex: { source: string; entryPoint: string };
         fragment: { source: string; entryPoint: string };
-        uniforms: UniformDictionary;
+        uniforms?: { descriptor: UniformBufferDescriptor; values: UniformDictionary };
+        textures?: number[];
       },
 ): RawShaderMaterialComponent {
   let descriptor: ShaderDescriptor;
 
-  // TODO: Convert uniforms to descriptor
+  const bindings: ShaderBindingDescriptor[] = [];
+
+  if (params.uniforms) {
+    bindings.push({
+      type: ShaderBindingType.UniformBuffer,
+      descriptor: params.uniforms.descriptor,
+      values: params.uniforms.values,
+    });
+  }
+
+  if (params.textures) {
+    bindings.push(
+      ...params.textures.map((texture): Texture2DBindingDescriptor => {
+        return {
+          type: ShaderBindingType.Texture2D,
+          resource: texture,
+        };
+      }),
+    );
+  }
+
   if ('source' in params) {
     descriptor = {
       source: params.source,
       vertex: params.vertex,
       fragment: params.fragment,
-      bindings: [],
+      bindings,
     };
   } else {
     descriptor = {
       vertex: params.vertex,
       fragment: params.fragment,
-      bindings: [],
+      bindings,
     };
   }
 
@@ -82,6 +114,6 @@ export function createRawShaderMaterialComponent(
     type: ComponentType.Material,
     subtype: MaterialComponentType.RawShader,
     descriptor,
-    uniforms: params.uniforms,
+    uniforms: params.uniforms?.values,
   };
 }

@@ -33,7 +33,7 @@
         ]
       },
       "material": {
-        "type": "RawShaderMaterial",
+        "type": "shader",
 
         "source": "/shaders/learnOpenGL/triangle.wgsl",
         "vertex": {

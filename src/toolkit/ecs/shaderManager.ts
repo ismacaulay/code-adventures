@@ -4,10 +4,12 @@ import {
   createShader,
   ShaderBindingType,
   type Shader,
+  type ShaderBindGroupEntry,
   type ShaderBindingDescriptor,
   type ShaderDescriptor,
 } from 'toolkit/rendering/shader';
 import { DefaultBuffers, type BufferManager } from './bufferManager';
+import type { Texture, TextureManager } from './textureManager';
 
 export enum DefaultShaders {
   MeshBasic = 0,
@@ -28,7 +30,10 @@ export interface ShaderManager {
 
 export function createShaderManager(
   device: GPUDevice,
-  { bufferManager }: { bufferManager: BufferManager },
+  {
+    bufferManager,
+    textureManager,
+  }: { bufferManager: BufferManager; textureManager: TextureManager },
 ): ShaderManager {
   let storage: GenericObject<Shader> = {};
   let next = DefaultShaders.Count;
@@ -50,11 +55,12 @@ export function createShaderManager(
     }
 
     if ('bindings' in descriptor) {
-      const { bindings, uniformBuffers } = processBindings(descriptor.bindings, {
+      const { bindings, uniformBuffers, textures } = processBindings(descriptor.bindings, {
         bufferManager,
+        textureManager,
       });
 
-      storage[next] = createShader(next, device, descriptor, bindings, uniformBuffers);
+      storage[next] = createShader(next, device, descriptor, bindings, uniformBuffers, textures);
     }
     return next++;
   }
@@ -81,11 +87,12 @@ export function createShaderManager(
         throw new Error(`Unknown shader: ${id}`);
       }
 
-      const { bindings, uniformBuffers } = processBindings(bindingDescriptors, {
+      const { bindings, uniformBuffers, textures } = processBindings(bindingDescriptors, {
         bufferManager,
+        textureManager,
       });
 
-      storage[next] = cloneShader(shader, bindings, uniformBuffers);
+      storage[next] = cloneShader(shader, bindings, uniformBuffers, textures);
       storage[next].id = next;
       return next++;
     },
@@ -98,42 +105,53 @@ export function createShaderManager(
 
 function processBindings(
   bindings: ShaderBindingDescriptor[],
-  { bufferManager }: { bufferManager: BufferManager },
+  {
+    bufferManager,
+    textureManager,
+  }: { bufferManager: BufferManager; textureManager: TextureManager },
 ) {
-  if (bindings.length === 0) {
-    return { bindings: [], uniformBuffers: [] };
+  const entries: ShaderBindGroupEntry[] = [];
+  const uniformBuffers: UniformBuffer[] = [];
+  const textures: Texture[] = [];
+
+  for (let i = 0; i < bindings.length; ++i) {
+    const binding = bindings[i];
+    if (binding.type === ShaderBindingType.UniformBuffer) {
+      if (binding.resource === undefined) {
+        binding.resource = bufferManager.createUniformBuffer(binding.descriptor, binding.values);
+      }
+
+      const buffer = bufferManager.get<UniformBuffer>(binding.resource);
+      if (binding.resource >= DefaultBuffers.Count) {
+        uniformBuffers.push(buffer);
+      }
+
+      entries.push({ resource: { buffer: buffer.buffer } });
+    } else if (binding.type === ShaderBindingType.Texture2D) {
+      if (binding.resource === undefined) {
+        throw new Error(`[ShaderManager] texture resource is undefined`);
+      }
+
+      const { texture, sampler } = textureManager.get(binding.resource);
+      textures.push(texture);
+      entries.push(
+        {
+          resource: sampler,
+        },
+        {
+          resource: texture.texture.createView(),
+        },
+      );
+    } else {
+      throw new Error(`Unknown binding type: ${(binding as any).type}`);
+    }
   }
 
-  const uniformBuffers: UniformBuffer[] = [];
-  const processed = [
-    {
-      entries: bindings.map((binding) => {
-        if (binding.resource === undefined) {
-          if (binding.type === ShaderBindingType.UniformBuffer) {
-            binding.resource = bufferManager.createUniformBuffer(
-              binding.descriptor,
-              binding.values,
-            );
-          } else {
-            throw new Error(`Unknown binding type: ${binding.type}`);
-          }
-        }
-
-        const buffer = bufferManager.get<UniformBuffer>(binding.resource);
-        // only include non default buffers
-        if (binding.resource >= DefaultBuffers.Count) {
-          uniformBuffers.push(buffer);
-        }
-        return {
-          resource: {
-            buffer: buffer.buffer,
-          },
-        };
-      }),
-    },
-  ];
-
-  return { bindings: processed, uniformBuffers };
+  return {
+    bindings: [{ entries }],
+    uniformBuffers,
+    textures,
+  };
 }
 
 function getMeshBasicShaderDescriptor(): ShaderDescriptor {

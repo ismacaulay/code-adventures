@@ -11,6 +11,6 @@
 </style>
 
 <div class="container">
-  <ComputationalGeometry />
   <WebGPU />
+  <ComputationalGeometry />
 </div>

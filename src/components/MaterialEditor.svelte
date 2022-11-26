@@ -1,7 +1,7 @@
 <script lang="ts">
   import { vec3 } from 'gl-matrix';
 
-  import type { MaterialComponent } from 'types/ecs/component';
+  import { MaterialComponentType, type MaterialComponent } from 'types/ecs/component';
   import Component from './Component.svelte';
 
   export let component: MaterialComponent;
@@ -22,14 +22,22 @@
       : undefined;
   }
 
-  let colour = rgbToHex(component.colour);
-
-  function handleColourChanged() {
-    const rgb = hexToRgb(colour);
-    if (rgb) {
-      vec3.copy(component.colour, rgb);
-    }
+  let colour: string;
+  let colourInputHandler: () => void;
+  if (
+    component.subtype === MaterialComponentType.MeshBasic ||
+    component.subtype === MaterialComponentType.MeshDiffuse
+  ) {
+    colour = rgbToHex(component.colour);
+    colourInputHandler = function handleColourChanged() {
+      const rgb = hexToRgb(colour);
+      if (rgb) {
+        vec3.copy((component as any).colour, rgb);
+      }
+    };
   }
+
+  // TODO: display shader path for RawShaderMaterial
 </script>
 
 <style>
@@ -46,7 +54,9 @@
 
 <Component title="Material">
   <div class="inputContainer">
-    <span class="label">Colour:</span>
-    <input type="color" bind:value={colour} on:input={handleColourChanged} />
+    {#if colour}
+      <span class="label">Colour:</span>
+      <input type="color" bind:value={colour} on:input={colourInputHandler} />
+    {/if}
   </div>
 </Component>

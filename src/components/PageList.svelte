@@ -25,7 +25,7 @@
   {#if page.section}
     <h3>{page.section}</h3>
     {#if page.description}
-      <p>{page.description}</p>
+      <p>{@html page.description}</p>
     {/if}
     <svelte:self pages={page.pages} />
   {:else if page.url}

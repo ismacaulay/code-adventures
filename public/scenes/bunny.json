@@ -20,7 +20,7 @@
         "location": "/models/bunny.obj"
       },
       "material": {
-        "type": "MeshDiffuseMaterial",
+        "type": "diffuse",
         "colour": [252, 148, 3]
       }
     }

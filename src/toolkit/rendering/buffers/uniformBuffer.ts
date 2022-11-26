@@ -2,20 +2,20 @@ import { BufferType, type BaseBuffer } from './base';
 import { createBuffer } from './common';
 
 export enum UniformType {
-  Bool,
-  Scalar,
-  Vec2,
-  Vec3,
-  Vec4,
-  Mat2,
-  Mat2x3,
-  Mat2x4,
-  Mat3x2,
-  Mat3,
-  Mat3x4,
-  Mat4x2,
-  Mat4x3,
-  Mat4,
+  Bool = 'bool',
+  Scalar = 'scalar',
+  Vec2 = 'vec2',
+  Vec3 = 'vec3',
+  Vec4 = 'vec4',
+  Mat2 = 'mat2',
+  Mat2x3 = 'mat2x3',
+  Mat2x4 = 'mat2x4',
+  Mat3x2 = 'mat3x2',
+  Mat3 = 'mat3',
+  Mat3x4 = 'mat3x4',
+  Mat4x2 = 'mat4x2',
+  Mat4x3 = 'mat4x3',
+  Mat4 = 'mat4',
 }
 
 export interface UniformBufferDescriptor {

@@ -1,8 +1,10 @@
 <script lang="ts">
   import { vec3 } from 'gl-matrix';
+  import { isAxisRotation } from 'toolkit/math/rotation';
 
   import type { TransformComponent } from 'types/ecs/component';
   import Component from './Component.svelte';
+  import FloatInput from './FloatInput.svelte';
   import Vec3Input from './Vec3Input.svelte';
 
   export let component: TransformComponent;
@@ -24,12 +26,32 @@
 </script>
 
 <style>
+  .rotationContainer {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rotationInputContainer {
+    display: flex;
+    flex-direction: column;
+  }
 </style>
 
 <Component title="Transform">
   <div>
     <Vec3Input label="Position" value={component.position} onChange={handlePositionChanged} />
-    <Vec3Input label="Rotation" value={component.rotation} onChange={handleRotationChanged} />
+    {#if isAxisRotation(component.rotation)}
+      <!-- TODO: Make a nicer rotation input -->
+      <div class="rotationContainer">
+        <span>Rotation:</span>
+        <div class="rotationInputContainer">
+          <Vec3Input label="Axis" value={component.rotation.axis} />
+          <FloatInput label="Angle" value={component.rotation.angle} />
+        </div>
+      </div>
+    {:else}
+      <Vec3Input label="Rotation" value={component.rotation} onChange={handleRotationChanged} />
+    {/if}
     <Vec3Input label="Scale" value={component.scale} onChange={handleScaleChanged} />
   </div>
 </Component>

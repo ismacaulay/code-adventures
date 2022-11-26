@@ -4,6 +4,6 @@ import type { TransformV1 } from './transform';
 
 export interface EntityV1 {
   transform: TransformV1;
-  geometry: GeometryComponentV1;
-  material: MaterialComponentV1;
+  geometry: GeometryComponentV1 | string;
+  material: MaterialComponentV1 | string;
 }

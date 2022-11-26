@@ -1,14 +1,15 @@
-import { mat4, type vec3, glMatrix } from 'gl-matrix';
+import { mat4, vec3, glMatrix } from 'gl-matrix';
 import { ComponentType } from 'types/ecs/component';
 import type { TransformComponent } from 'types/ecs/component';
+import { isAxisRotation, type Rotation } from 'toolkit/math/rotation';
 
 export function createTransformComponent({
-  position,
-  rotation,
-  scale,
+  position = [0, 0, 0],
+  rotation = [0, 0, 0],
+  scale = [1, 1, 1],
 }: {
   position: vec3;
-  rotation: vec3;
+  rotation: Rotation;
   scale: vec3;
 }): TransformComponent {
   let matrix = mat4.create();
@@ -16,11 +17,15 @@ export function createTransformComponent({
   function updateMatrix() {
     mat4.identity(matrix);
     mat4.translate(matrix, matrix, position);
-    // mat4.rotate(matrix, matrix, rotation.angle, rotation.axis);
-    // THIS MIGHT BE WRONG!
-    mat4.rotateX(matrix, matrix, glMatrix.toRadian(rotation[0]));
-    mat4.rotateY(matrix, matrix, glMatrix.toRadian(rotation[1]));
-    mat4.rotateZ(matrix, matrix, glMatrix.toRadian(rotation[2]));
+
+    if (isAxisRotation(rotation)) {
+      mat4.rotate(matrix, matrix, rotation.angle, rotation.axis);
+    } else {
+      // THIS MIGHT BE WRONG!
+      mat4.rotateX(matrix, matrix, glMatrix.toRadian(rotation[0]));
+      mat4.rotateY(matrix, matrix, glMatrix.toRadian(rotation[1]));
+      mat4.rotateZ(matrix, matrix, glMatrix.toRadian(rotation[2]));
+    }
     mat4.scale(matrix, matrix, scale);
   }
   updateMatrix();
