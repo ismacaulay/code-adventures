@@ -196,6 +196,10 @@
         {
           "type": "texture2d",
           "url": "/images/container.jpeg"
+        },
+        {
+          "type": "texture2d",
+          "url": "/images/awesomeface.png"
         }
       ]
     }

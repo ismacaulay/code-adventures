@@ -41,8 +41,7 @@
         },
         "fragment": {
           "entryPoint": "fragment_main"
-        },
-        "uniforms": {}
+        }
       }
     }
   }

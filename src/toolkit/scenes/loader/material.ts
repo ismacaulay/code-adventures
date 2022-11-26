@@ -28,33 +28,36 @@ export async function createMaterialComponent(
 
       let uniforms: Maybe<{ descriptor: UniformBufferDescriptor; values: UniformDictionary }>;
       if (material.uniforms) {
-        uniforms = Object.entries(material.uniforms).reduce(
-          (acc, cur) => {
-            const [name, value] = cur;
+        const uniformEntries = Object.entries(material.uniforms);
+        if (uniformEntries.length > 0) {
+          uniforms = uniformEntries.reduce(
+            (acc, cur) => {
+              const [name, value] = cur;
 
-            if (typeof value === 'string') {
-              acc.descriptor[name] = value;
+              if (typeof value === 'string') {
+                acc.descriptor[name] = value;
 
-              if (value === UniformType.Mat4) {
-                acc.values[name] = mat4.create();
+                if (value === UniformType.Mat4) {
+                  acc.values[name] = mat4.create();
+                } else {
+                  throw new Error(
+                    `[createMaterialComponent] Unhandled uniform string type: ${value}`,
+                  );
+                }
               } else {
                 throw new Error(
-                  `[createMaterialComponent] Unhandled uniform string type: ${value}`,
+                  `[createMaterialComponent] Unable to handle uniform: ${name}: ${value}`,
                 );
               }
-            } else {
-              throw new Error(
-                `[createMaterialComponent] Unable to handle uniform: ${name}: ${value}`,
-              );
-            }
 
-            return acc;
-          },
-          {
-            descriptor: {} as UniformBufferDescriptor,
-            values: {} as UniformDictionary,
-          },
-        );
+              return acc;
+            },
+            {
+              descriptor: {} as UniformBufferDescriptor,
+              values: {} as UniformDictionary,
+            },
+          );
+        }
       }
 
       let textures: Maybe<number[]>;
