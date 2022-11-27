@@ -1,7 +1,7 @@
 import { mat4 } from 'gl-matrix';
 import Stats from 'stats.js';
 import type { Camera } from 'toolkit/camera/camera';
-import { createCameraController } from 'toolkit/camera/cameraController';
+import { createCameraController, type CameraController } from 'toolkit/camera/cameraController';
 import { createBufferManager, DefaultBuffers } from 'toolkit/ecs/bufferManager';
 import { createComponentManager } from 'toolkit/ecs/componentManager';
 import { createEntityManager } from 'toolkit/ecs/entityManager';
@@ -21,7 +21,7 @@ import type { EntityManager } from 'types/ecs/entity';
 import type { ReadonlySceneGraph, SceneGraphNode } from 'types/sceneGraph';
 
 export interface WebGPUApplication {
-  readonly camera: Camera;
+  readonly cameraController: CameraController;
   readonly sceneGraph: ReadonlySceneGraph;
   readonly entityManager: EntityManager;
 
@@ -39,7 +39,7 @@ export async function createWebGPUApplication(
   const cameraController = createCameraController(canvas);
 
   const resizer = new ResizeObserver(() => {
-    cameraController.setAspect(canvas.clientWidth / canvas.clientHeight);
+    cameraController.aspect = canvas.clientWidth / canvas.clientHeight;
   });
   resizer.observe(canvas);
 
@@ -228,7 +228,7 @@ export async function createWebGPUApplication(
       document.body.removeChild(stats.dom);
     },
 
-    camera: cameraController.camera,
+    cameraController,
     sceneGraph,
     entityManager,
   };

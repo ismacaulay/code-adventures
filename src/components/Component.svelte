@@ -1,6 +1,4 @@
 <script lang="ts">
-  import type { Component } from 'types/ecs/component';
-
   export let title: string;
 
   let collapsed = false;

@@ -4,4 +4,4 @@ interface GenericObject<T> {
 
 type Maybe<T> = T | undefined;
 
-type Unsubscriber = VoidFunction;
+type Unsubscriber = () => void;

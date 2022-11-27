@@ -1,4 +1,5 @@
 import { vec3 } from 'gl-matrix';
+import { createSignal } from 'toolkit/signal';
 import { CameraType, type Camera } from './camera';
 import { CameraControlType, type CameraControls } from './controls';
 import { createFreeControls } from './freeControls';
@@ -16,16 +17,17 @@ export interface CameraState {
 export interface CameraController {
   camera: Camera;
 
-  setCameraType(type: CameraType): void;
-  setControlType(type: CameraControlType): void;
-
-  setAspect(value: number): void;
-  setTarget(target: vec3): void;
-  setPosition(position: vec3): void;
-  setUp(up: vec3): void;
+  cameraType: CameraType;
+  controlType: CameraControlType;
+  aspect: number;
+  target: vec3;
+  position: vec3;
+  up: vec3;
 
   update(dt: number): void;
   destroy(): void;
+
+  subscribe(cb: VoidFunction): Unsubscriber;
 }
 
 export function createCameraController(
@@ -35,6 +37,8 @@ export function createCameraController(
     control: CameraControlType;
   } = { type: CameraType.Perspective, control: CameraControlType.Orbit },
 ): CameraController {
+  const signal = createSignal();
+
   const orthographic = createOrthographicCamera({
     aspect: canvas.clientWidth / canvas.clientHeight,
 
@@ -77,6 +81,7 @@ export function createCameraController(
     }
 
     currentControlType = type;
+    signal.emit();
   }
   setControlType(initial.control);
 
@@ -85,7 +90,10 @@ export function createCameraController(
       return camera;
     },
 
-    setCameraType(type) {
+    get cameraType() {
+      return currentType;
+    },
+    set cameraType(type) {
       if (type === currentType) {
         return;
       }
@@ -95,8 +103,7 @@ export function createCameraController(
       const up = camera.up;
       const aspect = camera.aspect;
 
-      currentType = type;
-      camera = currentType === CameraType.Orthographic ? orthographic : perspective;
+      camera = type === CameraType.Orthographic ? orthographic : perspective;
 
       vec3.copy(camera.target, target);
       vec3.copy(camera.position, position);
@@ -106,22 +113,46 @@ export function createCameraController(
       camera.updateProjectionMatrix();
 
       controls.camera = camera;
-    },
-    setControlType,
+      currentType = type;
 
-    setAspect(aspect) {
+      signal.emit();
+    },
+
+    get controlType() {
+      return currentControlType;
+    },
+    set controlType(value) {
+      setControlType(value);
+    },
+
+    get aspect() {
+      return camera.aspect;
+    },
+    set aspect(aspect) {
       camera.aspect = aspect;
       camera.updateProjectionMatrix();
     },
-    setTarget(target) {
+
+    get target() {
+      return camera.target;
+    },
+    set target(target) {
       vec3.copy(camera.target, target);
       camera.updateViewMatrix();
     },
-    setPosition(position) {
+
+    get position() {
+      return camera.position;
+    },
+    set position(position) {
       vec3.copy(camera.position, position);
       camera.updateViewMatrix();
     },
-    setUp(up) {
+
+    get up() {
+      return camera.up;
+    },
+    set up(up) {
       vec3.copy(camera.up, up);
       camera.updateViewMatrix();
     },
@@ -132,6 +163,11 @@ export function createCameraController(
 
     destroy() {
       controls.destroy();
+      signal.destroy();
+    },
+
+    subscribe(cb: VoidFunction) {
+      return signal.subscribe(cb);
     },
   };
 }

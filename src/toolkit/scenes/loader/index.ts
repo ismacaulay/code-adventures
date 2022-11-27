@@ -41,13 +41,13 @@ export function createSceneLoader({
       }
 
       const { type, target, position, up, controls } = scene.camera;
-      cameraController.setCameraType(type);
+      cameraController.cameraType = type;
       if (controls) {
-        cameraController.setControlType(controls);
+        cameraController.controlType = controls;
       }
-      cameraController.setTarget(target);
-      cameraController.setPosition(position);
-      cameraController.setUp(up);
+      cameraController.target = target;
+      cameraController.position = position;
+      cameraController.up = up;
 
       if (scene.components) {
         await Promise.all(

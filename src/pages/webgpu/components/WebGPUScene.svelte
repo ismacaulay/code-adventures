@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Resizer from './Resizer.svelte';
-  import TreeView from './TreeView.svelte';
-  import TransformEditor from './TransformEditor.svelte';
-  import GeometryComponent from './GeometryComponent.svelte';
+  import Resizer from 'components/Resizer.svelte';
+  import TreeView from 'components/TreeView.svelte';
+  import TransformEditor from 'components/TransformEditor.svelte';
+  import GeometryComponent from 'components/GeometryComponent.svelte';
 
   import { onMount } from 'svelte';
   import { createWebGPUApplication, type WebGPUApplication } from 'toolkit/application/webgpu';
@@ -10,8 +10,9 @@
   import { type Component, ComponentType } from 'types/ecs/component';
   import type { ReadonlySceneGraphNode } from 'types/sceneGraph';
   import { CameraType, type Camera } from 'toolkit/camera/camera';
-  import OrthographicCameraEditor from 'components/OrthographicCameraEditor.svelte';
   import MaterialEditor from 'components/MaterialEditor.svelte';
+  import { createCameraViewModel, type CameraViewModel } from '../models/camera';
+  import CameraEditor from './CameraEditor.svelte';
 
   export let scene: Maybe<string>;
 
@@ -21,6 +22,8 @@
   let canvas: HTMLCanvasElement;
   let tree: Maybe<TreeViewNode>;
   let selectedComponents: (Camera | Component)[] = [];
+
+  let cameraViewModel: CameraViewModel;
 
   function handleTreeItemSelected(uid: string) {
     if (!app) {
@@ -34,7 +37,7 @@
     }
 
     if (uid === 'camera') {
-      selectedComponents.push(app.camera);
+      selectedComponents.push(app.cameraController.camera);
     } else {
       const entityManager = app.entityManager;
 
@@ -67,7 +70,18 @@
       return;
     }
 
-    tree = processSceneGraphNode(app.sceneGraph.root);
+    /* tree = processSceneGraphNode(app.sceneGraph.root); */
+    const root = app.sceneGraph.root;
+    tree = {
+      uid: root.uid,
+      children: [
+        {
+          uid: 'camera',
+          children: [],
+        },
+        ...root.children.map(processSceneGraphNode),
+      ],
+    };
   }
 
   onMount(() => {
@@ -76,12 +90,15 @@
     if (webGPUSupported) {
       (async () => {
         app = await createWebGPUApplication(canvas);
+        cameraViewModel = createCameraViewModel(app.cameraController);
+
         unsubscribers.push(app.sceneGraph.onChange(handleSceneGraphChanged));
 
         if (scene) {
           await app.loadScene(scene);
         }
 
+        (window as any).debug = { app };
         app.start();
       })();
     }
@@ -89,6 +106,9 @@
     return () => {
       unsubscribers.forEach((unsub) => unsub());
       app?.destroy();
+      if ((window as any).debug) {
+        (window as any).debug = undefined;
+      }
     };
   });
 </script>
@@ -109,6 +129,7 @@
     height: 100vh;
     width: 25%;
     min-width: min-content;
+    width: 365px;
   }
 
   .right-split-view-container {
@@ -156,25 +177,27 @@
     <div class="left-split-view-container">
       <div class="vertical-split-view-container">
         <div class="top-split-view-container">
-          <TreeView title="Scene" {tree} onSelected={handleTreeItemSelected} />
+          <TreeView {tree} onSelected={handleTreeItemSelected} />
         </div>
 
         <Resizer direction="vertical" />
 
         <div class="bottom-split-view-container">
-          <div class="noselect" style:display="flex" style:flex-direction="column">
-            {#each selectedComponents as component}
-              {#if component.type === CameraType.Orthographic}
-                <OrthographicCameraEditor camera={component} />
-              {:else if component.type === ComponentType.Transform}
-                <TransformEditor {component} />
-              {:else if component.type === ComponentType.Geometry}
-                <GeometryComponent {component} />
-              {:else if component.type === ComponentType.Material}
-                <MaterialEditor {component} />
-              {/if}
-            {/each}
-          </div>
+          {#if app}
+            <div class="noselect" style:display="flex" style:flex-direction="column">
+              {#each selectedComponents as component}
+                {#if component.type === CameraType.Orthographic || component.type === CameraType.Perspective}
+                  <CameraEditor model={cameraViewModel} />
+                {:else if component.type === ComponentType.Transform}
+                  <TransformEditor {component} />
+                {:else if component.type === ComponentType.Geometry}
+                  <GeometryComponent {component} />
+                {:else if component.type === ComponentType.Material}
+                  <MaterialEditor {component} />
+                {/if}
+              {/each}
+            </div>
+          {/if}
         </div>
       </div>
     </div>

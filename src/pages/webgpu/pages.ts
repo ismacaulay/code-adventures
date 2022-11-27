@@ -1,4 +1,4 @@
-import WebGPUScene from 'components/WebGPUScene.svelte';
+import WebGPUScene from './components/WebGPUScene.svelte';
 function toUrl(path: string) {
   return `webgpu/${path}`;
 }
