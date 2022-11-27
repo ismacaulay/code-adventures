@@ -1,9 +1,7 @@
 import { mat4 } from 'gl-matrix';
-import { CameraType, type Camera } from 'toolkit/camera/camera';
+import Stats from 'stats.js';
+import type { Camera } from 'toolkit/camera/camera';
 import { createCameraController } from 'toolkit/camera/cameraController';
-import { createOrbitControls } from 'toolkit/camera/orbitControls';
-import { createOrthographicCamera } from 'toolkit/camera/orthographic';
-import { createPerspectiveCamera } from 'toolkit/camera/perspective';
 import { createBufferManager, DefaultBuffers } from 'toolkit/ecs/bufferManager';
 import { createComponentManager } from 'toolkit/ecs/componentManager';
 import { createEntityManager } from 'toolkit/ecs/entityManager';
@@ -37,7 +35,6 @@ export async function createWebGPUApplication(
   canvas: HTMLCanvasElement,
 ): Promise<WebGPUApplication> {
   console.log('creating webgpu application');
-
   const sceneGraph = createSceneGraph();
   const cameraController = createCameraController(canvas);
 
@@ -162,6 +159,12 @@ export async function createWebGPUApplication(
     children.forEach(renderNode);
   }
 
+  const stats = new Stats();
+  stats.showPanel(0);
+  stats.dom.style.left = '';
+  stats.dom.style.right = '0px';
+  document.body.appendChild(stats.dom);
+
   // TODO: implement a needs update system so that it only rerenders
   // as necessary
   let frameId = -1;
@@ -169,6 +172,8 @@ export async function createWebGPUApplication(
   let lastFrameTime = performance.now();
   let dt = 0;
   function render() {
+    stats.begin();
+
     frameTime = performance.now();
     dt = (frameTime - lastFrameTime) / 1000;
     lastFrameTime = frameTime;
@@ -194,6 +199,7 @@ export async function createWebGPUApplication(
 
     renderer.end();
 
+    stats.end();
     frameId = requestAnimationFrame(render);
   }
 
@@ -219,6 +225,7 @@ export async function createWebGPUApplication(
       cameraController.destroy();
 
       resizer.unobserve(canvas);
+      document.body.removeChild(stats.dom);
     },
 
     camera: cameraController.camera,

@@ -7,6 +7,7 @@ specifiers:
   '@types/lodash': ^4.14.184
   '@types/page': ^1.11.5
   '@types/seedrandom': ^3.0.2
+  '@types/stats.js': ^0.17.0
   '@webgpu/types': ^0.1.23
   gl-matrix: ^3.4.3
   lodash: ^4.17.21
@@ -15,6 +16,7 @@ specifiers:
   prettier-plugin-organize-imports: ^3.1.0
   prettier-plugin-svelte: ^2.7.0
   seedrandom: ^3.0.5
+  stats.js: ^0.17.0
   svelte: ^3.49.0
   svelte-check: ^2.8.0
   svelte-preprocess: ^4.10.7
@@ -35,12 +37,14 @@ devDependencies:
   '@types/lodash': 4.14.184
   '@types/page': 1.11.5
   '@types/seedrandom': 3.0.2
+  '@types/stats.js': 0.17.0
   '@webgpu/types': 0.1.23
   lodash: 4.17.21
   prettier: 2.7.1
   prettier-plugin-organize-imports: 3.1.0_gd3y7r3s3evy6b2vthd7dmacga
   prettier-plugin-svelte: 2.7.0_o3ioganyptcsrh6x4hnxvjkpqi
   seedrandom: 3.0.5
+  stats.js: 0.17.0
   svelte: 3.49.0
   svelte-check: 2.8.1_svelte@3.49.0
   svelte-preprocess: 4.10.7_uslzfc62di2n2otc2tvfklnwji
@@ -159,6 +163,10 @@ packages:
 
   /@types/seedrandom/3.0.2:
     resolution: {integrity: sha512-YPLqEOo0/X8JU3rdiq+RgUKtQhQtrppE766y7vMTu8dGML7TVtZNiiiaC/hhU9Zqw9UYopXxhuWWENclMVBwKQ==}
+    dev: true
+
+  /@types/stats.js/0.17.0:
+    resolution: {integrity: sha512-9w+a7bR8PeB0dCT/HBULU2fMqf6BAzvKbxFboYhmDtDkKPiyXYbjoe2auwsXlEFI7CFNMF1dCv3dFH5Poy9R1w==}
     dev: true
 
   /@webgpu/types/0.1.23:
@@ -836,6 +844,10 @@ packages:
 
   /sourcemap-codec/1.4.8:
     resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
+    dev: true
+
+  /stats.js/0.17.0:
+    resolution: {integrity: sha512-hNKz8phvYLPEcRkeG1rsGmV5ChMjKDAWU7/OJJdDErPBNChQXxCo3WZurGpnWc6gZhAzEPFad1aVgyOANH1sMw==}
     dev: true
 
   /strip-indent/3.0.0:
