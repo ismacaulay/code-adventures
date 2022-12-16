@@ -2,7 +2,7 @@
   "version": 1,
 
   "camera": {
-    "type": "orthographic",
+    "type": "perspective",
     "target": [0, 0, 0],
     "position": [0, 0, 1],
     "up": [0, 1, 0]

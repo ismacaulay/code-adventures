@@ -10,7 +10,9 @@
 
 <style>
   .inputContainer {
-    padding-left: 3px;
+    display: flex;
+    /* justify-content: space-between; */
+    align-items: center;
   }
 
   .label {
@@ -19,7 +21,7 @@
   }
 
   .input {
-    width: 65px;
+    min-width: 65px;
   }
 </style>
 

@@ -1,10 +1,10 @@
 import type { SceneGraphNode } from 'types/sceneGraph';
 
 export function createSceneGraphNode({ uid }: { uid: string }): SceneGraphNode {
-  const children = [];
+  const children: SceneGraphNode[] = [];
 
   const unsubscribers = [];
-  const callbacks = [];
+  const callbacks: VoidFunction[] = [];
 
   function changed() {
     callbacks.forEach((cb) => cb());
@@ -25,6 +25,7 @@ export function createSceneGraphNode({ uid }: { uid: string }): SceneGraphNode {
 
       changed();
     },
+
     remove(child) {
       const idx = children.findIndex((value) => {
         return child.uid === value.uid;

@@ -161,6 +161,10 @@
     height: 100%;
   }
 
+  .unsupported-container {
+    padding-left: 10px;
+  }
+
   canvas {
     display: block;
     width: 100%;
@@ -210,7 +214,7 @@
           <canvas bind:this={canvas} />
         </div>
       {:else}
-        <div>
+        <div class="unsupported-container">
           <p>WebGPU is not supported by your browser!</p>
         </div>
       {/if}

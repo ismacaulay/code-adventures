@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { vec3 } from 'gl-matrix';
+  import { afterUpdate } from 'svelte';
 
   export let label = '';
   export let value: vec3;
@@ -13,6 +14,12 @@
   function handleValueChanged() {
     onChange([xValue, yValue, zValue]);
   }
+
+  afterUpdate(() => {
+    xValue = value[0];
+    yValue = value[1];
+    zValue = value[2];
+  });
 </script>
 
 <style>

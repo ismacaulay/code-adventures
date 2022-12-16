@@ -131,6 +131,7 @@ export function createCameraController(
     set aspect(aspect) {
       camera.aspect = aspect;
       camera.updateProjectionMatrix();
+      signal.emit();
     },
 
     get target() {
@@ -139,6 +140,7 @@ export function createCameraController(
     set target(target) {
       vec3.copy(camera.target, target);
       camera.updateViewMatrix();
+      signal.emit();
     },
 
     get position() {
@@ -147,6 +149,7 @@ export function createCameraController(
     set position(position) {
       vec3.copy(camera.position, position);
       camera.updateViewMatrix();
+      signal.emit();
     },
 
     get up() {
@@ -155,10 +158,12 @@ export function createCameraController(
     set up(up) {
       vec3.copy(camera.up, up);
       camera.updateViewMatrix();
+      signal.emit();
     },
 
     update(dt) {
       controls.update(dt);
+      signal.emit();
     },
 
     destroy() {

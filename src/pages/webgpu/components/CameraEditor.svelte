@@ -3,11 +3,11 @@
   import { CameraControlType } from 'toolkit/camera/controls';
   import type { CameraViewModel } from '../models/camera';
   import Component from 'components/Component.svelte';
+  import Vec3Input from 'components/Vec3Input.svelte';
 
   export let model: CameraViewModel;
 
-  const cameraType = model.cameraType;
-  const controlType = model.controlType;
+  const { cameraType, controlType, position, target, up } = model;
 </script>
 
 <Component title="Camera">
@@ -20,11 +20,11 @@
     <option value={CameraControlType.Free}> {CameraControlType.Free} </option>
     <option value={CameraControlType.Orbit}> {CameraControlType.Orbit} </option>
   </select>
-  <!-- common
-  <Vec3Input label="Position" value={position} />
-  <Vec3Input label="Target" value={target} />
-  <Vec3Input label="Up" value={up} />
-  -->
+
+  <!-- common -->
+  <Vec3Input label="position" value={$position} />
+  <Vec3Input label="target" value={$target} />
+  <Vec3Input label="up" value={$up} />
 
   <!-- camera specific -->
 </Component>

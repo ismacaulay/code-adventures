@@ -1,9 +1,9 @@
-import { children } from 'svelte/internal';
 import type { SceneGraph } from 'types/sceneGraph';
 import { createSceneGraphNode } from './node';
 
+// TODO: This is a leaky mess and children are not being unsubscribed properly
 export function createSceneGraph(): SceneGraph {
-  const callbacks = [];
+  const callbacks: VoidFunction[] = [];
 
   const root = createSceneGraphNode({ uid: 'root' });
   const unsub = root.onChange(() => {
