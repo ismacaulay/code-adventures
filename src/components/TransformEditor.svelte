@@ -15,8 +15,10 @@
   }
 
   function handleRotationChanged(v: vec3) {
-    vec3.copy(component.rotation, v);
-    component.updateMatrix();
+    if (!isAxisRotation(component.rotation)) {
+      vec3.copy(component.rotation, v);
+      component.updateMatrix();
+    }
   }
 
   function handleScaleChanged(v: vec3) {

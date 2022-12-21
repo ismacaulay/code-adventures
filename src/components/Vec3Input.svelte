@@ -1,25 +1,48 @@
 <script lang="ts">
   import type { vec3 } from 'gl-matrix';
-  import { afterUpdate } from 'svelte';
 
   export let label = '';
-  export let value: vec3;
+  export let value: vec3 = [0, 0, 0];
   export let labels: [string, string, string] = ['x', 'y', 'z'];
+
+  // TODO: remove onChange in favour of two way bindings
   export let onChange: (v: vec3) => void = () => {};
 
-  let xValue = value[0];
-  let yValue = value[1];
-  let zValue = value[2];
+  let xValue: number;
+  let yValue: number;
+  let zValue: number;
 
-  function handleValueChanged() {
-    onChange([xValue, yValue, zValue]);
-  }
-
-  afterUpdate(() => {
+  $: {
     xValue = value[0];
     yValue = value[1];
     zValue = value[2];
-  });
+  }
+
+  function update() {
+    value = [xValue, yValue, zValue];
+    onChange([xValue, yValue, zValue]);
+  }
+
+  function handleXValueChanged(e: any) {
+    if (e.currentTarget) {
+      xValue = e.currentTarget.value;
+      update();
+    }
+  }
+
+  function handleYValueChanged(e: any) {
+    if (e.currentTarget) {
+      yValue = e.currentTarget.value;
+      update();
+    }
+  }
+
+  function handleZValueChanged(e: any) {
+    if (e.currentTarget) {
+      zValue = e.currentTarget.value;
+      update();
+    }
+  }
 </script>
 
 <style>
@@ -52,24 +75,24 @@
     <span>{labels[0]}:</span><input
       class="input"
       type="number"
-      bind:value={xValue}
-      on:input={handleValueChanged}
+      value={xValue}
+      on:input={handleXValueChanged}
     />
   </div>
   <div class="inputContainer">
     <span>{labels[1]}:</span><input
       class="input"
       type="number"
-      bind:value={yValue}
-      on:input={handleValueChanged}
+      value={yValue}
+      on:input={handleYValueChanged}
     />
   </div>
   <div class="inputContainer">
     <span>{labels[2]}:</span><input
       class="input"
       type="number"
-      bind:value={zValue}
-      on:input={handleValueChanged}
+      value={zValue}
+      on:input={handleZValueChanged}
     />
   </div>
 </div>

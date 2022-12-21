@@ -22,9 +22,9 @@
   </select>
 
   <!-- common -->
-  <Vec3Input label="position" value={$position} />
-  <Vec3Input label="target" value={$target} />
-  <Vec3Input label="up" value={$up} />
+  <Vec3Input label="position" bind:value={$position} />
+  <Vec3Input label="target" bind:value={$target} />
+  <Vec3Input label="up" bind:value={$up} />
 
   <!-- camera specific -->
 </Component>

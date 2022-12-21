@@ -49,9 +49,28 @@ export function createCameraViewModel(controller: CameraController): CameraViewM
         controller.cameraType = type;
       }
     }),
+
     controlType.subscribe((type) => {
       if (type !== controller.controlType) {
         controller.controlType = type;
+      }
+    }),
+
+    position.subscribe((value) => {
+      if (!vec3.equals(get(position), controller.position)) {
+        vec3.copy(controller.position, value);
+      }
+    }),
+
+    target.subscribe((value) => {
+      if (!vec3.equals(get(target), controller.target)) {
+        vec3.copy(controller.target, value);
+      }
+    }),
+
+    up.subscribe((value) => {
+      if (!vec3.equals(get(up), controller.up)) {
+        vec3.copy(controller.up, value);
       }
     }),
   ];
