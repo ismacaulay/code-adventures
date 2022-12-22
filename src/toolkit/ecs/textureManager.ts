@@ -1,6 +1,9 @@
 export interface TextureDescriptor {
   uri: string;
   format: GPUTextureFormat;
+  addressModeU: GPUAddressMode;
+  addressModeV: GPUAddressMode;
+  addressModeW: GPUAddressMode;
   magFilter: GPUFilterMode;
   minFilter: GPUFilterMode;
 }
@@ -25,8 +28,22 @@ export function createTextureManager(device: GPUDevice): TextureManager {
   let storage: GenericObject<{ texture: Texture; sampler: GPUSampler }> = {};
 
   return {
-    async createTexture({ uri, format, minFilter, magFilter }: TextureDescriptor) {
-      const sampler = device.createSampler({ minFilter, magFilter });
+    async createTexture({
+      uri,
+      format,
+      addressModeU,
+      addressModeV,
+      addressModeW,
+      minFilter,
+      magFilter,
+    }: TextureDescriptor) {
+      const sampler = device.createSampler({
+        addressModeU,
+        addressModeV,
+        addressModeW,
+        minFilter,
+        magFilter,
+      });
       const texture = await createTextureFromURI(device, uri, format);
       storage[next] = { texture, sampler };
       return next++;

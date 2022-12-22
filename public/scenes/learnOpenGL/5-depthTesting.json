@@ -1,0 +1,117 @@
+{
+  "version": 1,
+
+  "camera": {
+    "type": "perspective",
+    "target": [0, 0, 0],
+    "position": [0, 0, 3.0],
+    "up": [0, 1, 0],
+    "controls": "free"
+  },
+
+  "root": [{ "entity": "cube1" }, { "entity": "cube2" }, { "entity": "floor" }],
+
+  "entities": {
+    "cube1": {
+      "transform": {
+        "position": [-1, 0, -1]
+      },
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "cube2": {
+      "transform": {
+        "position": [2, 0, 0]
+      },
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "floor": {
+      "geometry": "plane_geometry",
+      "material": "plane_material"
+    }
+  },
+
+  "components": {
+    "cube_geometry": {
+      "type": "mesh",
+      "vertices": [
+        -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5,
+        -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, 0.5,
+        -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5,
+        -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5,
+        0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5,
+        0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5,
+        0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5
+      ],
+      "attributes": [
+        {
+          "array": [
+            0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0,
+            1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0,
+            1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0,
+            1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0
+          ],
+          "format": "float32x2"
+        }
+      ]
+    },
+    "cube_material": {
+      "type": "shader",
+      "source": "/shaders/learnOpenGL/depthTesting.wgsl",
+      "vertex": {
+        "entryPoint": "vertex_main"
+      },
+      "fragment": {
+        "entryPoint": "fragment_main"
+      },
+      "uniforms": {
+        "model": "mat4",
+        "view": "mat4",
+        "projection": "mat4"
+      },
+      "textures": [
+        {
+          "type": "texture2d",
+          "url": "/images/marble.jpeg"
+        }
+      ]
+    },
+
+    "plane_geometry": {
+      "type": "mesh",
+      "vertices": [
+        5.0, -0.5, 5.0, -5.0, -0.5, 5.0, -5.0, -0.5, -5.0, 5.0, -0.5, 5.0, -5.0, -0.5, -5.0, 5.0,
+        -0.5, -5.0
+      ],
+      "attributes": [
+        {
+          "array": [2.0, 0.0, 0.0, 0.0, 0.0, 2.0, 2.0, 0.0, 0.0, 2.0, 2.0, 2.0],
+          "format": "float32x2"
+        }
+      ]
+    },
+    "plane_material": {
+      "type": "shader",
+      "source": "/shaders/learnOpenGL/depthTesting.wgsl",
+      "vertex": {
+        "entryPoint": "vertex_main"
+      },
+      "fragment": {
+        "entryPoint": "fragment_main"
+      },
+      "uniforms": {
+        "model": "mat4",
+        "view": "mat4",
+        "projection": "mat4"
+      },
+      "textures": [
+        {
+          "type": "texture2d",
+          "url": "/images/metal.png"
+        }
+      ]
+    }
+  }
+}

@@ -67,6 +67,9 @@ export async function createMaterialComponent(
             return textureManager.createTexture({
               uri: texture.url,
               format: 'rgba8unorm',
+              addressModeU: 'repeat',
+              addressModeV: 'repeat',
+              addressModeW: 'repeat',
               minFilter: 'linear',
               magFilter: 'linear',
             });

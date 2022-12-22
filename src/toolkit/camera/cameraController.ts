@@ -48,14 +48,14 @@ export function createCameraController(
     bottom: -2.5,
 
     znear: 0.1,
-    zfar: 1000,
+    zfar: 100,
   });
 
   const perspective = createPerspectiveCamera({
     aspect: canvas.clientWidth / canvas.clientHeight,
     fov: 45,
     znear: 0.1,
-    zfar: 1000,
+    zfar: 100,
   });
 
   let currentType: CameraType = initial.type;

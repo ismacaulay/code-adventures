@@ -28,6 +28,7 @@ export default [
       learnOpenGLPage('2-textures'),
       learnOpenGLPage('3-coordinates'),
       learnOpenGLPage('4-camera'),
+      learnOpenGLPage('5-depthTesting'),
     ],
   },
   {
