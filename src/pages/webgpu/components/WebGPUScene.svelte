@@ -5,6 +5,7 @@
   import GeometryComponent from 'components/GeometryComponent.svelte';
 
   import { onMount } from 'svelte';
+  import { nanoid } from 'nanoid';
   import { createWebGPUApplication, type WebGPUApplication } from 'toolkit/application/webgpu';
   import type { TreeViewNode } from 'types/components/tree';
   import { type Component, ComponentType } from 'types/ecs/component';
@@ -19,6 +20,7 @@
   let webGPUSupported = navigator.gpu !== undefined;
 
   let app: Maybe<WebGPUApplication>;
+  let destroyed = false;
   let canvas: HTMLCanvasElement;
   let tree: Maybe<TreeViewNode>;
   let selectedComponents: (Camera | Component)[] = [];
@@ -89,23 +91,37 @@
 
     if (webGPUSupported) {
       (async () => {
-        app = await createWebGPUApplication(canvas);
-        cameraViewModel = createCameraViewModel(app.cameraController);
+        try {
+          app = await createWebGPUApplication(nanoid(), canvas);
+          // during a hot reload, the component could get unmounted 
+          // before the application has finished being created
+          if (!destroyed) {
+            cameraViewModel = createCameraViewModel(app.cameraController);
 
-        unsubscribers.push(app.sceneGraph.onChange(handleSceneGraphChanged));
+            unsubscribers.push(app.sceneGraph.onChange(handleSceneGraphChanged));
 
-        if (scene) {
-          await app.loadScene(scene);
+            if (scene) {
+              await app.loadScene(scene);
+            }
+
+            (window as any).debug = { app };
+            app.start();
+          } else {
+            app.destroy();
+            app = undefined;
+          }
+        } catch (e: any){
+          console.log('Failed to create application: ', e);
         }
-
-        (window as any).debug = { app };
-        app.start();
       })();
     }
 
     return () => {
+      destroyed = true;
+
       unsubscribers.forEach((unsub) => unsub());
       app?.destroy();
+      app = undefined;
       if ((window as any).debug) {
         (window as any).debug = undefined;
       }

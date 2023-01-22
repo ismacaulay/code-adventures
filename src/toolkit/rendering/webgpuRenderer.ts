@@ -20,6 +20,10 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
   }
 
   let size = [canvas.clientWidth, canvas.clientHeight];
+  if (size[0] === 0 || size[1] === 0) {
+    throw new Error(`Invalid canvas size: [${canvas.clientWidth}, ${canvas.clientHeight}]`);
+  }
+
   const devicePixelRatio = window.devicePixelRatio || 1;
   let presentationSize = [size[0] * devicePixelRatio, size[1] * devicePixelRatio];
 

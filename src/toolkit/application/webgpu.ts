@@ -31,9 +31,10 @@ export interface WebGPUApplication {
 }
 
 export async function createWebGPUApplication(
+  appId: string,
   canvas: HTMLCanvasElement,
 ): Promise<WebGPUApplication> {
-  console.log('creating webgpu application');
+  console.log('creating webgpu application', appId);
   const sceneGraph = createSceneGraph();
   const cameraController = createCameraController(canvas);
 
@@ -208,14 +209,18 @@ export async function createWebGPUApplication(
     },
 
     start() {
+      if (frameId !== -1) {
+        return;
+      }
       render();
     },
 
     destroy() {
+      console.log('destroying webgpu application', appId);
+
       cancelAnimationFrame(frameId);
       frameId = -1;
 
-      console.log('destroying webgpu application');
       componentManager.destroy();
       shaderManager.destroy();
       textureManager.destroy();
