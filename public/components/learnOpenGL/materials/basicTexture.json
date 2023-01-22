@@ -1,0 +1,15 @@
+{
+  "type": "shader",
+  "source": "/shaders/learnOpenGL/basicTexture.wgsl",
+  "vertex": {
+    "entryPoint": "vertex_main"
+  },
+  "fragment": {
+    "entryPoint": "fragment_main"
+  },
+  "uniforms": {
+    "model": "mat4",
+    "view": "mat4",
+    "projection": "mat4"
+  }
+}

@@ -65,11 +65,11 @@ export async function createMaterialComponent(
         textures = await Promise.all(
           material.textures.map((texture) => {
             return textureManager.createTexture({
-              uri: texture.url,
+              uri: texture.location,
               format: 'rgba8unorm',
-              addressModeU: 'repeat',
-              addressModeV: 'repeat',
-              addressModeW: 'repeat',
+              addressModeU: texture.addressModeU || 'repeat',
+              addressModeV: texture.addressModeV || 'repeat',
+              addressModeW: texture.addressModeW || 'repeat',
               minFilter: 'linear',
               magFilter: 'linear',
             });

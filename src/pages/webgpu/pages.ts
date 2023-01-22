@@ -29,6 +29,7 @@ export default [
       learnOpenGLPage('3-coordinates'),
       learnOpenGLPage('4-camera'),
       learnOpenGLPage('5-depthTesting'),
+      learnOpenGLPage('6-blending'),
     ],
   },
   {

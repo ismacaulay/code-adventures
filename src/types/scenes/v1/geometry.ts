@@ -7,6 +7,7 @@ export enum GeometryComponentTypeV1 {
 
 interface BaseGeometryComponentV1 {
   type: GeometryComponentTypeV1;
+  base?: string;
 }
 
 export interface ObjGeometryComponentV1 extends BaseGeometryComponentV1 {

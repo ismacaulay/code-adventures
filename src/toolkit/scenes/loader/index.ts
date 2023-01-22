@@ -1,6 +1,6 @@
 import type { CameraController } from 'toolkit/camera/cameraController';
 import type { ComponentManager } from 'toolkit/ecs/componentManager';
-import { isGeometryComponent } from 'toolkit/ecs/components';
+import { isGeometryComponent, isMaterialComponent } from 'toolkit/ecs/components';
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
 import type { TextureManager } from 'toolkit/ecs/textureManager';
 import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
@@ -17,6 +17,16 @@ function isSceneV1(scene: any): scene is SceneV1 {
   return scene?.version === 1;
 }
 
+async function loadJSON(url: string) {
+  return fetch(url).then((r) => {
+    if (!r.ok) {
+      throw new Error(`Failed to load json: ${url}, ${r.status}, ${r.statusText}`);
+    }
+
+    return r.json();
+  });
+}
+
 export function createSceneLoader({
   entityManager,
   textureManager,
@@ -30,6 +40,27 @@ export function createSceneLoader({
   sceneGraph: SceneGraph;
   cameraController: CameraController;
 }) {
+  async function processComponent(state: ComponentV1 | string): Promise<Maybe<Component>> {
+    if (typeof state === 'string') {
+      return processComponent(await loadJSON(state));
+    }
+
+    let fullState = { ...state };
+    let component: Maybe<Component>;
+    if (state.base) {
+      const baseState = await loadJSON(state.base);
+      fullState = { ...baseState, ...fullState };
+    }
+
+    if (isGeometryComponentV1(fullState)) {
+      component = await createGeometryComponent(fullState);
+    } else if (isMaterialComponentV1(fullState)) {
+      component = await createMaterialComponent(fullState, { textureManager });
+    }
+
+    return component;
+  }
+
   return {
     async load(url: string) {
       const scene = await fetch(url).then((r) => r.json());
@@ -52,23 +83,14 @@ export function createSceneLoader({
       if (scene.components) {
         await Promise.all(
           Object.entries(scene.components).map(async ([uid, state]) => {
-            let component: Maybe<Component>;
-
-            if (isGeometryComponentV1(state)) {
-              component = await createGeometryComponent(state);
-            } else if (isMaterialComponentV1(state)) {
-              // pass, material components will be create below since shared components
-              // still need to clone shaders
-            } else {
-              throw new Error(
-                `[createSceneLoader] Unknown component type in component list: ${
-                  (state as any).type
-                }`,
-              );
-            }
+            const component = await processComponent(state);
 
             if (component) {
               componentManager.add(uid, component);
+            } else {
+              throw new Error(
+                `[createSceneLoader] Unknown component in component list: [${uid}]: ${state}`,
+              );
             }
           }),
         );
@@ -87,7 +109,7 @@ export function createSceneLoader({
           if (typeof geometry === 'string') {
             geometryComponent = componentManager.get(geometry);
             if (!isGeometryComponent(geometryComponent)) {
-              throw new Error(`[createSceneLoader] Invalid geometry component: ${geometry}`);
+              throw new Error(`[SceneLoader::load] Invalid geometry component: ${geometry}`);
             }
           } else {
             geometryComponent = await createGeometryComponent(geometry);
@@ -96,15 +118,12 @@ export function createSceneLoader({
 
           let materialComponent: Component;
           if (typeof material === 'string') {
-            let descriptor: Maybe<ComponentV1>;
-            if (scene.components) {
-              descriptor = scene.components[material];
+            let sharedComponent = componentManager.get(material);
+            if (!isMaterialComponent(sharedComponent)) {
+              throw new Error(`[SceneLoader::load] Invalid material component: ${material}`);
             }
-            if (!isMaterialComponentV1(descriptor)) {
-              throw new Error(`[createSceneLoader] Invalid material component: ${material}`);
-            }
-            // TODO: find a way to clone the material so that the shaders are not duplicated?
-            materialComponent = await createMaterialComponent(descriptor, { textureManager });
+
+            materialComponent = structuredClone(sharedComponent);
           } else {
             materialComponent = await createMaterialComponent(material, { textureManager });
           }

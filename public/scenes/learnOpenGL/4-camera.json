@@ -196,11 +196,11 @@
       "textures": [
         {
           "type": "texture2d",
-          "url": "/images/container.jpeg"
+          "location": "/images/container.jpeg"
         },
         {
           "type": "texture2d",
-          "url": "/images/awesomeface.png"
+          "location": "/images/awesomeface.png"
         }
       ]
     }

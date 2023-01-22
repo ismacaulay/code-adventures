@@ -1,6 +1,5 @@
 import { mat4 } from 'gl-matrix';
 import Stats from 'stats.js';
-import type { Camera } from 'toolkit/camera/camera';
 import { createCameraController, type CameraController } from 'toolkit/camera/cameraController';
 import { createBufferManager, DefaultBuffers } from 'toolkit/ecs/bufferManager';
 import { createComponentManager } from 'toolkit/ecs/componentManager';

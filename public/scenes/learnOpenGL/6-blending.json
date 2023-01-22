@@ -1,0 +1,147 @@
+{
+  "version": 1,
+
+  "camera": {
+    "type": "perspective",
+    "target": [0, 0, 0],
+    "position": [0, 0, 3.0],
+    "up": [0, 1, 0],
+    "controls": "free"
+  },
+
+  "root": [
+    { "entity": "cube1" },
+    { "entity": "cube2" },
+    { "entity": "floor" },
+    { "entity": "transparent1" },
+    { "entity": "transparent2" },
+    { "entity": "transparent3" },
+    { "entity": "transparent4" },
+    { "entity": "transparent5" }
+  ],
+
+  "entities": {
+    "cube1": {
+      "transform": {
+        "position": [-1, 0, -1]
+      },
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "cube2": {
+      "transform": {
+        "position": [2, 0, 0]
+      },
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "floor": {
+      "geometry": "plane_geometry",
+      "material": "plane_material"
+    },
+    "transparent1": {
+      "transform": {
+        "position": [-1.5, 0.0, -0.48]
+      },
+      "geometry": "transparent_geometry",
+      "material": "grass_material"
+    },
+    "transparent2": {
+      "transform": {
+        "position": [1.5, 0.0, 0.51]
+      },
+      "geometry": "transparent_geometry",
+      "material": "grass_material"
+    },
+    "transparent3": {
+      "transform": {
+        "position": [0.0, 0.0, 0.7]
+      },
+      "geometry": "transparent_geometry",
+      "material": "grass_material"
+    },
+    "transparent4": {
+      "transform": {
+        "position": [-0.3, 0.0, -2.3]
+      },
+      "geometry": "transparent_geometry",
+      "material": "grass_material"
+    },
+    "transparent5": {
+      "transform": {
+        "position": [0.5, 0.0, -0.6]
+      },
+      "geometry": "transparent_geometry",
+      "material": "grass_material"
+    }
+  },
+
+  "components": {
+    "cube_geometry": "/components/learnOpenGL/geometry/cubeGeometry.json",
+    "cube_material": {
+      "base": "/components/learnOpenGL/materials/basicTexture.json",
+      "textures": [
+        {
+          "type": "texture2d",
+          "location": "/images/marble.jpeg"
+        }
+      ]
+    },
+
+    "plane_geometry": "/components/learnOpenGL/geometry/floorPlaneGeometry.json",
+    "plane_material": {
+      "base": "/components/learnOpenGL/materials/basicTexture.json",
+      "textures": [
+        {
+          "type": "texture2d",
+          "location": "/images/metal.png"
+        }
+      ]
+    },
+
+    "transparent_geometry": {
+      "type": "mesh",
+      "vertices": [
+        0.0, 0.5, 0.0, 0.0, -0.5, 0.0, 1.0, -0.5, 0.0, 0.0, 0.5, 0.0, 1.0, -0.5, 0.0, 1.0, 0.5, 0.0
+      ],
+      "attributes": [
+        {
+          "array": [0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0],
+          "format": "float32x2"
+        }
+      ]
+    },
+    "grass_material": {
+      "type": "shader",
+      "source": "/shaders/learnOpenGL/transparentTexture.wgsl",
+      "vertex": {
+        "entryPoint": "vertex_main"
+      },
+      "fragment": {
+        "entryPoint": "fragment_main"
+      },
+      "uniforms": {
+        "model": "mat4",
+        "view": "mat4",
+        "projection": "mat4"
+      },
+      "textures": [
+        {
+          "type": "texture2d",
+          "location": "/images/grass.png",
+          "addressModeU": "clamp-to-edge",
+          "addressModeV": "clamp-to-edge"
+        }
+      ]
+    },
+    "window_material": {
+      "base": "/components/learnOpenGL/materials/basicTexture.json",
+      "textures": [
+        {
+          "type": "texture2d",
+          "location": "/images/window.png"
+        }
+      ]
+    }
+  }
+}

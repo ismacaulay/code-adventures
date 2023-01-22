@@ -1,5 +1,5 @@
 import type { vec3 } from 'gl-matrix';
-import type { UniformType, UniformValue } from 'toolkit/rendering/buffers/uniformBuffer';
+import type { UniformType } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { TextureV1 } from 'toolkit/rendering/textures';
 
 export enum MaterialComponentTypeV1 {
@@ -10,6 +10,7 @@ export enum MaterialComponentTypeV1 {
 
 interface BaseMaterialComponentV1 {
   type: MaterialComponentTypeV1;
+  base?: string;
 }
 
 export interface MeshBasicMaterialV1 extends BaseMaterialComponentV1 {

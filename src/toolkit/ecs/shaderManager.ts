@@ -148,7 +148,7 @@ function processBindings(
   }
 
   return {
-    bindings: [{ entries }],
+    bindings: entries.length > 0 ? [{ entries }] : [],
     uniformBuffers,
     textures,
   };

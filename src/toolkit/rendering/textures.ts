@@ -8,7 +8,10 @@ interface BaseTextureV1 {
 
 export interface Texture2DV1 extends BaseTextureV1 {
   type: TextureType.Texture2D;
-  url: string;
+  location: string;
+  addressModeU?: GPUAddressMode;
+  addressModeV?: GPUAddressMode;
+  addressModeW?: GPUAddressMode;
 }
 
 export type TextureV1 = Texture2DV1;
