@@ -39,6 +39,7 @@ export interface Shader extends BaseShader {
   bindings: ShaderBindGroupDescriptor[];
   buffers: UniformBuffer[];
   textures: Texture[];
+  blend?: GPUBlendState;
 
   update(uniforms: UniformDictionary): void;
 }
@@ -68,6 +69,7 @@ export type ShaderBindingDescriptor = UniformBufferBindingDescriptor | Texture2D
 interface BaseShaderDescriptor {
   id?: number;
   bindings: ShaderBindingDescriptor[];
+  blend?: GPUBlendState;
 }
 
 export interface SingleSourceShaderDescriptor extends BaseShaderDescriptor {
@@ -132,7 +134,15 @@ export function createShader(
     entryPoint: descriptor.fragment.entryPoint,
   };
 
-  return buildShader({ id, vertex, fragment, bindings, buffers, textures });
+  return buildShader({
+    id,
+    vertex,
+    fragment,
+    bindings,
+    buffers,
+    textures,
+    blend: descriptor.blend,
+  });
 }
 
 export function cloneShader(
@@ -153,6 +163,7 @@ function buildShader({
   bindings,
   buffers,
   textures,
+  blend,
 }: {
   id: number;
   vertex: { module: GPUShaderModule; entryPoint: string };
@@ -160,6 +171,7 @@ function buildShader({
   bindings: ShaderBindGroupDescriptor[];
   buffers: UniformBuffer[];
   textures: Texture[];
+  blend?: GPUBlendState;
 }): Shader {
   return {
     id,
@@ -168,6 +180,7 @@ function buildShader({
     bindings,
     buffers,
     textures,
+    blend,
 
     update(uniforms: UniformDictionary) {
       updateBuffers(buffers, uniforms);

@@ -11,6 +11,7 @@ export enum MaterialComponentTypeV1 {
 interface BaseMaterialComponentV1 {
   type: MaterialComponentTypeV1;
   base?: string;
+  transparent?: boolean;
 }
 
 export interface MeshBasicMaterialV1 extends BaseMaterialComponentV1 {
@@ -32,6 +33,7 @@ interface BaseRawShaderMaterialV1 extends BaseMaterialComponentV1 {
 
   uniforms: UniformDictionaryV1;
   textures: TextureV1[];
+  blend?: GPUBlendState;
 }
 
 export interface SingleSourceRawShaderMaterialV1 extends BaseRawShaderMaterialV1 {

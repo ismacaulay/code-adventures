@@ -83,6 +83,8 @@ export async function createMaterialComponent(
         fragment: { entryPoint: material.fragment.entryPoint },
         uniforms,
         textures,
+        blend: material.blend,
+        transparent: material.transparent,
       });
     }
   }

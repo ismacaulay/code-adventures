@@ -161,6 +161,7 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
               targets: [
                 {
                   format: presentationFormat,
+                  blend: shader.blend,
                 },
               ],
             },

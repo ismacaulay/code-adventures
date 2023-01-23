@@ -27,6 +27,7 @@ export function createMeshBasicMaterialComponent({
     subtype: MaterialComponentType.MeshBasic,
 
     colour,
+    transparent: false,
   };
 }
 
@@ -40,6 +41,7 @@ export function createMeshDiffuseMaterialComponent({
     subtype: MaterialComponentType.MeshDiffuse,
 
     colour,
+    transparent: false,
   };
 }
 
@@ -49,12 +51,16 @@ export function createRawShaderMaterialComponent(params: {
   fragment: { entryPoint: string };
   uniforms?: { descriptor: UniformBufferDescriptor; values: UniformDictionary };
   textures?: number[];
+  blend?: GPUBlendState;
+  transparent?: boolean;
 }): RawShaderMaterialComponent;
 export function createRawShaderMaterialComponent(params: {
   vertex: { source: string; entryPoint: string };
   fragment: { source: string; entryPoint: string };
   uniforms?: { descriptor: UniformBufferDescriptor; values: UniformDictionary };
   textures?: number[];
+  blend?: GPUBlendState;
+  transparent?: boolean;
 }): RawShaderMaterialComponent;
 export function createRawShaderMaterialComponent(
   params:
@@ -64,12 +70,16 @@ export function createRawShaderMaterialComponent(
         fragment: { entryPoint: string };
         uniforms?: { descriptor: UniformBufferDescriptor; values: UniformDictionary };
         textures?: number[];
+        blend?: GPUBlendState;
+        transparent?: boolean;
       }
     | {
         vertex: { source: string; entryPoint: string };
         fragment: { source: string; entryPoint: string };
         uniforms?: { descriptor: UniformBufferDescriptor; values: UniformDictionary };
         textures?: number[];
+        blend?: GPUBlendState;
+        transparent?: boolean;
       },
 ): RawShaderMaterialComponent {
   let descriptor: ShaderDescriptor;
@@ -101,12 +111,14 @@ export function createRawShaderMaterialComponent(
       vertex: params.vertex,
       fragment: params.fragment,
       bindings,
+      blend: params.blend,
     };
   } else {
     descriptor = {
       vertex: params.vertex,
       fragment: params.fragment,
       bindings,
+      blend: params.blend,
     };
   }
 
@@ -115,5 +127,6 @@ export function createRawShaderMaterialComponent(
     subtype: MaterialComponentType.RawShader,
     descriptor,
     uniforms: params.uniforms?.values,
+    transparent: params.transparent ?? false,
   };
 }

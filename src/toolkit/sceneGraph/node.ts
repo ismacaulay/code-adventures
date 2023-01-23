@@ -1,6 +1,12 @@
 import type { SceneGraphNode } from 'types/sceneGraph';
 
-export function createSceneGraphNode({ uid }: { uid: string }): SceneGraphNode {
+export function createSceneGraphNode({
+  uid,
+  renderOrder,
+}: {
+  uid: string;
+  renderOrder: number;
+}): SceneGraphNode {
   const children: SceneGraphNode[] = [];
 
   const unsubscribers = [];
@@ -13,6 +19,7 @@ export function createSceneGraphNode({ uid }: { uid: string }): SceneGraphNode {
   return {
     uid,
     children,
+    renderOrder,
 
     add(child) {
       children.push(child);

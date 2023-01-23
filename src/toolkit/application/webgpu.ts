@@ -1,4 +1,4 @@
-import { mat4 } from 'gl-matrix';
+import { mat4, vec3 } from 'gl-matrix';
 import Stats from 'stats.js';
 import { createCameraController, type CameraController } from 'toolkit/camera/cameraController';
 import { createBufferManager, DefaultBuffers } from 'toolkit/ecs/bufferManager';
@@ -159,6 +159,31 @@ export async function createWebGPUApplication(
     children.forEach(renderNode);
   }
 
+  function separateOpaqueAndTransparentNodes(nodes: readonly SceneGraphNode[]) {
+    return nodes.reduce(
+      (acc, cur) => {
+        // TODO: process children
+        const { uid, children } = cur;
+
+        // const transform = entityManager.getComponent(uid, ComponentType.Transform);
+        // const geometry = entityManager.getComponent(uid, ComponentType.Geometry);
+        const material = entityManager.getComponent(uid, ComponentType.Material);
+
+        if (material && material.transparent) {
+          acc.transparent.push(cur);
+        } else {
+          acc.opaque.push(cur);
+        }
+
+        const { opaque, transparent } = separateOpaqueAndTransparentNodes(children);
+        acc.opaque.push(...opaque);
+        acc.transparent.push(...transparent);
+        return acc;
+      },
+      { opaque: [] as SceneGraphNode[], transparent: [] as SceneGraphNode[] },
+    );
+  }
+
   const stats = new Stats();
   stats.showPanel(0);
   stats.dom.style.left = '';
@@ -171,6 +196,8 @@ export async function createWebGPUApplication(
   let frameTime = 0;
   let lastFrameTime = performance.now();
   let dt = 0;
+  const tmp = vec3.create();
+
   function render() {
     stats.begin();
 
@@ -195,7 +222,33 @@ export async function createWebGPUApplication(
       dst: matricesBuffer.buffer,
     });
 
-    sceneGraph.root.children.forEach(renderNode);
+    // we need to split the drawing into opaque and transparent objects
+    // but this should be based on what type of transparent rendering
+    // as an OIT would not need sorting. DWBOIT would still benefit from
+    // separating transparent and non transparent objects
+    // TODO: There is probably a way to cache this
+    const { opaque, transparent } = separateOpaqueAndTransparentNodes(sceneGraph.root.children);
+
+    opaque.forEach(renderNode);
+
+    transparent.sort((a, b) => {
+      // sort based on renderOrder, otherwise use distance to viewer
+      if (a.renderOrder !== b.renderOrder) {
+        return b.renderOrder - a.renderOrder;
+      }
+
+      const transformA = entityManager.getComponent(a.uid, ComponentType.Transform);
+      const transformB = entityManager.getComponent(b.uid, ComponentType.Transform);
+      if (transformA && transformB) {
+        const distA = vec3.length(vec3.sub(tmp, cameraController.position, transformA.position));
+        const distB = vec3.length(vec3.sub(tmp, cameraController.position, transformB.position));
+
+        return distB - distA;
+      }
+
+      return 0;
+    });
+    transparent.forEach(renderNode);
 
     renderer.end();
 

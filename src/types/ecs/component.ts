@@ -84,6 +84,8 @@ export enum MaterialComponentType {
 interface BaseMaterialComponent extends BaseComponent {
   type: ComponentType.Material;
   subtype: MaterialComponentType;
+
+  transparent: boolean;
 }
 
 export interface MeshBasicMaterialComponent extends BaseMaterialComponent {

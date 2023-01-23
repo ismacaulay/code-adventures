@@ -131,8 +131,11 @@ export function createSceneLoader({
         }),
       );
 
-      function addToSceneGraph(node: SceneGraphNode, { entity, children }: SceneGraphDescriptorV1) {
-        const childNode = createSceneGraphNode({ uid: entity });
+      function addToSceneGraph(
+        node: SceneGraphNode,
+        { entity, renderOrder, children }: SceneGraphDescriptorV1,
+      ) {
+        const childNode = createSceneGraphNode({ uid: entity, renderOrder: renderOrder ?? 0 });
         node.add(childNode);
 
         children?.forEach((child) => {

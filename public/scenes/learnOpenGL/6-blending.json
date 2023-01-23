@@ -17,7 +17,9 @@
     { "entity": "transparent2" },
     { "entity": "transparent3" },
     { "entity": "transparent4" },
-    { "entity": "transparent5" }
+    { "entity": "transparent5" },
+    { "entity": "grass1" },
+    { "entity": "grass2" }
   ],
 
   "entities": {
@@ -44,32 +46,46 @@
         "position": [-1.5, 0.0, -0.48]
       },
       "geometry": "transparent_geometry",
-      "material": "grass_material"
+      "material": "window_material"
     },
     "transparent2": {
       "transform": {
         "position": [1.5, 0.0, 0.51]
       },
       "geometry": "transparent_geometry",
-      "material": "grass_material"
+      "material": "window_material"
     },
     "transparent3": {
       "transform": {
         "position": [0.0, 0.0, 0.7]
       },
       "geometry": "transparent_geometry",
-      "material": "grass_material"
+      "material": "window_material"
     },
     "transparent4": {
       "transform": {
         "position": [-0.3, 0.0, -2.3]
       },
       "geometry": "transparent_geometry",
-      "material": "grass_material"
+      "material": "window_material"
     },
     "transparent5": {
       "transform": {
         "position": [0.5, 0.0, -0.6]
+      },
+      "geometry": "transparent_geometry",
+      "material": "window_material"
+    },
+    "grass1": {
+      "transform": {
+        "position": [-1.5, 0.0, -0.485]
+      },
+      "geometry": "transparent_geometry",
+      "material": "grass_material"
+    },
+    "grass2": {
+      "transform": {
+        "position": [1.5, 0.0, 0.505]
       },
       "geometry": "transparent_geometry",
       "material": "grass_material"
@@ -136,6 +152,19 @@
     },
     "window_material": {
       "base": "/components/learnOpenGL/materials/basicTexture.json",
+
+      "transparent": true,
+      "blend": {
+        "color": {
+          "srcFactor": "src-alpha",
+          "dstFactor": "one-minus-src-alpha"
+        },
+        "alpha": {
+          "srcFactor": "src-alpha",
+          "dstFactor": "one-minus-src-alpha"
+        }
+      },
+
       "textures": [
         {
           "type": "texture2d",
