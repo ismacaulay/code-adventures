@@ -11,6 +11,10 @@ export function createRenderer2D(canvas: HTMLCanvasElement) {
   canvas.addEventListener('wheel', handleWheelEvent);
 
   const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Unable to get 2D context');
+  }
+
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 
@@ -65,14 +69,14 @@ export function createRenderer2D(canvas: HTMLCanvasElement) {
         return;
       }
 
-      let segmentDashes: number[][];
+      let segmentDashes: number[][] | undefined;
       if (!isArrayOfArrays(dash)) {
         ctx.setLineDash(dash);
       } else {
         segmentDashes = dash;
       }
 
-      let segmentColors: string[];
+      let segmentColors: string[] | undefined;
       if (!Array.isArray(color)) {
         ctx.strokeStyle = color;
       } else {

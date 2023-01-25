@@ -5,6 +5,7 @@ import type { TextureV1 } from 'toolkit/rendering/textures';
 export enum MaterialComponentTypeV1 {
   MeshBasicMaterial = 'basic',
   MeshDiffuseMaterial = 'diffuse',
+  MeshPhongMaterial = 'phong',
   RawShaderMaterial = 'shader',
 }
 
@@ -22,6 +23,14 @@ export interface MeshBasicMaterialV1 extends BaseMaterialComponentV1 {
 export interface MeshDiffuseMaterialV1 extends BaseMaterialComponentV1 {
   type: MaterialComponentTypeV1.MeshDiffuseMaterial;
   colour: vec3;
+}
+
+export interface MeshPhongMaterialV1 extends BaseMaterialComponentV1 {
+  type: MaterialComponentTypeV1.MeshPhongMaterial;
+
+  diffuse: vec3;
+  specular: vec3;
+  shininess: number;
 }
 
 interface UniformDictionaryV1 {
@@ -49,4 +58,8 @@ export interface MultiSourceRawShaderMaterialV1 extends BaseRawShaderMaterialV1 
 
 export type RawShaderMaterialV1 = SingleSourceRawShaderMaterialV1 | MultiSourceRawShaderMaterialV1;
 
-export type MaterialComponentV1 = MeshBasicMaterialV1 | MeshDiffuseMaterialV1 | RawShaderMaterialV1;
+export type MaterialComponentV1 =
+  | MeshBasicMaterialV1
+  | MeshDiffuseMaterialV1
+  | MeshPhongMaterialV1
+  | RawShaderMaterialV1;

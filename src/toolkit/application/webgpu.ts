@@ -57,6 +57,7 @@ export async function createWebGPUApplication(
     textureManager,
     componentManager,
     sceneGraph,
+    renderer,
   });
 
   function renderNode(node: SceneGraphNode) {
@@ -96,23 +97,36 @@ export async function createWebGPUApplication(
       }
 
       if (material.shader === undefined) {
+        // TODO: move the shader creation into a factory
         if (material.subtype === MaterialComponentType.MeshBasic) {
           material.shader = shaderManager.create(DefaultShaders.MeshBasic);
         } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
           material.shader = shaderManager.create(DefaultShaders.MeshDiffuse);
+        } else if (material.subtype === MaterialComponentType.MeshPhong) {
+          material.shader = shaderManager.create(DefaultShaders.MeshPhong);
         } else if (material.subtype === MaterialComponentType.RawShader) {
           material.shader = shaderManager.create(material.descriptor);
         } else {
-          throw new Error('Unknown MaterialComponentType');
+          throw new Error(`Unknown MaterialComponentType: ${(material as any).subtype}`);
         }
       }
 
       const shader = shaderManager.get<Shader>(material.shader);
 
+      // TODO: make the material updating cleaner
       if (material.subtype === MaterialComponentType.MeshBasic) {
-        shader.update({ model: transform.matrix, colour: material.colour.map((c) => c / 255.0) });
+        shader.update({ model: transform.matrix, colour: material.colour });
       } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
-        shader.update({ model: transform.matrix, colour: material.colour.map((c) => c / 255.0) });
+        shader.update({ model: transform.matrix, colour: material.colour });
+      } else if (material.subtype === MaterialComponentType.MeshPhong) {
+        shader.update({
+          model: transform.matrix,
+          // TODO: implement light manager
+          // ambient:
+          diffuse: material.diffuse,
+          specular: material.specular,
+          shininess: material.shininess,
+        });
       } else if (material.subtype === MaterialComponentType.RawShader) {
         if (material.uniforms) {
           if ('model' in material.uniforms) {

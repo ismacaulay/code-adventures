@@ -14,6 +14,7 @@ import {
   MaterialComponentType,
   type MeshBasicMaterialComponent,
   type MeshDiffuseMaterialComponent,
+  type MeshPhongMaterialComponent,
   type RawShaderMaterialComponent,
 } from 'types/ecs/component';
 
@@ -42,6 +43,27 @@ export function createMeshDiffuseMaterialComponent({
 
     colour,
     transparent: false,
+  };
+}
+
+export function createMeshPhongMaterialComponent({
+  diffuse,
+  specular,
+  shininess,
+}: {
+  diffuse: vec3;
+  specular: vec3;
+  shininess: number;
+}): MeshPhongMaterialComponent {
+  return {
+    type: ComponentType.Material,
+    subtype: MaterialComponentType.MeshPhong,
+
+    transparent: false,
+
+    diffuse,
+    specular,
+    shininess,
   };
 }
 

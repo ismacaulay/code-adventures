@@ -78,6 +78,7 @@ export interface BasicMaterialComponent extends BaseComponent {
 export enum MaterialComponentType {
   MeshBasic,
   MeshDiffuse,
+  MeshPhong,
   RawShader,
 }
 
@@ -102,6 +103,15 @@ export interface MeshDiffuseMaterialComponent extends BaseMaterialComponent {
   colour: vec3;
 }
 
+export interface MeshPhongMaterialComponent extends BaseMaterialComponent {
+  subtype: MaterialComponentType.MeshPhong;
+
+  shader?: number;
+  diffuse: vec3;
+  specular: vec3;
+  shininess: number;
+}
+
 export interface RawShaderMaterialComponent extends BaseMaterialComponent {
   subtype: MaterialComponentType.RawShader;
 
@@ -113,6 +123,7 @@ export interface RawShaderMaterialComponent extends BaseMaterialComponent {
 export type MaterialComponent =
   | MeshBasicMaterialComponent
   | MeshDiffuseMaterialComponent
+  | MeshPhongMaterialComponent
   | RawShaderMaterialComponent;
 
 export type Component = TransformComponent | GeometryComponent | MaterialComponent;

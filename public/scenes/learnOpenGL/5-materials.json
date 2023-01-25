@@ -1,0 +1,61 @@
+{
+  "version": 1,
+
+  "settings": {
+    "background": [0.1, 0.1, 0.1]
+  },
+
+  "camera": {
+    "type": "perspective",
+    "target": [0, 0, 0],
+    "position": [0, 0, 3.0],
+    "up": [0, 1, 0],
+    "controls": "free"
+  },
+
+  "root": [
+    {
+      "entity": "cube"
+    },
+    {
+      "entity": "light"
+    }
+  ],
+
+  "entities": {
+    "cube": {
+      "transform": {
+        "position": [0, 0, 0]
+      },
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "light": {
+      "transform": {
+        "position": [1.2, 1.0, 2.0],
+        "scale": [0.2, 0.2, 0.2]
+      },
+      "geometry": "cube_geometry",
+      "material": "light_material"
+    }
+  },
+
+  "components": {
+    "cube_geometry": "/components/learnOpenGL/geometry/cubeGeometry.json",
+    "cube_material": {
+      "type": "phong",
+      "diffuse": [1.0, 0.5, 0.31],
+      "specular": [0.5, 0.5, 0.5],
+      "shininess": 32.0
+    },
+
+    "light_material": {
+      "type": "basic",
+      "colour": [1.0, 1.0, 1.0]
+    }
+  },
+
+  "lights": {
+    "ambient": [1.0, 0.5, 0.31]
+  }
+}

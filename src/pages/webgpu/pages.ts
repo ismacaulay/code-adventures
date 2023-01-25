@@ -28,8 +28,11 @@ export default [
       learnOpenGLPage('2-textures'),
       learnOpenGLPage('3-coordinates'),
       learnOpenGLPage('4-camera'),
-      learnOpenGLPage('5-depthTesting'),
-      learnOpenGLPage('6-blending'),
+      learnOpenGLPage('5-materials'),
+      learnOpenGLPage('6-lightMaps'),
+      learnOpenGLPage('7-multipleLights'),
+      learnOpenGLPage('8-depthTesting'),
+      learnOpenGLPage('9-blending'),
     ],
   },
   {

@@ -3,6 +3,7 @@ import type { ComponentManager } from 'toolkit/ecs/componentManager';
 import { isGeometryComponent, isMaterialComponent } from 'toolkit/ecs/components';
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
 import type { TextureManager } from 'toolkit/ecs/textureManager';
+import type { Renderer } from 'toolkit/rendering/renderer';
 import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
 import type { Component } from 'types/ecs/component';
 import type { EntityManager } from 'types/ecs/entity';
@@ -33,12 +34,14 @@ export function createSceneLoader({
   componentManager,
   sceneGraph,
   cameraController,
+  renderer,
 }: {
   entityManager: EntityManager;
   textureManager: TextureManager;
   componentManager: ComponentManager;
   sceneGraph: SceneGraph;
   cameraController: CameraController;
+  renderer: Renderer;
 }) {
   async function processComponent(state: ComponentV1 | string): Promise<Maybe<Component>> {
     if (typeof state === 'string') {
@@ -71,6 +74,9 @@ export function createSceneLoader({
         throw new Error('Unkown scene version');
       }
 
+      const { background } = scene.settings;
+      renderer.clearColour = background;
+
       const { type, target, position, up, controls } = scene.camera;
       cameraController.cameraType = type;
       if (controls) {
@@ -89,7 +95,9 @@ export function createSceneLoader({
               componentManager.add(uid, component);
             } else {
               throw new Error(
-                `[createSceneLoader] Unknown component in component list: [${uid}]: ${state}`,
+                `[createSceneLoader] Unknown component in component list: [${uid}]: ${JSON.stringify(
+                  state,
+                )}`,
               );
             }
           }),

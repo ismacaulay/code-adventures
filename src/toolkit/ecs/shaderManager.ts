@@ -14,6 +14,7 @@ import type { Texture, TextureManager } from './textureManager';
 export enum DefaultShaders {
   MeshBasic = 0,
   MeshDiffuse = 1,
+  MeshPhong = 2,
 
   Count,
 }
@@ -47,8 +48,10 @@ export function createShaderManager(
         descriptor = getMeshBasicShaderDescriptor();
       } else if (param === DefaultShaders.MeshDiffuse) {
         descriptor = getMeshDiffuseShaderDescriptor();
+      } else if (param === DefaultShaders.MeshPhong) {
+        descriptor = getMeshPhongShaderDescriptor();
       } else {
-        throw new Error('Unknown DefaultShaders value');
+        throw new Error(`Unknown DefaultShaders value: ${param}`);
       }
     } else {
       descriptor = param;
@@ -278,6 +281,77 @@ fn fragment_main(@location(0) position_eye: vec4<f32>) -> @location(0) vec4<f32>
         descriptor: {
           model: UniformType.Mat4,
           colour: UniformType.Vec3,
+        },
+      },
+      {
+        type: ShaderBindingType.UniformBuffer,
+        resource: DefaultBuffers.ViewProjection,
+        descriptor: {
+          view: UniformType.Mat4,
+          projection: UniformType.Mat4,
+        },
+      },
+    ],
+  };
+}
+
+function getMeshPhongShaderDescriptor(): ShaderDescriptor {
+  const shaderSource = `
+struct UBO {
+  model: mat4x4<f32>,
+
+  ambient: vec3<f32>,
+  diffuse: vec3<f32>,
+  specular: vec3<f32>,
+  shininess: f32,
+}
+
+struct Matrices {
+  view: mat4x4<f32>,
+  projection: mat4x4<f32>,
+}
+
+@group(0) @binding(0)
+var<uniform> ubo: UBO;
+@group(0) @binding(1)
+var<uniform> matrices: Matrices;
+
+struct VertexOutput {
+  @builtin(position) position: vec4<f32>,
+  @location(0) position_eye: vec4<f32>,
+}
+
+@vertex
+fn vertex_main(@location(0) position: vec3<f32>) -> VertexOutput {
+  var out : VertexOutput;
+  out.position = matrices.projection * matrices.view * ubo.model * vec4<f32>(position, 1.0);
+  out.position_eye = matrices.view * ubo.model * vec4<f32>(position, 1.0);
+  return out;
+}
+
+@fragment
+fn fragment_main(@location(0) position_eye: vec4<f32>) -> @location(0) vec4<f32> {
+  return vec4<f32>(ubo.diffuse, 1.0);
+}
+`;
+
+  return {
+    source: shaderSource,
+    vertex: {
+      entryPoint: 'vertex_main',
+    },
+    fragment: {
+      entryPoint: 'fragment_main',
+    },
+    bindings: [
+      {
+        type: ShaderBindingType.UniformBuffer,
+        descriptor: {
+          model: UniformType.Mat4,
+          ambient: UniformType.Vec3,
+          diffuse: UniformType.Vec3,
+          specular: UniformType.Vec3,
+          shininess: UniformType.Scalar,
         },
       },
       {

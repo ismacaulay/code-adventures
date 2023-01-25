@@ -1,3 +1,4 @@
+import { vec3 } from 'gl-matrix';
 import {
   CommandType,
   type CopyToTextureCommand,
@@ -50,8 +51,17 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
   let draws: DrawCommand[] = [];
   let commands: (WriteBufferCommand | CopyToTextureCommand)[] = [];
 
+  let clearColour = vec3.create(1.0, 1.0, 1.0);
+
   return {
     device,
+
+    get clearColour() {
+      return clearColour;
+    },
+    set clearColour(value: vec3) {
+      clearColour = value;
+    },
 
     begin() {},
 
@@ -85,7 +95,7 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
         colorAttachments: [
           {
             view: context.getCurrentTexture().createView(),
-            clearValue: [1, 1, 1, 1],
+            clearValue: [clearColour[0], clearColour[1], clearColour[2], 1],
             loadOp: 'clear',
             storeOp: 'store',
           },

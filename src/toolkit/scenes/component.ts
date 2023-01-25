@@ -20,6 +20,7 @@ export function isMaterialComponentV1(
     component !== undefined &&
     (component.type === MaterialComponentTypeV1.MeshBasicMaterial ||
       component.type === MaterialComponentTypeV1.MeshDiffuseMaterial ||
+      component.type === MaterialComponentTypeV1.MeshPhongMaterial ||
       component.type === MaterialComponentTypeV1.RawShaderMaterial)
   );
 }

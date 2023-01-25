@@ -2,6 +2,7 @@ import { mat4 } from 'gl-matrix';
 import {
   createMeshBasicMaterialComponent,
   createMeshDiffuseMaterialComponent,
+  createMeshPhongMaterialComponent,
   createRawShaderMaterialComponent,
 } from 'toolkit/ecs/components/material';
 import type { TextureManager } from 'toolkit/ecs/textureManager';
@@ -21,6 +22,12 @@ export async function createMaterialComponent(
     return createMeshBasicMaterialComponent({ colour: material.colour });
   } else if (material.type === MaterialComponentTypeV1.MeshDiffuseMaterial) {
     return createMeshDiffuseMaterialComponent({ colour: material.colour });
+  } else if (material.type === MaterialComponentTypeV1.MeshPhongMaterial) {
+    return createMeshPhongMaterialComponent({
+      diffuse: material.diffuse,
+      specular: material.specular,
+      shininess: material.shininess,
+    });
   } else if (material.type === MaterialComponentTypeV1.RawShaderMaterial) {
     // TODO: handle multi source, and move this check into function
     if ('source' in material) {
