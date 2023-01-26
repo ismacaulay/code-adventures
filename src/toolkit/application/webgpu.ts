@@ -119,14 +119,7 @@ export async function createWebGPUApplication(
       } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
         shader.update({ model: transform.matrix, colour: material.colour });
       } else if (material.subtype === MaterialComponentType.MeshPhong) {
-        shader.update({
-          model: transform.matrix,
-          // TODO: implement light manager
-          // ambient:
-          diffuse: material.diffuse,
-          specular: material.specular,
-          shininess: material.shininess,
-        });
+        throw new Error('Phong: Not implemented Yet');
       } else if (material.subtype === MaterialComponentType.RawShader) {
         if (material.uniforms) {
           if ('model' in material.uniforms) {
@@ -139,6 +132,10 @@ export async function createWebGPUApplication(
 
           if ('projection' in material.uniforms) {
             mat4.copy(material.uniforms.projection as mat4, cameraController.camera.projection);
+          }
+
+          if ('view_position' in material.uniforms) {
+            vec3.copy(material.uniforms.view_position as vec3, cameraController.camera.position);
           }
 
           shader.update(material.uniforms);

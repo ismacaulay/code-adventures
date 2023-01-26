@@ -300,10 +300,16 @@ function getMeshPhongShaderDescriptor(): ShaderDescriptor {
 struct UBO {
   model: mat4x4<f32>,
 
-  ambient: vec3<f32>,
+  // material
   diffuse: vec3<f32>,
   specular: vec3<f32>,
   shininess: f32,
+
+  // temp lights
+  light_ambient: vec3<f32>,
+
+  light_position: vec3<f32>,
+  light_colour: vec3<f32>,
 }
 
 struct Matrices {
@@ -319,19 +325,34 @@ var<uniform> matrices: Matrices;
 struct VertexOutput {
   @builtin(position) position: vec4<f32>,
   @location(0) position_eye: vec4<f32>,
+  @location(1) normal: vec3<f32>,
 }
 
 @vertex
-fn vertex_main(@location(0) position: vec3<f32>) -> VertexOutput {
+fn vertex_main(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>) -> VertexOutput {
   var out : VertexOutput;
   out.position = matrices.projection * matrices.view * ubo.model * vec4<f32>(position, 1.0);
   out.position_eye = matrices.view * ubo.model * vec4<f32>(position, 1.0);
+  out.normal = normal;
   return out;
 }
 
 @fragment
-fn fragment_main(@location(0) position_eye: vec4<f32>) -> @location(0) vec4<f32> {
-  return vec4<f32>(ubo.diffuse, 1.0);
+fn fragment_main(
+  @builtin(position) frag_position: vec4<f32>,
+  @location(0) position_eye: vec4<f32>, 
+  @location(1) normal: vec3<f32>
+) -> @location(0) vec4<f32> {
+  var n = normalize(normal);
+  var light_dir = normalize(ubo.light_position - frag_position.xyz);
+  var diff = max(dot(n, light_dir), 0.0);
+  var diffuse = ubo.light_colour * diff * ubo.diffuse;
+
+  var final_colour = diffuse;
+  return vec4<f32>(final_colour, 1.0);
+
+  // return vec4<f32>(abs(normal), 1.0);
+  // return vec4<f32>(ubo.diffuse, 1.0);
 }
 `;
 
@@ -348,10 +369,13 @@ fn fragment_main(@location(0) position_eye: vec4<f32>) -> @location(0) vec4<f32>
         type: ShaderBindingType.UniformBuffer,
         descriptor: {
           model: UniformType.Mat4,
-          ambient: UniformType.Vec3,
           diffuse: UniformType.Vec3,
           specular: UniformType.Vec3,
           shininess: UniformType.Scalar,
+
+          light_ambient: UniformType.Vec3,
+          light_position: UniformType.Vec3,
+          light_colour: UniformType.Vec3,
         },
       },
       {

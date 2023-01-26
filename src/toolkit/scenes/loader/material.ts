@@ -1,4 +1,4 @@
-import { mat4 } from 'gl-matrix';
+import { mat4, vec3 } from 'gl-matrix';
 import {
   createMeshBasicMaterialComponent,
   createMeshDiffuseMaterialComponent,
@@ -13,6 +13,22 @@ import {
 } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { MaterialComponent } from 'types/ecs/component';
 import { MaterialComponentTypeV1, type MaterialComponentV1 } from 'types/scenes/v1/material';
+
+function isNumber(value: any): value is number {
+  return typeof value === 'number';
+}
+
+function isBoolean(value: any): value is boolean {
+  return typeof value === 'boolean';
+}
+
+function isNumberArray(arr: any): arr is ArrayLike<number> {
+  if (!Array.isArray(arr) || arr.length === 0) {
+    return false;
+  }
+
+  return isNumber(arr[0]);
+}
 
 export async function createMaterialComponent(
   material: MaterialComponentV1,
@@ -44,11 +60,28 @@ export async function createMaterialComponent(
               if (typeof value === 'string') {
                 acc.descriptor[name] = value;
 
-                if (value === UniformType.Mat4) {
+                if (value === UniformType.Vec3) {
+                  acc.values[name] = vec3.create();
+                } else if (value === UniformType.Mat4) {
                   acc.values[name] = mat4.create();
                 } else {
                   throw new Error(
                     `[createMaterialComponent] Unhandled uniform string type: ${value}`,
+                  );
+                }
+              } else if (isNumber(value)) {
+                acc.descriptor[name] = UniformType.Scalar;
+                acc.values[name] = value;
+              } else if (isBoolean(value)) {
+                acc.descriptor[name] = UniformType.Bool;
+                acc.values[name] = value;
+              } else if (isNumberArray(value)) {
+                if (value.length === 3) {
+                  acc.descriptor[name] = UniformType.Vec3;
+                  acc.values[name] = value;
+                } else {
+                  throw new Error(
+                    `[createMaterialComponent] Unhandled number of array values: ${value.length}`,
                   );
                 }
               } else {
