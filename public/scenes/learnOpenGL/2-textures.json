@@ -49,11 +49,11 @@
         "textures": [
           {
             "type": "texture2d",
-            "location": "/images/container.jpeg"
+            "location": "/images/learnOpenGL/container.jpeg"
           },
           {
             "type": "texture2d",
-            "location": "/images/awesomeface.png"
+            "location": "/images/learnOpenGL/awesomeface.png"
           }
         ]
       }

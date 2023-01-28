@@ -74,7 +74,7 @@
       "textures": [
         {
           "type": "texture2d",
-          "location": "/images/marble.jpeg"
+          "location": "/images/learnOpenGL/marble.jpeg"
         }
       ]
     },
@@ -109,7 +109,7 @@
       "textures": [
         {
           "type": "texture2d",
-          "location": "/images/metal.png"
+          "location": "/images/learnOpenGL/metal.png"
         }
       ]
     }

@@ -99,7 +99,7 @@
       "textures": [
         {
           "type": "texture2d",
-          "location": "/images/marble.jpeg"
+          "location": "/images/learnOpenGL/marble.jpeg"
         }
       ]
     },
@@ -110,7 +110,7 @@
       "textures": [
         {
           "type": "texture2d",
-          "location": "/images/metal.png"
+          "location": "/images/learnOpenGL/metal.png"
         }
       ]
     },
@@ -144,7 +144,7 @@
       "textures": [
         {
           "type": "texture2d",
-          "location": "/images/grass.png",
+          "location": "/images/learnOpenGL/grass.png",
           "addressModeU": "clamp-to-edge",
           "addressModeV": "clamp-to-edge"
         }
@@ -168,7 +168,7 @@
       "textures": [
         {
           "type": "texture2d",
-          "location": "/images/window.png"
+          "location": "/images/learnOpenGL/window.png"
         }
       ]
     }

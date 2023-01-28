@@ -59,13 +59,6 @@ export async function createWebGPUApplication(
       shaderManager,
 
       ComponentType,
-      // TODO: figure out how to generate this
-      // ComponentType: {
-      //   Transform: ComponentType.Transform,
-      //   Geometry: ComponentType.Geometry,
-      //   Material: ComponentType.Material,
-      //   Script: ComponentType.Script,
-      // },
     },
   };
   const scriptManager = createScriptManager(system);
