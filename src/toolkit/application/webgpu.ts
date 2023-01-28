@@ -58,13 +58,14 @@ export async function createWebGPUApplication(
       entityManager,
       shaderManager,
 
+      ComponentType,
       // TODO: figure out how to generate this
-      ComponentType: {
-        Transform: ComponentType.Transform,
-        Geometry: ComponentType.Geometry,
-        Material: ComponentType.Material,
-        Script: ComponentType.Script,
-      },
+      // ComponentType: {
+      //   Transform: ComponentType.Transform,
+      //   Geometry: ComponentType.Geometry,
+      //   Material: ComponentType.Material,
+      //   Script: ComponentType.Script,
+      // },
     },
   };
   const scriptManager = createScriptManager(system);
@@ -308,6 +309,7 @@ export async function createWebGPUApplication(
       cancelAnimationFrame(frameId);
       frameId = -1;
 
+      scriptManager.destroy();
       componentManager.destroy();
       shaderManager.destroy();
       textureManager.destroy();

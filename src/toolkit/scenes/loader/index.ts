@@ -89,7 +89,7 @@ export function createSceneLoader({
         throw new Error('Unkown scene version');
       }
 
-      const { background } = scene.settings;
+      const { background = [1.0, 1.0, 1.0] } = scene.settings ?? {};
       renderer.clearColour = background;
 
       const { type, target, position, up, controls } = scene.camera;

@@ -15,7 +15,7 @@ export interface SettingsV1 {
 export interface SceneV1 extends BaseScene {
   version: 1;
 
-  settings: SettingsV1;
+  settings?: SettingsV1;
   camera: CameraV1;
   root: SceneGraphV1;
   entities: {
