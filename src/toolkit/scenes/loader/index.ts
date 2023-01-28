@@ -1,7 +1,12 @@
 import type { CameraController } from 'toolkit/camera/cameraController';
 import type { ComponentManager } from 'toolkit/ecs/componentManager';
-import { isGeometryComponent, isMaterialComponent } from 'toolkit/ecs/components';
+import {
+  isGeometryComponent,
+  isMaterialComponent,
+  isScriptComponent,
+} from 'toolkit/ecs/components';
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
+import type { ScriptManager } from 'toolkit/ecs/scriptManager';
 import type { TextureManager } from 'toolkit/ecs/textureManager';
 import type { Renderer } from 'toolkit/rendering/renderer';
 import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
@@ -10,9 +15,15 @@ import type { EntityManager } from 'types/ecs/entity';
 import type { SceneGraph, SceneGraphNode } from 'types/sceneGraph';
 import type { SceneV1 } from 'types/scenes/v1/scene';
 import type { SceneGraphDescriptorV1 } from 'types/scenes/v1/sceneGraph';
-import { isGeometryComponentV1, isMaterialComponentV1, type ComponentV1 } from '../component';
+import {
+  isGeometryComponentV1,
+  isMaterialComponentV1,
+  isScriptComponentV1,
+  type ComponentV1,
+} from '../component';
 import { createGeometryComponent } from './geometry';
 import { createMaterialComponent } from './material';
+import { createScriptComponent } from './script';
 
 function isSceneV1(scene: any): scene is SceneV1 {
   return scene?.version === 1;
@@ -30,15 +41,17 @@ async function loadJSON(url: string) {
 
 export function createSceneLoader({
   entityManager,
-  textureManager,
   componentManager,
+  textureManager,
+  scriptManager,
   sceneGraph,
   cameraController,
   renderer,
 }: {
   entityManager: EntityManager;
-  textureManager: TextureManager;
   componentManager: ComponentManager;
+  textureManager: TextureManager;
+  scriptManager: ScriptManager;
   sceneGraph: SceneGraph;
   cameraController: CameraController;
   renderer: Renderer;
@@ -59,6 +72,8 @@ export function createSceneLoader({
       component = await createGeometryComponent(fullState);
     } else if (isMaterialComponentV1(fullState)) {
       component = await createMaterialComponent(fullState, { textureManager });
+    } else if (isScriptComponentV1(fullState)) {
+      component = createScriptComponent(fullState);
     }
 
     return component;
@@ -109,7 +124,7 @@ export function createSceneLoader({
           // TODO: validate entities
           entityManager.add(uid);
 
-          const { transform, geometry, material } = state;
+          const { transform, geometry, material, script } = state;
 
           entityManager.addComponent(uid, createTransformComponent({ ...transform }));
 
@@ -136,6 +151,23 @@ export function createSceneLoader({
             materialComponent = await createMaterialComponent(material, { textureManager });
           }
           entityManager.addComponent(uid, materialComponent);
+
+          if (script) {
+            let scriptComponent: Component;
+            if (typeof script === 'string') {
+              scriptComponent = componentManager.get(script);
+              if (!isScriptComponent(scriptComponent)) {
+                throw new Error(`[SceneLoader::load] Invalid script component: ${script}`);
+              }
+            } else {
+              scriptComponent = createScriptComponent(script);
+            }
+
+            if (!scriptComponent.script) {
+              scriptComponent.script = await scriptManager.create(scriptComponent);
+            }
+            entityManager.addComponent(uid, scriptComponent);
+          }
         }),
       );
 

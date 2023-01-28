@@ -3,6 +3,7 @@ import type {
   ComponentType,
   GeometryComponent,
   MaterialComponent,
+  ScriptComponent,
   TransformComponent,
 } from './component';
 
@@ -11,6 +12,7 @@ type GetComponentReturnType<T extends ComponentType> =
   T extends ComponentType.Transform ? Maybe<TransformComponent> :
   T extends ComponentType.Geometry ? Maybe<GeometryComponent> :
   T extends ComponentType.Material ? Maybe<MaterialComponent> :
+  T extends ComponentType.Script ? Maybe<ScriptComponent> :
   never;
 
 export interface EntityManager {

@@ -7,6 +7,7 @@ export enum ComponentType {
   Transform = 1,
   Geometry = 2,
   Material = 4,
+  Script = 8,
 }
 
 export interface BaseComponent {
@@ -126,4 +127,18 @@ export type MaterialComponent =
   | MeshPhongMaterialComponent
   | RawShaderMaterialComponent;
 
-export type Component = TransformComponent | GeometryComponent | MaterialComponent;
+/**
+ * Script
+ */
+export interface ScriptComponent {
+  type: ComponentType.Script;
+
+  script?: number;
+  location: string;
+}
+
+export type Component =
+  | TransformComponent
+  | GeometryComponent
+  | MaterialComponent
+  | ScriptComponent;

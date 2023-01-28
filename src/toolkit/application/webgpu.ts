@@ -4,6 +4,7 @@ import { createCameraController, type CameraController } from 'toolkit/camera/ca
 import { createBufferManager, DefaultBuffers } from 'toolkit/ecs/bufferManager';
 import { createComponentManager } from 'toolkit/ecs/componentManager';
 import { createEntityManager } from 'toolkit/ecs/entityManager';
+import { createScriptManager } from 'toolkit/ecs/scriptManager';
 import { createShaderManager, DefaultShaders } from 'toolkit/ecs/shaderManager';
 import { createTextureManager } from 'toolkit/ecs/textureManager';
 import type { IndexBuffer } from 'toolkit/rendering/buffers/indexBuffer';
@@ -44,21 +45,46 @@ export async function createWebGPUApplication(
   resizer.observe(canvas);
 
   const renderer = await createWebGPURenderer(canvas);
-
   const entityManager = createEntityManager();
   const bufferManager = createBufferManager(renderer.device);
   const textureManager = createTextureManager(renderer.device);
   const shaderManager = createShaderManager(renderer.device, { bufferManager, textureManager });
   const componentManager = createComponentManager();
 
+  const system = {
+    vec3,
+
+    engine: {
+      entityManager,
+      shaderManager,
+
+      // TODO: figure out how to generate this
+      ComponentType: {
+        Transform: ComponentType.Transform,
+        Geometry: ComponentType.Geometry,
+        Material: ComponentType.Material,
+        Script: ComponentType.Script,
+      },
+    },
+  };
+  const scriptManager = createScriptManager(system);
   const sceneLoader = createSceneLoader({
     cameraController,
     entityManager,
     textureManager,
+    scriptManager,
     componentManager,
     sceneGraph,
     renderer,
   });
+
+  // TODO: implement a needs update system so that it only rerenders
+  // as necessary
+  let frameId = -1;
+  let frameTime = 0;
+  let lastFrameTime = performance.now();
+  let dt = 0;
+  const tmp = vec3.create();
 
   function renderNode(node: SceneGraphNode) {
     const { uid, children } = node;
@@ -66,6 +92,11 @@ export async function createWebGPUApplication(
     const transform = entityManager.getComponent(uid, ComponentType.Transform);
     const geometry = entityManager.getComponent(uid, ComponentType.Geometry);
     const material = entityManager.getComponent(uid, ComponentType.Material);
+    const script = entityManager.getComponent(uid, ComponentType.Script);
+
+    if (script && script.script !== undefined) {
+      scriptManager.get(script.script).update(dt, uid);
+    }
 
     if (transform && geometry && material) {
       const vertexBuffers = geometry.buffers.map((buffer) => {
@@ -200,14 +231,6 @@ export async function createWebGPUApplication(
   stats.dom.style.left = '';
   stats.dom.style.right = '0px';
   document.body.appendChild(stats.dom);
-
-  // TODO: implement a needs update system so that it only rerenders
-  // as necessary
-  let frameId = -1;
-  let frameTime = 0;
-  let lastFrameTime = performance.now();
-  let dt = 0;
-  const tmp = vec3.create();
 
   function render() {
     stats.begin();

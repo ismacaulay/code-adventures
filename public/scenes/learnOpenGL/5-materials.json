@@ -28,7 +28,8 @@
         "position": [0, 0, 0]
       },
       "geometry": "cube_geometry",
-      "material": "cube_material"
+      "material": "cube_material",
+      "script": "colour_script"
     },
     "light": {
       "transform": {
@@ -74,6 +75,11 @@
     "light_material": {
       "type": "basic",
       "colour": [1.0, 1.0, 1.0]
+    },
+
+    "colour_script": {
+      "type": "script",
+      "location": "/components/learnOpenGL/scripts/materialLightColour.js"
     }
   }
 }
