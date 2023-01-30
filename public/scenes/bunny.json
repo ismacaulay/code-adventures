@@ -21,7 +21,7 @@
       },
       "material": {
         "type": "diffuse",
-        "colour": [252, 148, 3]
+        "colour": [0.988, 0.58, 0.012]
       }
     }
   },
