@@ -9,10 +9,21 @@ import type { TextureManager } from 'toolkit/ecs/textureManager';
 import {
   UniformType,
   type UniformBufferDescriptor,
+  type UniformBufferDescriptorEntry,
   type UniformDictionary,
+  type UniformValue,
 } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { MaterialComponent } from 'types/ecs/component';
-import { MaterialComponentTypeV1, type MaterialComponentV1 } from 'types/scenes/v1/material';
+import {
+  MaterialComponentTypeV1,
+  type MaterialComponentV1,
+  type UniformDictionaryV1,
+  type UniformValueV1,
+} from 'types/scenes/v1/material';
+
+function isString(value: any): value is string {
+  return typeof value === 'string';
+}
 
 function isNumber(value: any): value is number {
   return typeof value === 'number';
@@ -22,12 +33,108 @@ function isBoolean(value: any): value is boolean {
   return typeof value === 'boolean';
 }
 
+function isUniformDictionary(value: any): value is UniformDictionaryV1 {
+  return !Array.isArray(value) && !isNumber(value) && !isBoolean(value) && !isString(value);
+}
+
 function isNumberArray(arr: any): arr is ArrayLike<number> {
   if (!Array.isArray(arr) || arr.length === 0) {
     return false;
   }
 
   return isNumber(arr[0]);
+}
+
+function isUniformDictionaryArray(arr: any): arr is UniformDictionaryV1[] {
+  if (!Array.isArray(arr) || arr.length === 0) {
+    return false;
+  }
+
+  return isUniformDictionary(arr[0]);
+}
+
+function processUniformEntryValue(entryValue: UniformType | UniformValueV1) {
+  let uniformDescriptor: UniformBufferDescriptorEntry;
+  let uniformValue: UniformValue;
+
+  if (isString(entryValue)) {
+    uniformDescriptor = entryValue;
+
+    if (entryValue === UniformType.Vec3) {
+      uniformValue = vec3.create();
+    } else if (entryValue === UniformType.Mat4) {
+      uniformValue = mat4.create();
+    } else {
+      throw new Error(`[processUniformEntryValue] Unhandled uniform string type: ${entryValue}`);
+    }
+  } else if (isNumber(entryValue)) {
+    uniformDescriptor = UniformType.Scalar;
+    uniformValue = entryValue;
+  } else if (isBoolean(entryValue)) {
+    uniformDescriptor = UniformType.Bool;
+    uniformValue = entryValue;
+  } else if (isNumberArray(entryValue)) {
+    if (entryValue.length === 3) {
+      uniformDescriptor = UniformType.Vec3;
+      uniformValue = entryValue;
+    } else {
+      throw new Error(
+        `[processUniformEntryValue] Unhandled number of array values: ${entryValue.length}`,
+      );
+    }
+  } else if (isUniformDictionary(entryValue)) {
+    const { descriptor, values } = Object.entries(entryValue).reduce(
+      (acc, [n, v]) => {
+        const { descriptor, value } = processUniformEntryValue(v);
+        acc.descriptor[n] = descriptor;
+        acc.values[n] = value;
+        return acc;
+      },
+      {
+        descriptor: {} as UniformBufferDescriptor,
+        values: {} as UniformDictionary,
+      },
+    );
+    uniformDescriptor = descriptor;
+    uniformValue = values;
+  } else if (isUniformDictionaryArray(entryValue)) {
+    // TODO: we are only processing a single entry so we have a correct descriptor,
+    //       but incorrect values
+    const { descriptor, values } = entryValue.reduce(
+      (acc, cur) => {
+        const { descriptor, values } = Object.entries(cur).reduce(
+          (acc, [n, v]) => {
+            const { descriptor, value } = processUniformEntryValue(v);
+            acc.descriptor[n] = descriptor;
+            acc.values[n] = value;
+            return acc;
+          },
+          {
+            descriptor: {} as UniformBufferDescriptor,
+            values: {} as UniformDictionary,
+          },
+        );
+
+        acc.descriptor.push(descriptor);
+        acc.values.push(values);
+        return acc;
+      },
+      {
+        descriptor: [] as UniformBufferDescriptor[],
+        values: [] as UniformDictionary[],
+      },
+    );
+
+    // All of the descriptors should be the same (should verify that) so we just take the first one
+    uniformDescriptor = [descriptor[0], entryValue.length];
+    uniformValue = values;
+  } else {
+    throw new Error(
+      `[createMaterialComponent] Unable to handle uniform: ${JSON.stringify(entryValue)}`,
+    );
+  }
+
+  return { descriptor: uniformDescriptor, value: uniformValue };
 }
 
 export async function createMaterialComponent(
@@ -54,42 +161,10 @@ export async function createMaterialComponent(
         const uniformEntries = Object.entries(material.uniforms);
         if (uniformEntries.length > 0) {
           uniforms = uniformEntries.reduce(
-            (acc, cur) => {
-              const [name, value] = cur;
-
-              if (typeof value === 'string') {
-                acc.descriptor[name] = value;
-
-                if (value === UniformType.Vec3) {
-                  acc.values[name] = vec3.create();
-                } else if (value === UniformType.Mat4) {
-                  acc.values[name] = mat4.create();
-                } else {
-                  throw new Error(
-                    `[createMaterialComponent] Unhandled uniform string type: ${value}`,
-                  );
-                }
-              } else if (isNumber(value)) {
-                acc.descriptor[name] = UniformType.Scalar;
-                acc.values[name] = value;
-              } else if (isBoolean(value)) {
-                acc.descriptor[name] = UniformType.Bool;
-                acc.values[name] = value;
-              } else if (isNumberArray(value)) {
-                if (value.length === 3) {
-                  acc.descriptor[name] = UniformType.Vec3;
-                  acc.values[name] = value;
-                } else {
-                  throw new Error(
-                    `[createMaterialComponent] Unhandled number of array values: ${value.length}`,
-                  );
-                }
-              } else {
-                throw new Error(
-                  `[createMaterialComponent] Unable to handle uniform: ${name}: ${value}`,
-                );
-              }
-
+            (acc, [n, v]) => {
+              const { descriptor, value } = processUniformEntryValue(v);
+              acc.descriptor[n] = descriptor;
+              acc.values[n] = value;
               return acc;
             },
             {

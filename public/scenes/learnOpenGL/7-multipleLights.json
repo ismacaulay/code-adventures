@@ -1,0 +1,330 @@
+{
+  "version": 1,
+
+  "settings": {
+    "background": [0.1, 0.1, 0.1]
+  },
+
+  "camera": {
+    "type": "perspective",
+    "target": [0, 0, 0],
+    "position": [0, 0, 3.0],
+    "up": [0, 1, 0],
+    "controls": "free"
+  },
+
+  "root": [
+    {
+      "entity": "cube_group",
+      "children": [
+        {
+          "entity": "cube1"
+        },
+        {
+          "entity": "cube2"
+        },
+        {
+          "entity": "cube3"
+        },
+        {
+          "entity": "cube4"
+        },
+        {
+          "entity": "cube5"
+        },
+        {
+          "entity": "cube6"
+        },
+        {
+          "entity": "cube7"
+        },
+        {
+          "entity": "cube8"
+        },
+        {
+          "entity": "cube9"
+        },
+        {
+          "entity": "cube10"
+        }
+      ]
+    },
+    {
+      "entity": "light_group",
+      "children": [
+        {
+          "entity": "point_light1"
+        },
+        {
+          "entity": "point_light2"
+        },
+        {
+          "entity": "point_light3"
+        },
+        {
+          "entity": "point_light4"
+        }
+      ]
+    }
+  ],
+
+  "entities": {
+    "cube_group": {
+      "type": "object"
+    },
+    "cube1": {
+      "type": "object",
+      "transform": {
+        "position": [0, 0, 0],
+        "rotation": {
+          "angle": 0,
+          "axis": [1.0, 0.3, 0.5]
+        }
+      },
+      "script": "spot_light_script",
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "cube2": {
+      "transform": {
+        "position": [2, 5, -15],
+        "rotation": {
+          "angle": 0.3491,
+          "axis": [1.0, 0.3, 0.5]
+        }
+      },
+      "script": "spot_light_script",
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "cube3": {
+      "transform": {
+        "position": [-1.5, -2.2, -2.5],
+        "rotation": {
+          "angle": 0.6981,
+          "axis": [1.0, 0.3, 0.5]
+        }
+      },
+      "script": "spot_light_script",
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "cube4": {
+      "transform": {
+        "position": [-3.8, -2, -12.3],
+        "rotation": {
+          "angle": 1.047,
+          "axis": [1.0, 0.3, 0.5]
+        }
+      },
+      "script": "spot_light_script",
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "cube5": {
+      "transform": {
+        "position": [2.4, -0.4, -3.5],
+        "rotation": {
+          "angle": 1.396,
+          "axis": [1.0, 0.3, 0.5]
+        }
+      },
+      "script": "spot_light_script",
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "cube6": {
+      "transform": {
+        "position": [-1.7, 3.0, -7.5],
+        "rotation": {
+          "angle": 1.745,
+          "axis": [1.0, 0.3, 0.5]
+        }
+      },
+      "script": "spot_light_script",
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "cube7": {
+      "transform": {
+        "position": [1.3, -2.0, -2.5],
+        "rotation": {
+          "angle": 2.094,
+          "axis": [1.0, 0.3, 0.5]
+        }
+      },
+      "script": "spot_light_script",
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "cube8": {
+      "transform": {
+        "position": [1.5, 2.0, -2.5],
+        "rotation": {
+          "angle": 2.443,
+          "axis": [1.0, 0.3, 0.5]
+        }
+      },
+      "script": "spot_light_script",
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "cube9": {
+      "transform": {
+        "position": [1.5, 0.2, -1.5],
+        "rotation": {
+          "angle": 2.793,
+          "axis": [1.0, 0.3, 0.5]
+        }
+      },
+      "script": "spot_light_script",
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+    "cube10": {
+      "transform": {
+        "position": [-1.3, 1.0, -1.5],
+        "rotation": {
+          "angle": 3.1415,
+          "axis": [1.0, 0.3, 0.5]
+        }
+      },
+      "script": "spot_light_script",
+      "geometry": "cube_geometry",
+      "material": "cube_material"
+    },
+
+    "light_group": {},
+    "point_light1": {
+      "transform": {
+        "position": [0.7, 0.2, 2.0],
+        "scale": [0.2, 0.2, 0.2]
+      },
+      "geometry": "cube_geometry",
+      "material": "light_material"
+    },
+    "point_light2": {
+      "transform": {
+        "position": [2.3, -3.3, -4.0],
+        "scale": [0.2, 0.2, 0.2]
+      },
+      "geometry": "cube_geometry",
+      "material": "light_material"
+    },
+    "point_light3": {
+      "transform": {
+        "position": [-4.0, 2.0, -12.0],
+        "scale": [0.2, 0.2, 0.2]
+      },
+      "geometry": "cube_geometry",
+      "material": "light_material"
+    },
+    "point_light4": {
+      "transform": {
+        "position": [0.0, 0.0, -3.0],
+        "scale": [0.2, 0.2, 0.2]
+      },
+      "geometry": "cube_geometry",
+      "material": "light_material"
+    }
+  },
+  "components": {
+    "cube_geometry": "/components/learnOpenGL/geometry/cubeGeometry.json",
+    "cube_material": {
+      "type": "shader",
+      "source": "/shaders/learnOpenGL/cubeMultipleLights.wgsl",
+      "vertex": {
+        "entryPoint": "vertex_main"
+      },
+      "fragment": {
+        "entryPoint": "fragment_main"
+      },
+      "uniforms": {
+        "model": "mat4",
+        "view": "mat4",
+        "projection": "mat4",
+
+        "view_position": "vec3",
+
+        "mat_shininess": 128,
+
+        "point_lights": [
+          {
+            "position": [0.7, 0.2, 2.0],
+            "ambient": [0.05, 0.05, 0.05],
+            "diffuse": [0.8, 0.8, 0.8],
+            "specular": [1.0, 1.0, 1.0],
+            "constant": 1.0,
+            "linear": 0.09,
+            "quadratic": 0.032
+          },
+          {
+            "position": [2.3, -3.3, -4.0],
+            "ambient": [0.05, 0.05, 0.05],
+            "diffuse": [0.8, 0.8, 0.8],
+            "specular": [1.0, 1.0, 1.0],
+            "constant": 1.0,
+            "linear": 0.09,
+            "quadratic": 0.032
+          },
+          {
+            "position": [-4.0, 2.0, -12.0],
+            "ambient": [0.05, 0.05, 0.05],
+            "diffuse": [0.8, 0.8, 0.8],
+            "specular": [1.0, 1.0, 1.0],
+            "constant": 1.0,
+            "linear": 0.09,
+            "quadratic": 0.032
+          },
+          {
+            "position": [0.0, 0.0, -3.0],
+            "ambient": [0.05, 0.05, 0.05],
+            "diffuse": [0.8, 0.8, 0.8],
+            "specular": [1.0, 1.0, 1.0],
+            "constant": 1.0,
+            "linear": 0.09,
+            "quadratic": 0.032
+          }
+        ],
+        "dir_light": {
+          "direction": [-0.2, -1.0, -0.3],
+          "ambient": [0.05, 0.05, 0.05],
+          "diffuse": [0.4, 0.4, 0.4],
+          "specular": [0.5, 0.5, 0.5]
+        },
+        "spot_light": {
+          "position": [0, 0, 3.0],
+          "direction": [0, 0, -1],
+          "ambient": [0.0, 0.0, 0.0],
+          "diffuse": [1.0, 1.0, 1.0],
+          "specular": [1.0, 1.0, 1.0],
+          "constant": 1.0,
+          "linear": 0.09,
+          "quadratic": 0.032,
+          "cut_off": 0.976296007119933,
+          "outer_cutoff": 0.965925826289068
+        }
+      },
+      "textures": [
+        {
+          "type": "texture2d",
+          "location": "/images/learnOpenGL/container2.png"
+        },
+        {
+          "type": "texture2d",
+          "location": "/images/learnOpenGL/container2_specular.png"
+        }
+      ]
+    },
+
+    "light_material": {
+      "type": "basic",
+      "colour": [1.0, 1.0, 1.0]
+    },
+
+    "spot_light_script": {
+      "type": "script",
+      "location": "/components/learnOpenGL/scripts/spotLight.js"
+    }
+  }
+}

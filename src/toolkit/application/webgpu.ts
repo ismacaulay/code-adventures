@@ -57,6 +57,7 @@ export async function createWebGPUApplication(
     engine: {
       entityManager,
       shaderManager,
+      cameraController,
 
       ComponentType,
     },

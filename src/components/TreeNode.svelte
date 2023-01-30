@@ -27,9 +27,11 @@
   }
 </style>
 
-<div class={selected === text ? 'selected' : ''} style:padding-left="{level * 10}px">
-  <span class="noselect" on:click={handleClick}>{text}</span>
+<div>
+  <div class={selected === text ? 'selected' : ''} style:padding-left="{level * 10}px">
+    <span class="noselect" on:click={handleClick}>{text}</span>
+  </div>
   {#each children as node}
-    <svelte:self text={node.uid} children={node.children} level={level + 1} {onSelected} />
+    <svelte:self text={node.uid} children={node.children} level={level + 1} {selected} {onSelected} />
   {/each}
 </div>

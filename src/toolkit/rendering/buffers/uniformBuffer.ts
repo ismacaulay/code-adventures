@@ -18,12 +18,14 @@ export enum UniformType {
   Mat4 = 'mat4',
 }
 
+export type UniformBufferDescriptorEntry =
+  | UniformType
+  | UniformBufferDescriptor
+  | [UniformType, number]
+  | [UniformBufferDescriptor, number];
+
 export interface UniformBufferDescriptor {
-  [key: string]:
-    | UniformType
-    | UniformBufferDescriptor
-    | [UniformType, number]
-    | [UniformBufferDescriptor, number];
+  [key: string]: UniformBufferDescriptorEntry;
 }
 
 export type UniformValue =

@@ -8,9 +8,9 @@ export function createTransformComponent({
   rotation = [0, 0, 0],
   scale = [1, 1, 1],
 }: {
-  position: vec3;
-  rotation: Rotation;
-  scale: vec3;
+  position?: vec3;
+  rotation?: Rotation;
+  scale?: vec3;
 }): TransformComponent {
   let matrix = mat4.create();
 

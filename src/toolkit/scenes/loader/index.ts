@@ -126,31 +126,43 @@ export function createSceneLoader({
 
           const { transform, geometry, material, script } = state;
 
-          entityManager.addComponent(uid, createTransformComponent({ ...transform }));
-
-          let geometryComponent: Component;
-          if (typeof geometry === 'string') {
-            geometryComponent = componentManager.get(geometry);
-            if (!isGeometryComponent(geometryComponent)) {
-              throw new Error(`[SceneLoader::load] Invalid geometry component: ${geometry}`);
-            }
+          if (transform) {
+            entityManager.addComponent(uid, createTransformComponent({ ...transform }));
           } else {
-            geometryComponent = await createGeometryComponent(geometry);
+            entityManager.addComponent(uid, createTransformComponent({}));
           }
-          entityManager.addComponent(uid, geometryComponent);
 
-          let materialComponent: Component;
-          if (typeof material === 'string') {
-            let sharedComponent = componentManager.get(material);
-            if (!isMaterialComponent(sharedComponent)) {
-              throw new Error(`[SceneLoader::load] Invalid material component: ${material}`);
+          if (geometry) {
+            let geometryComponent: Component;
+            if (typeof geometry === 'string') {
+              geometryComponent = componentManager.get(geometry);
+              if (!isGeometryComponent(geometryComponent)) {
+                throw new Error(`[SceneLoader::load] Invalid geometry component: ${geometry}`);
+              }
+            } else {
+              geometryComponent = await createGeometryComponent(geometry);
             }
-
-            materialComponent = structuredClone(sharedComponent);
-          } else {
-            materialComponent = await createMaterialComponent(material, { textureManager });
+            entityManager.addComponent(uid, geometryComponent);
           }
-          entityManager.addComponent(uid, materialComponent);
+
+          if (material) {
+            let materialComponent: Component;
+            if (typeof material === 'string') {
+              // TODO: this is not sharing a shader properly since it does
+              // not exist when its copied. This causes a new shader to be created
+              // everytime instead of being cloned. We can create the shader here
+              // since these are used materials for entities
+              let sharedComponent = componentManager.get(material);
+              if (!isMaterialComponent(sharedComponent)) {
+                throw new Error(`[SceneLoader::load] Invalid material component: ${material}`);
+              }
+
+              materialComponent = structuredClone(sharedComponent);
+            } else {
+              materialComponent = await createMaterialComponent(material, { textureManager });
+            }
+            entityManager.addComponent(uid, materialComponent);
+          }
 
           if (script) {
             let scriptComponent: Component;

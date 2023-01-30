@@ -1,5 +1,5 @@
 import type { vec3 } from 'gl-matrix';
-import type { UniformType, UniformValue } from 'toolkit/rendering/buffers/uniformBuffer';
+import type { UniformType } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { TextureV1 } from 'toolkit/rendering/textures';
 
 export enum MaterialComponentTypeV1 {
@@ -33,8 +33,16 @@ export interface MeshPhongMaterialV1 extends BaseMaterialComponentV1 {
   shininess: number;
 }
 
-interface UniformDictionaryV1 {
-  [key: string]: UniformType | UniformValue | UniformDictionaryV1;
+export type UniformValueV1 =
+  | boolean
+  | number
+  | ArrayLike<number>
+  | ArrayLike<number>[]
+  | UniformDictionaryV1
+  | UniformDictionaryV1[];
+
+export interface UniformDictionaryV1 {
+  [key: string]: UniformType | UniformValueV1;
 }
 
 interface BaseRawShaderMaterialV1 extends BaseMaterialComponentV1 {
