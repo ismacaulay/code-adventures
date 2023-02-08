@@ -3,10 +3,10 @@ function toUrl(path: string) {
   return `webgpu/${path}`;
 }
 
-function learnOpenGLPage(uid: string) {
+function learnOpenGLPage(uid: string, params?: { title?: string }) {
   return {
     url: toUrl(`learnOpenGL/${uid}`),
-    title: uid,
+    title: params?.title ?? uid,
     component: WebGPUScene,
     params: {
       scene: `/scenes/learnOpenGL/${uid}.json`,
@@ -21,7 +21,7 @@ export default [
       Implementation of the concepts taught by
       <a href="https://www.learnopengl.com">Learn OpenGL</a>
       as they provide a nice order to learn the basic concepts
-      of WebGPU.
+      of a graphics api.
     `,
     pages: [
       learnOpenGLPage('1-triangle'),
@@ -30,10 +30,25 @@ export default [
       learnOpenGLPage('4-camera'),
       learnOpenGLPage('5-materials'),
       learnOpenGLPage('6-lightmaps'),
-      learnOpenGLPage('6_1-lightmaps-emission'),
-      learnOpenGLPage('7-multipleLights'),
-      learnOpenGLPage('8-depthTesting'),
+      learnOpenGLPage('6_1-lightmaps-emission', { title: '6.1-emission lightmaps' }),
+      learnOpenGLPage('7-multipleLights', { title: '7-multiple lights' }),
+      learnOpenGLPage('8-depthTesting', { title: '8-depth testing' }),
       learnOpenGLPage('9-blending'),
+    ],
+  },
+  {
+    section: 'Transparency',
+    pages: [
+      {
+        section: 'Weighted Blended Order-Independent Transparency',
+        description: 'Coming Soon!',
+        pages: [],
+      },
+      // {
+      //   section: 'Depth Peeling',
+      //   description: 'Coming Soon!',
+      //   pages: [],
+      // },
     ],
   },
   {

@@ -1,5 +1,6 @@
 <script lang="ts">
   export let pages: any;
+  export let subsection = false;
 </script>
 
 <style>
@@ -11,7 +12,6 @@
   a {
     text-decoration: none;
   }
-
   a:link,
   a:visited {
     color: #118ab2;
@@ -23,11 +23,15 @@
 
 {#each pages as page}
   {#if page.section}
-    <h3>{page.section}</h3>
+    {#if subsection}
+      <h3>{page.section}</h3>
+    {:else}
+      <h2>{page.section}</h2>
+    {/if}
     {#if page.description}
       <p>{@html page.description}</p>
     {/if}
-    <svelte:self pages={page.pages} />
+    <svelte:self pages={page.pages} subsection={true}/>
   {:else if page.url}
     <a class="nav-link" href="/{page.url}">{page.title}</a>
   {/if}

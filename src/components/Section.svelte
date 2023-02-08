@@ -10,15 +10,14 @@
     margin-bottom: 20px;
   }
 
-  h2 {
+  h1 {
     font-weight: 300;
     margin: 0 0 0.5em 0;
-    /* color: #6c757d; */
   }
 </style>
 
 <div class="container">
-  <h2>{title}</h2>
+  <h1>{title}</h1>
 
   <slot />
 
