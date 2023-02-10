@@ -5,7 +5,7 @@ import { createBufferManager, DefaultBuffers } from 'toolkit/ecs/bufferManager';
 import { createComponentManager } from 'toolkit/ecs/componentManager';
 import { createEntityManager } from 'toolkit/ecs/entityManager';
 import { createScriptManager } from 'toolkit/ecs/scriptManager';
-import { createShaderManager, DefaultShaders } from 'toolkit/ecs/shaderManager';
+import { createShaderManager, DefaultShaders, type ShaderManager } from 'toolkit/ecs/shaderManager';
 import { createTextureManager } from 'toolkit/ecs/textureManager';
 import type { IndexBuffer } from 'toolkit/rendering/buffers/indexBuffer';
 import type { UniformBuffer } from 'toolkit/rendering/buffers/uniformBuffer';
@@ -24,6 +24,7 @@ export interface WebGPUApplication {
   readonly cameraController: CameraController;
   readonly sceneGraph: ReadonlySceneGraph;
   readonly entityManager: EntityManager;
+  readonly shaderManager: ShaderManager;
 
   loadScene(url: string): Promise<void>;
 
@@ -141,9 +142,17 @@ export async function createWebGPUApplication(
 
       // TODO: make the material updating cleaner
       if (material.subtype === MaterialComponentType.MeshBasic) {
-        shader.update({ model: transform.matrix, colour: material.colour });
+        shader.update({
+          model: transform.matrix,
+          opacity: material.opacity,
+          colour: material.colour,
+        });
       } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
-        shader.update({ model: transform.matrix, colour: material.colour });
+        shader.update({
+          model: transform.matrix,
+          opacity: material.opacity,
+          colour: material.colour,
+        });
       } else if (material.subtype === MaterialComponentType.MeshPhong) {
         throw new Error('Phong: Not implemented Yet');
       } else if (material.subtype === MaterialComponentType.RawShader) {
@@ -318,5 +327,6 @@ export async function createWebGPUApplication(
     cameraController,
     sceneGraph,
     entityManager,
+    shaderManager,
   };
 }

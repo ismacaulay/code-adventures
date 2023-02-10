@@ -1,0 +1,63 @@
+{
+  "version": 1,
+
+  "settings": {
+    "background": [0.1, 0.1, 0.1]
+  },
+  "camera": {
+    "type": "orthographic",
+    "target": [0, 0, 0],
+    "position": [0, 0, 5.0],
+    "up": [0, 1, 0],
+    "controls": "orbit"
+  },
+
+  "root": [{ "entity": "cube1" }, { "entity": "cube2" }, { "entity": "cube3" }],
+
+  "entities": {
+    "cube1": {
+      "transform": {
+        "position": [0, 0, 0],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "geometry": "cube_geometry",
+      "material": {
+        "type": "diffuse",
+        "transparent": true,
+        "opacity": 0.5,
+        "colour": [0.988, 0.58, 0.012]
+      }
+    },
+    "cube2": {
+      "transform": {
+        "position": [0, 0, 1],
+        "rotation": [0, 0, 0],
+        "scale": [0.5, 0.5, 0.5]
+      },
+      "geometry": "cube_geometry",
+      "material": {
+        "type": "diffuse",
+        "transparent": true,
+        "colour": [0.391, 0.455, 0.87]
+      }
+    },
+    "cube3": {
+      "transform": {
+        "position": [0, 0, -1],
+        "rotation": [0, 0, 0],
+        "scale": [0.5, 0.5, 0.5]
+      },
+      "geometry": "cube_geometry",
+      "material": {
+        "type": "diffuse",
+        "transparent": true,
+        "colour": [0.191, 0.83, 0.319]
+      }
+    }
+  },
+
+  "components": {
+    "cube_geometry": "/components/learnOpenGL/geometry/cubeGeometry.json"
+  }
+}

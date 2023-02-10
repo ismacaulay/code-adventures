@@ -142,9 +142,17 @@ export async function createMaterialComponent(
   { textureManager }: { textureManager: TextureManager },
 ): Promise<MaterialComponent> {
   if (material.type === MaterialComponentTypeV1.MeshBasicMaterial) {
-    return createMeshBasicMaterialComponent({ colour: material.colour });
+    return createMeshBasicMaterialComponent({
+      transparent: material.transparent ?? false,
+      opacity: material.opacity ?? 1.0,
+      colour: material.colour ?? [0.0, 0.0, 0.0],
+    });
   } else if (material.type === MaterialComponentTypeV1.MeshDiffuseMaterial) {
-    return createMeshDiffuseMaterialComponent({ colour: material.colour });
+    return createMeshDiffuseMaterialComponent({
+      transparent: material.transparent ?? false,
+      opacity: material.opacity ?? 1.0,
+      colour: material.colour ?? [0.0, 0.0, 0.0],
+    });
   } else if (material.type === MaterialComponentTypeV1.MeshPhongMaterial) {
     return createMeshPhongMaterialComponent({
       diffuse: material.diffuse,

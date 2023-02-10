@@ -41,8 +41,16 @@ export default [
     pages: [
       {
         section: 'Weighted Blended Order-Independent Transparency',
-        description: 'Coming Soon!',
-        pages: [],
+        pages: [
+          {
+            url: toUrl('cubes'),
+            title: 'Cubes',
+            component: WebGPUScene,
+            params: {
+              scene: '/scenes/transparency/wboit/cubes.json',
+            },
+          },
+        ],
       },
       // {
       //   section: 'Depth Peeling',

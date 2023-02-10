@@ -17,12 +17,16 @@ interface BaseMaterialComponentV1 {
 
 export interface MeshBasicMaterialV1 extends BaseMaterialComponentV1 {
   type: MaterialComponentTypeV1.MeshBasicMaterial;
-  colour: vec3;
+
+  opacity?: number;
+  colour?: vec3;
 }
 
 export interface MeshDiffuseMaterialV1 extends BaseMaterialComponentV1 {
   type: MaterialComponentTypeV1.MeshDiffuseMaterial;
-  colour: vec3;
+
+  opacity?: number;
+  colour?: vec3;
 }
 
 export interface MeshPhongMaterialV1 extends BaseMaterialComponentV1 {

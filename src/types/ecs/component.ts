@@ -94,6 +94,8 @@ export interface MeshBasicMaterialComponent extends BaseMaterialComponent {
   subtype: MaterialComponentType.MeshBasic;
 
   shader?: number;
+
+  opacity: number;
   colour: vec3;
 }
 
@@ -101,6 +103,8 @@ export interface MeshDiffuseMaterialComponent extends BaseMaterialComponent {
   subtype: MaterialComponentType.MeshDiffuse;
 
   shader?: number;
+
+  opacity: number;
   colour: vec3;
 }
 

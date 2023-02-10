@@ -14,6 +14,7 @@
   import MaterialEditor from 'components/MaterialEditor.svelte';
   import { createCameraViewModel, type CameraViewModel } from '../models/camera';
   import CameraEditor from './CameraEditor.svelte';
+  import { createMaterialViewModel, type MaterialViewModel } from '../models/material';
 
   export let scene: Maybe<string>;
 
@@ -26,6 +27,7 @@
   let selectedComponents: (Camera | Component)[] = [];
 
   let cameraViewModel: CameraViewModel;
+  let materialViewModel: MaterialViewModel
 
   function handleTreeItemSelected(uid: string) {
     if (!app) {
@@ -56,6 +58,7 @@
       const material = entityManager.getComponent(uid, ComponentType.Material);
       if (material) {
         selectedComponents.push(material);
+        materialViewModel = createMaterialViewModel(material);
       }
     }
   }
@@ -213,7 +216,7 @@
                 {:else if component.type === ComponentType.Geometry}
                   <GeometryComponent {component} />
                 {:else if component.type === ComponentType.Material}
-                  <MaterialEditor {component} />
+                  <MaterialEditor model={materialViewModel}/>
                 {/if}
               {/each}
             </div>

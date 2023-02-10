@@ -19,30 +19,40 @@ import {
 } from 'types/ecs/component';
 
 export function createMeshBasicMaterialComponent({
+  transparent,
+  opacity,
   colour,
 }: {
+  transparent: boolean;
+  opacity: number;
   colour: vec3;
 }): MeshBasicMaterialComponent {
   return {
     type: ComponentType.Material,
     subtype: MaterialComponentType.MeshBasic,
 
+    opacity,
     colour,
-    transparent: false,
+    transparent,
   };
 }
 
 export function createMeshDiffuseMaterialComponent({
+  transparent,
+  opacity,
   colour,
 }: {
+  transparent: boolean;
+  opacity: number;
   colour: vec3;
 }): MeshDiffuseMaterialComponent {
   return {
     type: ComponentType.Material,
     subtype: MaterialComponentType.MeshDiffuse,
 
+    opacity,
     colour,
-    transparent: false,
+    transparent,
   };
 }
 

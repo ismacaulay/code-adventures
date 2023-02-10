@@ -161,6 +161,7 @@ function getMeshBasicShaderDescriptor(): ShaderDescriptor {
   const shaderSource = `
 struct UBO {
   model: mat4x4<f32>,
+  opacity: f32,
   colour: vec3<f32>,
 }
 
@@ -187,7 +188,7 @@ fn vertex_main(@location(0) position: vec3<f32>) -> VertexOutput {
 
 @fragment
 fn fragment_main() -> @location(0) vec4<f32> {
-  return vec4<f32>(ubo.colour, 1.0);
+  return vec4<f32>(ubo.colour, ubo.opacity);
 }
 `;
 
@@ -199,11 +200,22 @@ fn fragment_main() -> @location(0) vec4<f32> {
     fragment: {
       entryPoint: 'fragment_main',
     },
+    blend: {
+      color: {
+        srcFactor: 'src-alpha',
+        dstFactor: 'one-minus-src-alpha',
+      },
+      alpha: {
+        srcFactor: 'src-alpha',
+        dstFactor: 'one-minus-src-alpha',
+      },
+    },
     bindings: [
       {
         type: ShaderBindingType.UniformBuffer,
         descriptor: {
           model: UniformType.Mat4,
+          opacity: UniformType.Scalar,
           colour: UniformType.Vec3,
         },
       },
@@ -223,6 +235,7 @@ function getMeshDiffuseShaderDescriptor(): ShaderDescriptor {
   const shaderSource = `
 struct UBO {
   model: mat4x4<f32>,
+  opacity: f32,
   colour: vec3<f32>,
 }
 
@@ -263,7 +276,7 @@ fn fragment_main(@location(0) position_eye: vec4<f32>) -> @location(0) vec4<f32>
   kd = kd + light1.w * max(dot(normal, normalize(light1.xyz)), MIN_DIFFUSE);
   kd = kd + light2.w * max(dot(normal, normalize(light2.xyz)), MIN_DIFFUSE);
 
-  return vec4<f32>(kd * ubo.colour, 1.0);
+  return vec4<f32>(kd * ubo.colour, ubo.opacity);
 }
 `;
 
@@ -275,11 +288,24 @@ fn fragment_main(@location(0) position_eye: vec4<f32>) -> @location(0) vec4<f32>
     fragment: {
       entryPoint: 'fragment_main',
     },
+    blend: {
+      color: {
+        operation: 'add',
+        srcFactor: 'src-alpha',
+        dstFactor: 'one-minus-src-alpha',
+      },
+      alpha: {
+        operation: 'add',
+        srcFactor: 'src-alpha',
+        dstFactor: 'one-minus-src-alpha',
+      },
+    },
     bindings: [
       {
         type: ShaderBindingType.UniformBuffer,
         descriptor: {
           model: UniformType.Mat4,
+          opacity: UniformType.Scalar,
           colour: UniformType.Vec3,
         },
       },
