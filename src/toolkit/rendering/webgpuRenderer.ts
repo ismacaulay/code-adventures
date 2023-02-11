@@ -1,10 +1,40 @@
-import { vec3 } from 'gl-matrix';
+import { vec2, vec3 } from 'gl-matrix';
+import { BufferAttributeFormat, createVertexBuffer } from './buffers/vertexBuffer';
 import {
   CommandType,
   type CopyToTextureCommand,
   type DrawCommand,
   type WriteBufferCommand,
 } from './commands';
+import { createDefaultRenderer } from './webgpu/renderer/defaultRenderer';
+
+const screenShaderSource = `
+struct VertexOutput {
+  @builtin(position) position: vec4<f32>,
+  @location(0) uv: vec2<f32>,
+}
+
+@vertex
+fn vertex_main(
+  @location(0) a_pos: vec2<f32>,
+  @location(1) a_uv: vec2<f32>
+) -> VertexOutput {
+  var out: VertexOutput;
+  out.position = vec4(a_pos.x, a_pos.y, 0.0, 1.0);
+  out.uv = a_uv;
+  return out;
+}
+
+@group(0) @binding(0)
+var u_sampler: sampler;
+@group(0) @binding(1)
+var u_texture: texture_2d<f32>;
+
+@fragment
+fn fragment_main(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {
+  return textureSample(u_texture, u_sampler, uv);
+}
+`;
 
 export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
   const gpu = navigator.gpu;
@@ -26,7 +56,7 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
   }
 
   const devicePixelRatio = window.devicePixelRatio || 1;
-  let presentationSize = [size[0] * devicePixelRatio, size[1] * devicePixelRatio];
+  let presentationSize: vec2 = [size[0] * devicePixelRatio, size[1] * devicePixelRatio];
 
   // configure the context
   const presentationFormat = gpu.getPreferredCanvasFormat();
@@ -45,22 +75,77 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
   });
 
-  const pipelineCache: GenericObject<GPURenderPipeline> = {};
-  const bindGroupCache: GenericObject<any> = {};
+  // const pipelineCache: GenericObject<GPURenderPipeline> = {};
+  // const bindGroupCache: GenericObject<any> = {};
 
   let draws: DrawCommand[] = [];
   let commands: (WriteBufferCommand | CopyToTextureCommand)[] = [];
 
-  let clearColour = vec3.create(1.0, 1.0, 1.0);
+  let renderer = createDefaultRenderer(device, { size: presentationSize });
+
+  // setup screen quad
+  const screenSampler = device.createSampler();
+  // prettier-ignore
+  const screenVertices = new Float32Array([
+    // positions   // texCoords
+    -1.0,  1.0,  0.0, 0.0,
+    -1.0, -1.0,  0.0, 1.0,
+     1.0, -1.0,  1.0, 1.0,
+
+    -1.0,  1.0,  0.0, 0.0,
+     1.0, -1.0,  1.0, 1.0,
+     1.0,  1.0,  1.0, 0.0
+  ]);
+  const screenVertexBuffer = createVertexBuffer(device, {
+    array: screenVertices,
+    attributes: [
+      {
+        location: 0,
+        format: BufferAttributeFormat.Float32x2,
+      },
+      {
+        location: 1,
+        format: BufferAttributeFormat.Float32x2,
+      },
+    ],
+  });
+
+  const screenShaderModule = device.createShaderModule({
+    code: screenShaderSource,
+  });
+  const screenPipeline = device.createRenderPipeline({
+    layout: 'auto',
+    vertex: {
+      module: screenShaderModule,
+      entryPoint: 'vertex_main',
+      buffers: [screenVertexBuffer.layout],
+    },
+    fragment: {
+      module: screenShaderModule,
+      entryPoint: 'fragment_main',
+      targets: [
+        {
+          format: presentationFormat,
+        },
+      ],
+    },
+
+    primitive: {
+      topology: 'triangle-list',
+      cullMode: 'none',
+    },
+  });
+
+  let screenBindGroup: Maybe<GPUBindGroup>;
 
   return {
     device,
 
     get clearColour() {
-      return clearColour;
+      return renderer.clearColour;
     },
     set clearColour(value: vec3) {
-      clearColour = value;
+      vec3.copy(renderer.clearColour, value);
     },
 
     begin() {},
@@ -83,31 +168,12 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
 
         canvas.width = presentationSize[0];
         canvas.height = presentationSize[1];
-        depthTexture.destroy();
-        depthTexture = device.createTexture({
-          size: presentationSize,
-          format: 'depth24plus',
-          usage: GPUTextureUsage.RENDER_ATTACHMENT,
-        });
+        renderer.resize(presentationSize);
+
+        // when the size changes, the renderer texture gets recreated so we need
+        // to invalidate the screen bindgroup
+        screenBindGroup = undefined;
       }
-
-      const renderPassDescriptor: GPURenderPassDescriptor = {
-        colorAttachments: [
-          {
-            view: context.getCurrentTexture().createView(),
-            clearValue: [clearColour[0], clearColour[1], clearColour[2], 1],
-            loadOp: 'clear',
-            storeOp: 'store',
-          },
-        ],
-        depthStencilAttachment: {
-          view: depthTexture.createView(),
-
-          depthClearValue: 1.0,
-          depthLoadOp: 'clear',
-          depthStoreOp: 'store',
-        },
-      };
 
       const commandEncoder = device.createCommandEncoder();
 
@@ -150,83 +216,41 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
       }
       commands = [];
 
-      const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-
-      for (let i = 0; i < draws.length; ++i) {
-        const { shader, buffers, count, instances, indices } = draws[i];
-
-        // setup the render pipeline for the shader
-        let pipeline = pipelineCache[shader.id];
-        if (!pipeline) {
-          pipeline = device.createRenderPipeline({
-            layout: 'auto',
-            vertex: {
-              module: shader.vertex.module,
-              entryPoint: shader.vertex.entryPoint,
-              buffers: buffers.map((buf) => buf.layout),
-            },
-            fragment: {
-              module: shader.fragment.module,
-              entryPoint: shader.fragment.entryPoint,
-              targets: [
-                {
-                  format: presentationFormat,
-                  blend: shader.blend,
-                },
-              ],
-            },
-
-            primitive: {
-              topology: 'triangle-list',
-              cullMode: 'none',
-            },
-
-            depthStencil: {
-              depthWriteEnabled: true,
-              depthCompare: 'less',
-              format: 'depth24plus',
-            },
-          });
-          pipelineCache[shader.id] = pipeline;
-        }
-        passEncoder.setPipeline(pipeline);
-
-        // setup the shader bind groups
-        let groups = bindGroupCache[shader.id];
-        if (!groups) {
-          groups = shader.bindings.map((groupDescriptors, idx) => {
-            return device.createBindGroup({
-              layout: pipeline.getBindGroupLayout(idx),
-              entries: groupDescriptors.entries.map((entry, idx) => {
-                return {
-                  binding: idx,
-                  resource: entry.resource,
-                };
-              }),
-            });
-          });
-          bindGroupCache[shader.id] = groups;
-        }
-        groups.forEach((group: any, idx: number) => {
-          passEncoder.setBindGroup(idx, group);
-        });
-
-        // setup the vertex buffers
-        buffers.forEach((buf, idx) => {
-          passEncoder.setVertexBuffer(idx, buf.buffer);
-        });
-
-        // draw
-        if (indices) {
-          passEncoder.setIndexBuffer(indices.buffer, indices.format);
-          passEncoder.drawIndexed(count, instances, 0, 0, 0);
-        } else {
-          passEncoder.draw(count, instances, 0, 0);
-        }
-      }
+      // use the renderer for the draw commands
+      renderer.render(commandEncoder, draws);
       draws = [];
 
+      // render the final texture to a quad
+      const passEncoder = commandEncoder.beginRenderPass({
+        colorAttachments: [
+          {
+            view: context.getCurrentTexture().createView(),
+            clearValue: [0, 0, 0, 1],
+            loadOp: 'clear',
+            storeOp: 'store',
+          },
+        ],
+      });
+
+      passEncoder.setPipeline(screenPipeline);
+
+      if (!screenBindGroup) {
+        screenBindGroup = device.createBindGroup({
+          layout: screenPipeline.getBindGroupLayout(0),
+          entries: [
+            { binding: 0, resource: screenSampler },
+            {
+              binding: 1,
+              resource: renderer.texture.createView(),
+            },
+          ],
+        });
+      }
+      passEncoder.setBindGroup(0, screenBindGroup);
+      passEncoder.setVertexBuffer(0, screenVertexBuffer.buffer);
+      passEncoder.draw(6, 1, 0, 0);
       passEncoder.end();
+
       device.queue.submit([commandEncoder.finish()]);
     },
 

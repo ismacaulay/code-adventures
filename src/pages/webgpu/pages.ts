@@ -43,7 +43,7 @@ export default [
         section: 'Weighted Blended Order-Independent Transparency',
         pages: [
           {
-            url: toUrl('cubes'),
+            url: toUrl('transparency/cubes'),
             title: 'Cubes',
             component: WebGPUScene,
             params: {

@@ -2,8 +2,10 @@
   "version": 1,
 
   "settings": {
-    "background": [0.1, 0.1, 0.1]
+    "background": [0.1, 0.1, 0.1],
+    "transparency": "weighted-blended-oit"
   },
+
   "camera": {
     "type": "orthographic",
     "target": [0, 0, 0],
