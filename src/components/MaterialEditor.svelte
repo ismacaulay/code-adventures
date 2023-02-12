@@ -70,7 +70,7 @@
 
 <Component title="Material">
   <div class="container">
-    {#if model.type === MaterialComponentType.MeshDiffuse}
+    {#if model.type === MaterialComponentType.MeshBasic || model.type === MaterialComponentType.MeshDiffuse}
       <div class="inputContainer">
         <span class="label">transparent:</span>
         <input type="checkbox" bind:checked={$transparent} />

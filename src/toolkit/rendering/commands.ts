@@ -19,6 +19,7 @@ export interface DrawCommand extends BaseCommand {
   buffers: VertexBuffer[];
   count: number;
   instances: number;
+  transparent: boolean;
 }
 
 export interface WriteBufferCommand extends BaseCommand {

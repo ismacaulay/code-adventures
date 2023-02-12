@@ -11,11 +11,17 @@ import type { IndexBuffer } from 'toolkit/rendering/buffers/indexBuffer';
 import type { UniformBuffer } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { VertexBuffer } from 'toolkit/rendering/buffers/vertexBuffer';
 import { CommandType } from 'toolkit/rendering/commands';
+import { RendererType } from 'toolkit/rendering/renderer';
 import type { Shader } from 'toolkit/rendering/shader';
 import { createWebGPURenderer } from 'toolkit/rendering/webgpuRenderer';
 import { createSceneGraph } from 'toolkit/sceneGraph';
 import { createSceneLoader } from 'toolkit/scenes/loader';
-import { ComponentType, MaterialComponentType } from 'types/ecs/component';
+import {
+  ComponentType,
+  isWeightedBlendedShaderId,
+  MaterialComponentType,
+  type MaterialComponent,
+} from 'types/ecs/component';
 
 import type { EntityManager } from 'types/ecs/entity';
 import type { ReadonlySceneGraph, SceneGraphNode } from 'types/sceneGraph';
@@ -49,7 +55,11 @@ export async function createWebGPUApplication(
   const entityManager = createEntityManager();
   const bufferManager = createBufferManager(renderer.device);
   const textureManager = createTextureManager(renderer.device);
-  const shaderManager = createShaderManager(renderer.device, { bufferManager, textureManager });
+  const shaderManager = createShaderManager(renderer.device, {
+    bufferManager,
+    textureManager,
+    renderer,
+  });
   const componentManager = createComponentManager();
 
   const system = {
@@ -81,6 +91,45 @@ export async function createWebGPUApplication(
   let lastFrameTime = performance.now();
   let dt = 0;
   const tmp = vec3.create();
+
+  function isMaterialTransparent(material: MaterialComponent) {
+    if (
+      material.subtype !== MaterialComponentType.MeshBasic &&
+      material.subtype !== MaterialComponentType.MeshDiffuse
+    ) {
+      throw new Error(`[isMaterialTransparent] subtype: ${material.subtype} not implemented yet!`);
+    }
+
+    return material.transparent && material.opacity !== 1.0;
+  }
+
+  function getShaderForMaterial(material: MaterialComponent) {
+    if (
+      material.subtype !== MaterialComponentType.MeshBasic &&
+      material.subtype !== MaterialComponentType.MeshDiffuse
+    ) {
+      throw new Error(`[getShaderForMaterial] subtype: ${material.subtype} not implemented yet!`);
+    }
+
+    const transparent = isMaterialTransparent(material);
+
+    if (renderer.type === RendererType.Default) {
+      if (typeof material.shader !== 'number') {
+        throw new Error(`Invalid shader for render type: ${material.shader}`);
+      }
+
+      return shaderManager.get<Shader>(material.shader);
+    } else if (renderer.type === RendererType.WeightedBlended) {
+      if (!isWeightedBlendedShaderId(material.shader)) {
+        throw new Error(`Invalid shader for render type: ${material.shader}`);
+      }
+      return transparent
+        ? shaderManager.get<Shader>(material.shader.transparent)
+        : shaderManager.get<Shader>(material.shader.opaque);
+    }
+
+    throw new Error(`Unknown renderer type: ${renderer.type}`);
+  }
 
   function renderNode(node: SceneGraphNode) {
     const { uid, children } = node;
@@ -130,24 +179,29 @@ export async function createWebGPUApplication(
         } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
           material.shader = shaderManager.create(DefaultShaders.MeshDiffuse);
         } else if (material.subtype === MaterialComponentType.MeshPhong) {
-          material.shader = shaderManager.create(DefaultShaders.MeshPhong);
+          material.shader = shaderManager.create(DefaultShaders.MeshPhong) as number;
         } else if (material.subtype === MaterialComponentType.RawShader) {
-          material.shader = shaderManager.create(material.descriptor);
+          material.shader = shaderManager.create(material.descriptor) as number;
         } else {
           throw new Error(`Unknown MaterialComponentType: ${(material as any).subtype}`);
         }
       }
 
-      const shader = shaderManager.get<Shader>(material.shader);
+      let shader: Shader;
+      let transparent = material.transparent;
 
       // TODO: make the material updating cleaner
       if (material.subtype === MaterialComponentType.MeshBasic) {
+        transparent = isMaterialTransparent(material);
+        shader = getShaderForMaterial(material);
         shader.update({
           model: transform.matrix,
           opacity: material.opacity,
           colour: material.colour,
         });
       } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
+        transparent = isMaterialTransparent(material);
+        shader = getShaderForMaterial(material);
         shader.update({
           model: transform.matrix,
           opacity: material.opacity,
@@ -156,6 +210,7 @@ export async function createWebGPUApplication(
       } else if (material.subtype === MaterialComponentType.MeshPhong) {
         throw new Error('Phong: Not implemented Yet');
       } else if (material.subtype === MaterialComponentType.RawShader) {
+        shader = shaderManager.get<Shader>(material.shader!);
         if (material.uniforms) {
           if ('model' in material.uniforms) {
             mat4.copy(material.uniforms.model as mat4, transform.matrix);
@@ -175,7 +230,10 @@ export async function createWebGPUApplication(
 
           shader.update(material.uniforms);
         }
+      } else {
+        throw new Error(`Unknown material subtype: ${(material as any).subtype}`);
       }
+
       shader.buffers.forEach((buf) => {
         renderer.submit({
           type: CommandType.WriteBuffer,
@@ -199,6 +257,7 @@ export async function createWebGPUApplication(
         buffers: vertexBuffers,
         count: geometry.count,
         instances: geometry.instances,
+        transparent,
       });
     }
 

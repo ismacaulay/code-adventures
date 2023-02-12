@@ -7,6 +7,7 @@ import {
   type WriteBufferCommand,
 } from './commands';
 import { createDefaultRenderer } from './webgpu/renderer/defaultRenderer';
+import { createWeightedBlendedRenderer } from './webgpu/renderer/weightedBlendedRenderer';
 
 const screenShaderSource = `
 struct VertexOutput {
@@ -81,13 +82,14 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
   let draws: DrawCommand[] = [];
   let commands: (WriteBufferCommand | CopyToTextureCommand)[] = [];
 
-  let renderer = createDefaultRenderer(device, { size: presentationSize });
+  // let renderer = createDefaultRenderer(device, { size: presentationSize });
+  let renderer = createWeightedBlendedRenderer(device, { size: presentationSize });
 
   // setup screen quad
   const screenSampler = device.createSampler();
   // prettier-ignore
   const screenVertices = new Float32Array([
-    // positions   // texCoords
+    // positions // uv
     -1.0,  1.0,  0.0, 0.0,
     -1.0, -1.0,  0.0, 1.0,
      1.0, -1.0,  1.0, 1.0,
@@ -140,6 +142,10 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
 
   return {
     device,
+
+    get type() {
+      return renderer.type;
+    },
 
     get clearColour() {
       return renderer.clearColour;

@@ -8,6 +8,14 @@ export interface BaseMaterialViewModel {
   destroy(): void;
 }
 
+export interface MeshBasicMaterialViewModel extends BaseMaterialViewModel {
+  type: MaterialComponentType.MeshBasic;
+
+  transparent: Writable<boolean>;
+  opacity: Writable<number>;
+  colour: Writable<vec3>;
+}
+
 export interface MeshDiffuseMaterialViewModel extends BaseMaterialViewModel {
   type: MaterialComponentType.MeshDiffuse;
 
@@ -16,12 +24,15 @@ export interface MeshDiffuseMaterialViewModel extends BaseMaterialViewModel {
   colour: Writable<vec3>;
 }
 
-export type MaterialViewModel = MeshDiffuseMaterialViewModel;
+export type MaterialViewModel = MeshBasicMaterialViewModel | MeshDiffuseMaterialViewModel;
 
 export function createMaterialViewModel(component: MaterialComponent): MaterialViewModel {
   let unsubscribers: Unsubscriber[] = [];
 
-  if (component.subtype === MaterialComponentType.MeshDiffuse) {
+  if (
+    component.subtype === MaterialComponentType.MeshBasic ||
+    component.subtype === MaterialComponentType.MeshDiffuse
+  ) {
     const transparent = writable(component.transparent);
     const opacity = writable(component.opacity);
     const colour = writable(vec3.clone(component.colour));

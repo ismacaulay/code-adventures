@@ -43,6 +43,14 @@ export default [
         section: 'Weighted Blended Order-Independent Transparency',
         pages: [
           {
+            url: toUrl('transparency/quads'),
+            title: 'Quads',
+            component: WebGPUScene,
+            params: {
+              scene: '/scenes/transparency/wboit/quads.json',
+            },
+          },
+          {
             url: toUrl('transparency/cubes'),
             title: 'Cubes',
             component: WebGPUScene,

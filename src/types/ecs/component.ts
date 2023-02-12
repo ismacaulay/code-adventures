@@ -83,6 +83,13 @@ export enum MaterialComponentType {
   RawShader,
 }
 
+export type WeightedBlendedShaderId = { opaque: number; transparent: number };
+export type ShaderId = number | WeightedBlendedShaderId;
+
+export function isWeightedBlendedShaderId(id: any): id is WeightedBlendedShaderId {
+  return id !== undefined && 'opaque' in id && 'transparent' in id;
+}
+
 interface BaseMaterialComponent extends BaseComponent {
   type: ComponentType.Material;
   subtype: MaterialComponentType;
@@ -93,7 +100,7 @@ interface BaseMaterialComponent extends BaseComponent {
 export interface MeshBasicMaterialComponent extends BaseMaterialComponent {
   subtype: MaterialComponentType.MeshBasic;
 
-  shader?: number;
+  shader?: ShaderId;
 
   opacity: number;
   colour: vec3;
@@ -102,7 +109,7 @@ export interface MeshBasicMaterialComponent extends BaseMaterialComponent {
 export interface MeshDiffuseMaterialComponent extends BaseMaterialComponent {
   subtype: MaterialComponentType.MeshDiffuse;
 
-  shader?: number;
+  shader?: ShaderId;
 
   opacity: number;
   colour: vec3;

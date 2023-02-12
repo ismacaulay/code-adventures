@@ -1,5 +1,6 @@
 import { vec2, vec3 } from 'gl-matrix';
 import type { DrawCommand } from 'toolkit/rendering/commands';
+import { RendererType } from 'toolkit/rendering/renderer';
 
 export function createDefaultRenderer(device: GPUDevice, params: { size: vec2 }) {
   let clearColour = vec3.fromValues(1.0, 1.0, 1.0);
@@ -21,6 +22,8 @@ export function createDefaultRenderer(device: GPUDevice, params: { size: vec2 })
   });
 
   return {
+    type: RendererType.Default,
+
     get clearColour() {
       return clearColour;
     },
