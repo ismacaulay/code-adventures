@@ -35,8 +35,12 @@ fn fragment_main(@builtin(position) frag_coord: vec4<f32>) -> @location(0) vec4<
 }
 `;
 
-export function createWeightedBlendedRenderer(device: GPUDevice, params: { size: vec2 }) {
-  const clearColour = vec3.fromValues(1.0, 1.0, 1.0);
+export function createWeightedBlendedRenderer(
+  device: GPUDevice,
+  params: { clearColour: vec3; size: vec2 },
+) {
+  console.log('Using weighted blended renderer');
+  const clearColour = vec3.clone(params.clearColour);
 
   const pipelineCache: GenericObject<GPURenderPipeline> = {};
   const bindGroupCache: GenericObject<any> = {};

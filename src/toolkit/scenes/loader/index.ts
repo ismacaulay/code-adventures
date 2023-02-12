@@ -8,7 +8,7 @@ import {
 import { createTransformComponent } from 'toolkit/ecs/components/transform';
 import type { ScriptManager } from 'toolkit/ecs/scriptManager';
 import type { TextureManager } from 'toolkit/ecs/textureManager';
-import type { Renderer } from 'toolkit/rendering/renderer';
+import { RendererType, type Renderer } from 'toolkit/rendering/renderer';
 import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
 import type { Component } from 'types/ecs/component';
 import type { EntityManager } from 'types/ecs/entity';
@@ -89,8 +89,9 @@ export function createSceneLoader({
         throw new Error('Unkown scene version');
       }
 
-      const { background = [1.0, 1.0, 1.0] } = scene.settings ?? {};
-      renderer.clearColour = background;
+      const settings = scene.settings ?? {};
+      renderer.clearColour = settings.background ?? [1.0, 1.0, 1.0];
+      renderer.type = settings.renderer ?? RendererType.Default;
 
       const { type, target, position, up, controls } = scene.camera;
       cameraController.cameraType = type;

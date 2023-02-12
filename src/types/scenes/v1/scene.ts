@@ -1,4 +1,5 @@
 import type { vec3 } from 'gl-matrix';
+import type { RendererType } from 'toolkit/rendering/renderer';
 import type { ComponentV1 } from 'toolkit/scenes/component';
 import type { CameraV1 } from './camera';
 import type { EntityV1 } from './entity';
@@ -9,7 +10,8 @@ interface BaseScene {
 }
 
 export interface SettingsV1 {
-  background: vec3;
+  background?: vec3;
+  renderer?: RendererType;
 }
 
 export interface SceneV1 extends BaseScene {

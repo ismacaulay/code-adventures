@@ -3,7 +3,7 @@
 
   "settings": {
     "background": [0.1, 0.1, 0.1],
-    "transparency": "weighted-blended-oit"
+    "renderer": "weighted-blended"
   },
 
   "camera": {

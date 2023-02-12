@@ -2,8 +2,12 @@ import { vec2, vec3 } from 'gl-matrix';
 import type { DrawCommand } from 'toolkit/rendering/commands';
 import { RendererType } from 'toolkit/rendering/renderer';
 
-export function createDefaultRenderer(device: GPUDevice, params: { size: vec2 }) {
-  let clearColour = vec3.fromValues(1.0, 1.0, 1.0);
+export function createDefaultRenderer(
+  device: GPUDevice,
+  params: { clearColour: vec3; size: vec2 },
+) {
+  console.log('Using default renderer');
+  const clearColour = vec3.clone(params.clearColour);
 
   const pipelineCache: GenericObject<GPURenderPipeline> = {};
   const bindGroupCache: GenericObject<any> = {};
@@ -26,9 +30,6 @@ export function createDefaultRenderer(device: GPUDevice, params: { size: vec2 })
 
     get clearColour() {
       return clearColour;
-    },
-    set clearColour(value: vec3) {
-      clearColour = value;
     },
 
     get texture() {

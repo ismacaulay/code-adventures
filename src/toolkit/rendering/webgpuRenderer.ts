@@ -6,6 +6,7 @@ import {
   type DrawCommand,
   type WriteBufferCommand,
 } from './commands';
+import { RendererType } from './renderer';
 import { createDefaultRenderer } from './webgpu/renderer/defaultRenderer';
 import { createWeightedBlendedRenderer } from './webgpu/renderer/weightedBlendedRenderer';
 
@@ -82,8 +83,8 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
   let draws: DrawCommand[] = [];
   let commands: (WriteBufferCommand | CopyToTextureCommand)[] = [];
 
-  // let renderer = createDefaultRenderer(device, { size: presentationSize });
-  let renderer = createWeightedBlendedRenderer(device, { size: presentationSize });
+  const clearColour = vec3.fromValues(1.0, 1.0, 1.0);
+  let renderer = createDefaultRenderer(device, { clearColour, size: presentationSize });
 
   // setup screen quad
   const screenSampler = device.createSampler();
@@ -147,10 +148,31 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
       return renderer.type;
     },
 
+    set type(value: RendererType) {
+      if (value !== renderer.type) {
+        renderer.destroy();
+
+        if (value === RendererType.Default) {
+          renderer = createDefaultRenderer(device, {
+            clearColour,
+            size: presentationSize,
+          });
+        } else if (value === RendererType.WeightedBlended) {
+          renderer = createWeightedBlendedRenderer(device, {
+            clearColour,
+            size: presentationSize,
+          });
+        } else {
+          throw new Error(`Unknown renderer: ${value}`);
+        }
+      }
+    },
+
     get clearColour() {
-      return renderer.clearColour;
+      return clearColour;
     },
     set clearColour(value: vec3) {
+      vec3.copy(clearColour, value);
       vec3.copy(renderer.clearColour, value);
     },
 
