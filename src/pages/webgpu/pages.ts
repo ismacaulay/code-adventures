@@ -1,18 +1,24 @@
 import WebGPUScene from './components/WebGPUScene.svelte';
+
 function toUrl(path: string) {
   return `webgpu/${path}`;
 }
 
-function learnOpenGLPage(uid: string, params?: { title?: string }) {
-  return {
-    url: toUrl(`learnOpenGL/${uid}`),
-    title: params?.title ?? uid,
-    component: WebGPUScene,
-    params: {
-      scene: `/scenes/learnOpenGL/${uid}.json`,
-    },
+function createPageGenerator(path: string) {
+  return function generatePage(uid: string, params?: { title?: string }) {
+    return {
+      url: toUrl(`${path}/${uid}`),
+      title: params?.title ?? uid,
+      component: WebGPUScene,
+      params: {
+        scene: `/scenes/${path}/${uid}.json`,
+      },
+    };
   };
 }
+
+const learnOpenGLPage = createPageGenerator('learnOpenGL');
+const wboitPage = createPageGenerator('transparency/wboit');
 
 export default [
   {
@@ -41,30 +47,8 @@ export default [
     pages: [
       {
         section: 'Weighted Blended Order-Independent Transparency',
-        pages: [
-          {
-            url: toUrl('transparency/quads'),
-            title: 'Quads',
-            component: WebGPUScene,
-            params: {
-              scene: '/scenes/transparency/wboit/quads.json',
-            },
-          },
-          {
-            url: toUrl('transparency/cubes'),
-            title: 'Cubes',
-            component: WebGPUScene,
-            params: {
-              scene: '/scenes/transparency/wboit/cubes.json',
-            },
-          },
-        ],
+        pages: [wboitPage('quads'), wboitPage('cubes'), wboitPage('bunny'), wboitPage('dragon')],
       },
-      // {
-      //   section: 'Depth Peeling',
-      //   description: 'Coming Soon!',
-      //   pages: [],
-      // },
     ],
   },
   {
