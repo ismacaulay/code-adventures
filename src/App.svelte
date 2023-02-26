@@ -3,6 +3,7 @@
   import Home from './pages/Home.svelte';
   import computationalGeometry from './pages/computationalGeometry/pages';
   import webgpu from './pages/webgpu/pages';
+  import wasm from './pages/wasm/pages';
 
   let component: any;
   let params: any;
@@ -30,6 +31,8 @@
 
   addRoutes(computationalGeometry);
   addRoutes(webgpu);
+  addRoutes(wasm);
+
   router.start();
 </script>
 

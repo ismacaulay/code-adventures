@@ -1,6 +1,7 @@
 <script>
   import ComputationalGeometry from './computationalGeometry/index.svelte';
   import WebGPU from './webgpu/index.svelte';
+  import Wasm from './wasm/index.svelte';
 </script>
 
 <style>
@@ -12,5 +13,6 @@
 
 <div class="container">
   <WebGPU />
+  <Wasm />
   <ComputationalGeometry />
 </div>

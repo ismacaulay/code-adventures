@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import wasmPack from 'vite-plugin-wasm-pack';
 import path from 'path';
 
 // https://vitejs.dev/config/
@@ -13,5 +14,5 @@ export default defineConfig({
       types: path.resolve(__dirname, './src/types'),
     },
   },
-  plugins: [svelte()],
+  plugins: [wasmPack('./wasm/game-of-life'), svelte()],
 });

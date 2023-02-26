@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "wasm": "pnpm run wasm:game-of-life",
+    "wasm:game-of-life": "wasm-pack build ./wasm/game-of-life --target web"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.1",
@@ -30,7 +32,8 @@
     "svelte-preprocess": "^4.10.7",
     "tslib": "^2.4.0",
     "typescript": "^4.6.4",
-    "vite": "^3.0.7"
+    "vite": "^3.0.7",
+    "vite-plugin-wasm-pack": "^0.1.12"
   },
   "dependencies": {
     "gl-matrix": "^3.4.3",
