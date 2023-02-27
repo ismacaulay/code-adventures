@@ -201,6 +201,7 @@ export function processUniforms(uniforms: UniformBufferDescriptor) {
   }
 
   processUniformsRecursive(uniforms);
+  offset += computeFourBytePadding(offset);
   return { buffer: new Float32Array(offset), locations };
 }
 

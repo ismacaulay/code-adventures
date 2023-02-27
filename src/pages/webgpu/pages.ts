@@ -51,17 +51,4 @@ export default [
       },
     ],
   },
-  {
-    section: 'Other',
-    pages: [
-      {
-        url: toUrl('bunny'),
-        title: 'Bunny',
-        component: WebGPUScene,
-        params: {
-          scene: '/scenes/bunny.json',
-        },
-      },
-    ],
-  },
 ];
