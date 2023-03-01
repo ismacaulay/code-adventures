@@ -1,8 +1,7 @@
 import { vec2, vec3 } from 'gl-matrix';
-import { createVertexBuffer } from 'toolkit/rendering/buffers/vertexBuffer';
+import { BufferAttributeFormat, createVertexBuffer } from 'toolkit/rendering/buffers/vertexBuffer';
 import type { DrawCommand } from 'toolkit/rendering/commands';
 import { RendererType } from 'toolkit/rendering/renderer';
-import { BufferAttributeFormat } from 'types/ecs/component';
 
 const compositeShaderSource = `
 struct VertexOutput {
@@ -192,7 +191,7 @@ export function createWeightedBlendedRenderer(
           // setup the render pipeline for the shader
           let pipeline = pipelineCache[shader.id];
           if (!pipeline) {
-            pipeline = device.createRenderPipeline({
+            const descriptor: GPURenderPipelineDescriptor = {
               layout: 'auto',
               vertex: {
                 module: shader.vertex.module,
@@ -210,7 +209,7 @@ export function createWeightedBlendedRenderer(
               },
 
               primitive: {
-                topology: 'triangle-list',
+                topology: shader.topology ?? 'triangle-list',
                 cullMode: 'none',
               },
 
@@ -219,7 +218,8 @@ export function createWeightedBlendedRenderer(
                 depthCompare: 'less',
                 format: depthTexture.format,
               },
-            });
+            };
+            pipeline = device.createRenderPipeline(descriptor);
             pipelineCache[shader.id] = pipeline;
           }
           passEncoder.setPipeline(pipeline);
@@ -293,7 +293,7 @@ export function createWeightedBlendedRenderer(
           // setup the render pipeline for the shader
           let pipeline = pipelineCache[shader.id];
           if (!pipeline) {
-            pipeline = device.createRenderPipeline({
+            const descriptor: GPURenderPipelineDescriptor = {
               layout: 'auto',
               vertex: {
                 module: shader.vertex.module,
@@ -347,7 +347,9 @@ export function createWeightedBlendedRenderer(
                 depthCompare: 'less',
                 format: depthTexture.format,
               },
-            });
+            };
+
+            pipeline = device.createRenderPipeline(descriptor);
             pipelineCache[shader.id] = pipeline;
           }
           passEncoder.setPipeline(pipeline);

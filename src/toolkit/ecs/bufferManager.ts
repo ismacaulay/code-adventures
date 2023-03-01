@@ -1,13 +1,18 @@
 import type { Buffer } from 'toolkit/rendering/buffers';
-import { createIndexBuffer } from 'toolkit/rendering/buffers/indexBuffer';
+import {
+  createIndexBuffer,
+  type IndexBufferDescriptor,
+} from 'toolkit/rendering/buffers/indexBuffer';
 import {
   createUniformBuffer,
   UniformType,
   type UniformBufferDescriptor,
   type UniformDictionary,
 } from 'toolkit/rendering/buffers/uniformBuffer';
-import { createVertexBuffer } from 'toolkit/rendering/buffers/vertexBuffer';
-import type { IndexBufferDescriptor, VertexBufferDescriptor } from 'types/ecs/component';
+import {
+  createVertexBuffer,
+  type VertexBufferDescriptor,
+} from 'toolkit/rendering/buffers/vertexBuffer';
 
 export enum DefaultBuffers {
   ViewProjection = 0,

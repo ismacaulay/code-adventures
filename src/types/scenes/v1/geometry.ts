@@ -1,4 +1,4 @@
-import type { BufferAttributeFormat } from 'types/ecs/component';
+import type { BufferAttributeFormat } from 'toolkit/rendering/buffers/vertexBuffer';
 
 export enum GeometryComponentTypeV1 {
   Obj = 'obj',

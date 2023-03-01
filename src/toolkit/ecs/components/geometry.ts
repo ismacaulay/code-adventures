@@ -4,13 +4,16 @@ import type {
   IndexBufferDescriptor,
   VertexBufferDescriptor,
 } from 'types/ecs/component';
+import type { BoundingBox } from 'toolkit/geometry/boundingBox';
 
 export function createMeshGeometryComponent({
+  boundingBox,
   indices,
   buffers,
   count,
   instances = 1,
 }: {
+  boundingBox: BoundingBox;
   indices?: Uint16Array | Uint32Array;
   buffers: VertexBufferDescriptor[];
   count: number;
@@ -29,5 +32,7 @@ export function createMeshGeometryComponent({
     buffers,
     count,
     instances,
+    boundingBox,
+    showBoundingBox: false,
   };
 }

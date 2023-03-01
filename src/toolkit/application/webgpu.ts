@@ -7,6 +7,11 @@ import { createEntityManager } from 'toolkit/ecs/entityManager';
 import { createScriptManager } from 'toolkit/ecs/scriptManager';
 import { createShaderManager, DefaultShaders, type ShaderManager } from 'toolkit/ecs/shaderManager';
 import { createTextureManager } from 'toolkit/ecs/textureManager';
+import type { BoundingBox } from 'toolkit/geometry/boundingBox';
+import {
+  createBoundingBoxRenderer,
+  type RenderableBoundingBox,
+} from 'toolkit/rendering/boundingBoxRenderer';
 import type { IndexBuffer } from 'toolkit/rendering/buffers/indexBuffer';
 import type { UniformBuffer } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { VertexBuffer } from 'toolkit/rendering/buffers/vertexBuffer';
@@ -84,6 +89,12 @@ export async function createWebGPUApplication(
     renderer,
   });
 
+  const boundingBoxRenderer = createBoundingBoxRenderer({
+    renderer,
+    bufferManager,
+    shaderManager,
+  });
+
   // TODO: implement a needs update system so that it only rerenders
   // as necessary
   let frameId = -1;
@@ -91,6 +102,7 @@ export async function createWebGPUApplication(
   let lastFrameTime = performance.now();
   let dt = 0;
   const tmp = vec3.create();
+  const boundingBoxes: RenderableBoundingBox[] = [];
 
   function isMaterialTransparent(material: MaterialComponent) {
     if (
@@ -259,6 +271,10 @@ export async function createWebGPUApplication(
         instances: geometry.instances,
         transparent,
       });
+
+      if (geometry.showBoundingBox) {
+        boundingBoxes.push({ boundingBox: geometry.boundingBox, transform: transform.matrix });
+      }
     }
 
     children.forEach(renderNode);
@@ -319,6 +335,10 @@ export async function createWebGPUApplication(
       dst: matricesBuffer.buffer,
     });
 
+    // TODO: if nothing has changed we probably want to just keep rendering the bounding boxes
+    //       as is
+    boundingBoxes.length = 0;
+
     // we need to split the drawing into opaque and transparent objects
     // but this should be based on what type of transparent rendering
     // as an OIT would not need sorting. DWBOIT would still benefit from
@@ -346,6 +366,10 @@ export async function createWebGPUApplication(
       return 0;
     });
     transparent.forEach(renderNode);
+
+    if (boundingBoxes.length > 0) {
+      boundingBoxRenderer.render(boundingBoxes);
+    }
 
     renderer.end();
 

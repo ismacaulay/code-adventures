@@ -1,6 +1,9 @@
 import type { mat4, vec3 } from 'gl-matrix';
+import type { BoundingBox } from 'toolkit/geometry/boundingBox';
 import type { Rotation } from 'toolkit/math/rotation';
+import type { IndexBufferDescriptor } from 'toolkit/rendering/buffers/indexBuffer';
 import type { UniformDictionary } from 'toolkit/rendering/buffers/uniformBuffer';
+import type { VertexBufferDescriptor } from 'toolkit/rendering/buffers/vertexBuffer';
 import type { ShaderDescriptor } from 'toolkit/rendering/shader';
 
 export enum ComponentType {
@@ -35,33 +38,14 @@ export interface BaseGeometryComponent extends BaseComponent {
   type: ComponentType.Geometry;
 }
 
-export interface IndexBufferDescriptor {
-  id?: number;
-  array: Uint16Array | Uint32Array;
-}
-
-export enum BufferAttributeFormat {
-  Float32 = 'float32',
-  Float32x2 = 'float32x2',
-  Float32x3 = 'float32x3',
-}
-
-export interface BufferAttribute {
-  format: BufferAttributeFormat;
-  location: number;
-}
-
-export interface VertexBufferDescriptor {
-  id?: number;
-  array: Float32Array | Float64Array;
-  attributes: BufferAttribute[];
-}
-
 export interface MeshGeometryComponent extends BaseGeometryComponent {
+  boundingBox: BoundingBox;
   indices?: IndexBufferDescriptor;
   buffers: VertexBufferDescriptor[];
   count: number;
   instances: number;
+
+  showBoundingBox: boolean;
 }
 
 export type GeometryComponent = MeshGeometryComponent;

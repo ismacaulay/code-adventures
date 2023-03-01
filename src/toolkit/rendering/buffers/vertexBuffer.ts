@@ -12,6 +12,7 @@ export enum BufferAttributeFormat {
   Float32 = 'float32',
   Float32x2 = 'float32x2',
   Float32x3 = 'float32x3',
+  Float32x4 = 'float32x4',
 }
 
 export interface BufferAttribute {
@@ -39,6 +40,8 @@ function getStrideForFormat(type: BufferAttributeFormat) {
       return 4 * 2;
     case BufferAttributeFormat.Float32x3:
       return 4 * 3;
+    case BufferAttributeFormat.Float32x4:
+      return 4 * 4;
   }
 }
 

@@ -83,7 +83,7 @@ export function createDefaultRenderer(
             },
 
             primitive: {
-              topology: 'triangle-list',
+              topology: shader.topology ?? 'triangle-list',
               cullMode: 'none',
             },
 

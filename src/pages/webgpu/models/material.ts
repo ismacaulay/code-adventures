@@ -24,7 +24,16 @@ export interface MeshDiffuseMaterialViewModel extends BaseMaterialViewModel {
   colour: Writable<vec3>;
 }
 
-export type MaterialViewModel = MeshBasicMaterialViewModel | MeshDiffuseMaterialViewModel;
+export interface RawShaderMaterialViewModel extends BaseMaterialViewModel {
+  type: MaterialComponentType.RawShader;
+
+  transparent: Writable<boolean>;
+}
+
+export type MaterialViewModel =
+  | MeshBasicMaterialViewModel
+  | MeshDiffuseMaterialViewModel
+  | RawShaderMaterialViewModel;
 
 export function createMaterialViewModel(component: MaterialComponent): MaterialViewModel {
   let unsubscribers: Unsubscriber[] = [];
@@ -58,6 +67,22 @@ export function createMaterialViewModel(component: MaterialComponent): MaterialV
       transparent,
       opacity,
       colour,
+      destroy() {
+        unsubscribers.forEach((cb) => cb());
+        unsubscribers = [];
+      },
+    };
+  } else if (component.subtype === MaterialComponentType.RawShader) {
+    const transparent = writable(component.transparent);
+
+    unsubscribers.push(
+      transparent.subscribe((value) => {
+        component.transparent = value;
+      }),
+    );
+    return {
+      type: component.subtype,
+      transparent,
       destroy() {
         unsubscribers.forEach((cb) => cb());
         unsubscribers = [];

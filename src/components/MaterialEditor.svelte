@@ -28,20 +28,35 @@
       : undefined;
   }
 
-  let transparent: Writable<boolean>;
-  let opacity: Writable<number>;
-  let colour: string;
+  let transparent: Maybe<Writable<boolean>>;
+  let opacity: Maybe<Writable<number>>;
+  let colour: Maybe<string>;
 
   $: {
     transparent = model.transparent;
-    opacity = model.opacity;
-    colour = rgbToHex(get(model.colour));
+
+    if (
+      model.type === MaterialComponentType.MeshBasic ||
+      model.type === MaterialComponentType.MeshDiffuse
+    ) {
+      opacity = model.opacity;
+      colour = rgbToHex(get(model.colour));
+    } else {
+      opacity = undefined;
+      colour = undefined;
+    }
   }
 
   function handleColourInput() {
-    const rgb = hexToRgb(colour);
-    if (rgb) {
-      model.colour.set(rgb);
+    if (
+      colour &&
+      (model.type === MaterialComponentType.MeshBasic ||
+        model.type === MaterialComponentType.MeshDiffuse)
+    ) {
+      const rgb = hexToRgb(colour);
+      if (rgb) {
+        model.colour.set(rgb);
+      }
     }
   }
 
@@ -70,11 +85,13 @@
 
 <Component title="Material">
   <div class="container">
-    {#if model.type === MaterialComponentType.MeshBasic || model.type === MaterialComponentType.MeshDiffuse}
+    {#if transparent}
       <div class="inputContainer">
         <span class="label">transparent:</span>
         <input type="checkbox" bind:checked={$transparent} />
       </div>
+    {/if}
+    {#if opacity}
       <div class="inputContainer">
         <span class="label">opacity:</span>
         <div>
@@ -82,6 +99,9 @@
         </div>
         <span>{$opacity}</span>
       </div>
+    {/if}
+
+    {#if colour}
       <div class="inputContainer">
         <span class="label">colour:</span>
         <input type="color" bind:value={colour} on:input={handleColourInput} />

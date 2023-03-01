@@ -25,6 +25,7 @@ export enum DefaultShaders {
   MeshBasic = 0,
   MeshDiffuse = 1,
   MeshPhong = 2,
+  BoundingBox = 3,
 
   Count,
 }
@@ -33,7 +34,7 @@ export interface ShaderManager {
   get<T extends Shader>(id: number): T;
 
   create(id: DefaultShaders): ShaderId;
-  create(descriptor: ShaderDescriptor): ShaderId;
+  create(descriptor: ShaderDescriptor): number;
 
   clone(id: number, bindings: ShaderBindingDescriptor[]): number;
   destroy(): void;
@@ -51,7 +52,7 @@ export function createShaderManager(
   let next = DefaultShaders.Count;
 
   function create(id: DefaultShaders): ShaderId;
-  function create(descriptor: ShaderDescriptor): ShaderId;
+  function create(descriptor: ShaderDescriptor): number;
   function create(param: DefaultShaders | ShaderDescriptor): ShaderId {
     let descriptor: Maybe<ShaderDescriptor>;
     if (typeof param === 'number') {

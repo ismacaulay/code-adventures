@@ -1,3 +1,4 @@
+import { CameraType } from 'toolkit/camera/camera';
 import type { CameraController } from 'toolkit/camera/cameraController';
 import type { ComponentManager } from 'toolkit/ecs/componentManager';
 import {
@@ -93,7 +94,7 @@ export function createSceneLoader({
       renderer.clearColour = settings.background ?? [1.0, 1.0, 1.0];
       renderer.type = settings.renderer ?? RendererType.Default;
 
-      const { type, target, position, up, controls } = scene.camera;
+      const { type, target, position, up, zoom = 1, controls } = scene.camera;
       cameraController.cameraType = type;
       if (controls) {
         cameraController.controlType = controls;
@@ -101,6 +102,10 @@ export function createSceneLoader({
       cameraController.target = target;
       cameraController.position = position;
       cameraController.up = up;
+      if (cameraController.camera.type === CameraType.Orthographic) {
+        cameraController.camera.zoom = zoom;
+        cameraController.camera.updateProjectionMatrix();
+      }
 
       if (scene.components) {
         await Promise.all(

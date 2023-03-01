@@ -40,6 +40,7 @@ export interface Shader extends BaseShader {
   buffers: UniformBuffer[];
   textures: Texture[];
   blend?: GPUBlendState;
+  topology?: GPUPrimitiveTopology;
 
   update(uniforms: UniformDictionary): void;
 }
@@ -70,6 +71,7 @@ interface BaseShaderDescriptor {
   id?: number;
   bindings: ShaderBindingDescriptor[];
   blend?: GPUBlendState;
+  topology?: GPUPrimitiveTopology;
 }
 
 export interface SingleSourceShaderDescriptor extends BaseShaderDescriptor {
@@ -142,6 +144,7 @@ export function createShader(
     buffers,
     textures,
     blend: descriptor.blend,
+    topology: descriptor.topology,
   });
 }
 
@@ -164,6 +167,7 @@ function buildShader({
   buffers,
   textures,
   blend,
+  topology,
 }: {
   id: number;
   vertex: { module: GPUShaderModule; entryPoint: string };
@@ -172,6 +176,7 @@ function buildShader({
   buffers: UniformBuffer[];
   textures: Texture[];
   blend?: GPUBlendState;
+  topology?: GPUPrimitiveTopology;
 }): Shader {
   return {
     id,
@@ -181,6 +186,7 @@ function buildShader({
     buffers,
     textures,
     blend,
+    topology,
 
     update(uniforms: UniformDictionary) {
       updateBuffers(buffers, uniforms);

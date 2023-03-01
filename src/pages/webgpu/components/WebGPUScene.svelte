@@ -15,6 +15,7 @@
   import { createCameraViewModel, type CameraViewModel } from '../models/camera';
   import CameraEditor from './CameraEditor.svelte';
   import { createMaterialViewModel, type MaterialViewModel } from '../models/material';
+  import { createGeometryViewModel, type GeometryViewModel } from '../models/geometry';
 
   export let scene: Maybe<string>;
 
@@ -27,7 +28,8 @@
   let selectedComponents: (Camera | Component)[] = [];
 
   let cameraViewModel: CameraViewModel;
-  let materialViewModel: MaterialViewModel
+  let geometryViewModel: GeometryViewModel;
+  let materialViewModel: MaterialViewModel;
 
   function handleTreeItemSelected(uid: string) {
     if (!app) {
@@ -53,11 +55,20 @@
       const geometry = entityManager.getComponent(uid, ComponentType.Geometry);
       if (geometry) {
         selectedComponents.push(geometry);
+        if (geometryViewModel) {
+          geometryViewModel.destroy();
+        }
+        console.log(geometry);
+        geometryViewModel = createGeometryViewModel(geometry);
       }
 
       const material = entityManager.getComponent(uid, ComponentType.Material);
       if (material) {
         selectedComponents.push(material);
+        if (materialViewModel) {
+          materialViewModel.destroy();
+        }
+
         materialViewModel = createMaterialViewModel(material);
       }
     }
@@ -96,7 +107,7 @@
       (async () => {
         try {
           app = await createWebGPUApplication(nanoid(), canvas);
-          // during a hot reload, the component could get unmounted 
+          // during a hot reload, the component could get unmounted
           // before the application has finished being created
           if (!destroyed) {
             cameraViewModel = createCameraViewModel(app.cameraController);
@@ -113,7 +124,7 @@
             app.destroy();
             app = undefined;
           }
-        } catch (e: any){
+        } catch (e: any) {
           console.log('Failed to create application: ', e);
         }
       })();
@@ -214,9 +225,9 @@
                 {:else if component.type === ComponentType.Transform}
                   <TransformEditor {component} />
                 {:else if component.type === ComponentType.Geometry}
-                  <GeometryComponent {component} />
+                  <GeometryComponent model={geometryViewModel} />
                 {:else if component.type === ComponentType.Material}
-                  <MaterialEditor model={materialViewModel}/>
+                  <MaterialEditor model={materialViewModel} />
                 {/if}
               {/each}
             </div>

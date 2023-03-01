@@ -7,5 +7,6 @@ export interface CameraV1 {
   target: vec3;
   position: vec3;
   up: vec3;
+  zoom: number;
   controls?: CameraControlType;
 }
