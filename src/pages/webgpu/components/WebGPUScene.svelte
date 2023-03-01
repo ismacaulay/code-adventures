@@ -58,7 +58,6 @@
         if (geometryViewModel) {
           geometryViewModel.destroy();
         }
-        console.log(geometry);
         geometryViewModel = createGeometryViewModel(geometry);
       }
 

@@ -1,9 +1,12 @@
 import { writable, type Writable } from 'svelte/store';
+import type { BoundingBox } from 'toolkit/geometry/boundingBox';
 import type { GeometryComponent } from 'types/ecs/component';
 
 export interface GeometryViewModel {
   triangles: number;
   buffers: number;
+
+  boundingBox: BoundingBox;
   showBoundingBox: Writable<boolean>;
 
   destroy(): void;
@@ -25,6 +28,7 @@ export function createGeometryViewModel(component: GeometryComponent): GeometryV
   return {
     triangles: component.count,
     buffers: component.buffers.length,
+    boundingBox: component.boundingBox,
     showBoundingBox,
 
     destroy() {
