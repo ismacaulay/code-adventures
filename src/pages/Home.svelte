@@ -2,6 +2,7 @@
   import ComputationalGeometry from './computationalGeometry/index.svelte';
   import WebGPU from './webgpu/index.svelte';
   import Wasm from './wasm/index.svelte';
+  import Voxelization from './voxelization/index.svelte';
 </script>
 
 <style>
@@ -15,4 +16,5 @@
   <WebGPU />
   <Wasm />
   <ComputationalGeometry />
+  <Voxelization />
 </div>

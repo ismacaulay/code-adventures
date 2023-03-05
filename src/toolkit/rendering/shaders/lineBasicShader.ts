@@ -1,13 +1,8 @@
 import { DefaultBuffers } from 'toolkit/ecs/bufferManager';
 import { UniformType } from '../buffers/uniformBuffer';
-import {
-  ShaderBindingType,
-  type ShaderBindingDescriptor,
-  type ShaderDescriptor,
-  type WeightedBlendedShaderDescriptor,
-} from '../shader';
+import { ShaderBindingType, type ShaderBindingDescriptor, type ShaderDescriptor } from '../shader';
 
-export function createDefaultMeshBasicShaderDescriptor(): ShaderDescriptor {
+export function createDefaultLineBasicShaderDescriptor(): ShaderDescriptor {
   const shaderSource = `
 struct UBO {
   model: mat4x4<f32>,
@@ -60,6 +55,7 @@ fn fragment_main() -> @location(0) vec4<f32> {
         dstFactor: 'one-minus-src-alpha',
       },
     },
+    topology: 'line-list',
     bindings: [
       {
         type: ShaderBindingType.UniformBuffer,
@@ -81,7 +77,7 @@ fn fragment_main() -> @location(0) vec4<f32> {
   };
 }
 
-export function createWeightedBlendedMeshBasicShaderDescriptor(): WeightedBlendedShaderDescriptor {
+export function createWeightedBlendedLineBasicShaderDescriptor() {
   const shaderSource = `
 struct UBO {
   model: mat4x4<f32>,
@@ -180,6 +176,7 @@ fn fragment_transparent_main(
         entryPoint: 'fragment_opaque_main',
       },
       bindings,
+      topology: 'line-list',
     },
     transparent: {
       source: shaderSource,
@@ -190,6 +187,7 @@ fn fragment_transparent_main(
         entryPoint: 'fragment_transparent_main',
       },
       bindings,
+      topology: 'line-list',
     },
   };
 }

@@ -16,12 +16,14 @@
   import CameraEditor from './CameraEditor.svelte';
   import { createMaterialViewModel, type MaterialViewModel } from '../models/material';
   import { createGeometryViewModel, type GeometryViewModel } from '../models/geometry';
+  import type { RendererType } from 'toolkit/rendering/renderer';
 
-  export let scene: Maybe<string>;
+  export let app: Maybe<WebGPUApplication> = undefined;
+  export let scene: Maybe<string> = undefined;
+  export let opts: Maybe<{ rendererType?: RendererType }> = undefined;
 
   let webGPUSupported = navigator.gpu !== undefined;
 
-  let app: Maybe<WebGPUApplication>;
   let destroyed = false;
   let canvas: HTMLCanvasElement;
   let tree: Maybe<TreeViewNode>;
@@ -102,10 +104,10 @@
   onMount(() => {
     const unsubscribers: Unsubscriber[] = [];
 
-    if (webGPUSupported) {
+    if (webGPUSupported && app === undefined) {
       (async () => {
         try {
-          app = await createWebGPUApplication(nanoid(), canvas);
+          app = await createWebGPUApplication(nanoid(), canvas, opts);
           // during a hot reload, the component could get unmounted
           // before the application has finished being created
           if (!destroyed) {

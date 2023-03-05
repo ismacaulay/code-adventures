@@ -96,6 +96,13 @@ export interface MultiSourceShaderDescriptor extends BaseShaderDescriptor {
 }
 
 export type ShaderDescriptor = SingleSourceShaderDescriptor | MultiSourceShaderDescriptor;
+export type WeightedBlendedShaderDescriptor = {
+  opaque: ShaderDescriptor;
+  transparent: ShaderDescriptor;
+};
+export function isShaderDescriptor(descriptor: any): descriptor is ShaderDescriptor {
+  return 'bindings' in descriptor && 'vertex' in descriptor && 'fragment' in descriptor;
+}
 
 export function createShader(
   id: number,

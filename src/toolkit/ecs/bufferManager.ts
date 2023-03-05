@@ -27,7 +27,7 @@ export interface BufferManager {
 
   get<T extends Buffer>(id: number): T;
 
-  destroy(): void;
+  destroy(id?: number): void;
 }
 
 export function createBufferManager(device: GPUDevice): BufferManager {
@@ -68,9 +68,17 @@ export function createBufferManager(device: GPUDevice): BufferManager {
       return buffer as T;
     },
 
-    destroy() {
-      Object.values(storage).forEach((buf: Buffer) => buf.destroy());
-      storage = {};
+    destroy(id?: number) {
+      if (id !== undefined) {
+        const buffer = storage[id];
+        if (buffer) {
+          buffer.destroy();
+          delete storage[id];
+        }
+      } else {
+        Object.values(storage).forEach((buf: Buffer) => buf.destroy());
+        storage = {};
+      }
     },
   };
 }

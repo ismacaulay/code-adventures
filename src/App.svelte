@@ -1,9 +1,7 @@
 <script lang="ts">
   import router from 'page';
   import Home from './pages/Home.svelte';
-  import computationalGeometry from './pages/computationalGeometry/pages';
-  import webgpu from './pages/webgpu/pages';
-  import wasm from './pages/wasm/pages';
+  import pages from './pages';
 
   let component: any;
   let params: any;
@@ -29,9 +27,7 @@
     }
   }
 
-  addRoutes(computationalGeometry);
-  addRoutes(webgpu);
-  addRoutes(wasm);
+  Object.values(pages).forEach(addRoutes);
 
   router.start();
 </script>

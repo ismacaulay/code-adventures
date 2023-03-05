@@ -12,6 +12,7 @@ import {
 import {
   ComponentType,
   MaterialComponentType,
+  type LineBasicMaterial,
   type MeshBasicMaterialComponent,
   type MeshDiffuseMaterialComponent,
   type MeshPhongMaterialComponent,
@@ -74,6 +75,25 @@ export function createMeshPhongMaterialComponent({
     diffuse,
     specular,
     shininess,
+  };
+}
+
+export function createLineBasicMaterial({
+  transparent,
+  opacity,
+  colour,
+}: {
+  transparent: boolean;
+  opacity: number;
+  colour: vec3;
+}): LineBasicMaterial {
+  return {
+    type: ComponentType.Material,
+    subtype: MaterialComponentType.LineBasic,
+
+    opacity,
+    colour,
+    transparent,
   };
 }
 

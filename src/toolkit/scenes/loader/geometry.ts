@@ -1,5 +1,5 @@
-import { createMeshGeometryComponent } from 'toolkit/ecs/components/geometry';
-import { computeBoundingBox } from 'toolkit/geometry/boundingBox';
+import { createBufferGeometryComponent } from 'toolkit/ecs/components/geometry';
+import { BoundingBox } from 'toolkit/geometry/boundingBox';
 import { loadObj } from 'toolkit/loaders/objLoader';
 import { BufferAttributeFormat } from 'toolkit/rendering/buffers/vertexBuffer';
 import type { GeometryComponent } from 'types/ecs/component';
@@ -10,9 +10,9 @@ export async function createGeometryComponent(
 ): Promise<GeometryComponent> {
   if (geometry.type === GeometryComponentTypeV1.Obj) {
     const { vertices, faces } = await loadObj(geometry.location);
-    const boundingBox = computeBoundingBox(vertices);
+    const boundingBox = BoundingBox.fromVertices(vertices);
 
-    return createMeshGeometryComponent({
+    return createBufferGeometryComponent({
       boundingBox,
       count: faces.length,
       indices: faces,
@@ -30,7 +30,7 @@ export async function createGeometryComponent(
     });
   } else if (geometry.type === GeometryComponentTypeV1.Mesh) {
     const { vertices, triangles, attributes = [] } = geometry;
-    const boundingBox = computeBoundingBox(vertices);
+    const boundingBox = BoundingBox.fromVertices(vertices);
 
     let count = 0;
     const vertBuf = new Float64Array(vertices);
@@ -41,7 +41,7 @@ export async function createGeometryComponent(
     } else {
       count = vertices.length / 3;
     }
-    return createMeshGeometryComponent({
+    return createBufferGeometryComponent({
       boundingBox,
       count,
       indices: triBuf,

@@ -1,12 +1,10 @@
 import { ComponentType } from 'types/ecs/component';
-import type {
-  MeshGeometryComponent,
-  IndexBufferDescriptor,
-  VertexBufferDescriptor,
-} from 'types/ecs/component';
+import type { MeshGeometryComponent } from 'types/ecs/component';
 import type { BoundingBox } from 'toolkit/geometry/boundingBox';
+import type { VertexBufferDescriptor } from 'toolkit/rendering/buffers/vertexBuffer';
+import type { IndexBufferDescriptor } from 'toolkit/rendering/buffers/indexBuffer';
 
-export function createMeshGeometryComponent({
+export function createBufferGeometryComponent({
   boundingBox,
   indices,
   buffers,

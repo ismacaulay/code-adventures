@@ -38,7 +38,10 @@ fn fragment_main(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {
 }
 `;
 
-export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
+export async function createWebGPURenderer(
+  canvas: HTMLCanvasElement,
+  opts?: { type?: RendererType },
+) {
   const gpu = navigator.gpu;
   const adapter = await gpu.requestAdapter();
   if (!adapter) {
@@ -84,7 +87,19 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
   let commands: (WriteBufferCommand | CopyToTextureCommand)[] = [];
 
   const clearColour = vec3.fromValues(1.0, 1.0, 1.0);
-  let renderer = createDefaultRenderer(device, { clearColour, size: presentationSize });
+
+  function createRenderer(type?: RendererType) {
+    if (type !== undefined && type === RendererType.WeightedBlended) {
+      return createWeightedBlendedRenderer(device, {
+        clearColour,
+        size: presentationSize,
+      });
+    }
+
+    return createDefaultRenderer(device, { clearColour, size: presentationSize });
+  }
+
+  let renderer = createRenderer(opts?.type);
 
   // setup screen quad
   const screenSampler = device.createSampler();
@@ -152,19 +167,7 @@ export async function createWebGPURenderer(canvas: HTMLCanvasElement) {
       if (value !== renderer.type) {
         renderer.destroy();
 
-        if (value === RendererType.Default) {
-          renderer = createDefaultRenderer(device, {
-            clearColour,
-            size: presentationSize,
-          });
-        } else if (value === RendererType.WeightedBlended) {
-          renderer = createWeightedBlendedRenderer(device, {
-            clearColour,
-            size: presentationSize,
-          });
-        } else {
-          throw new Error(`Unknown renderer: ${value}`);
-        }
+        renderer = createRenderer(value);
       }
     },
 

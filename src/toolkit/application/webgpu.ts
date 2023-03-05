@@ -1,13 +1,12 @@
 import { mat4, vec3 } from 'gl-matrix';
 import Stats from 'stats.js';
 import { createCameraController, type CameraController } from 'toolkit/camera/cameraController';
-import { createBufferManager, DefaultBuffers } from 'toolkit/ecs/bufferManager';
+import { createBufferManager, DefaultBuffers, type BufferManager } from 'toolkit/ecs/bufferManager';
 import { createComponentManager } from 'toolkit/ecs/componentManager';
 import { createEntityManager } from 'toolkit/ecs/entityManager';
 import { createScriptManager } from 'toolkit/ecs/scriptManager';
 import { createShaderManager, DefaultShaders, type ShaderManager } from 'toolkit/ecs/shaderManager';
 import { createTextureManager } from 'toolkit/ecs/textureManager';
-import type { BoundingBox } from 'toolkit/geometry/boundingBox';
 import {
   createBoundingBoxRenderer,
   type RenderableBoundingBox,
@@ -16,7 +15,7 @@ import type { IndexBuffer } from 'toolkit/rendering/buffers/indexBuffer';
 import type { UniformBuffer } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { VertexBuffer } from 'toolkit/rendering/buffers/vertexBuffer';
 import { CommandType } from 'toolkit/rendering/commands';
-import { RendererType } from 'toolkit/rendering/renderer';
+import { RendererType, type Renderer } from 'toolkit/rendering/renderer';
 import type { Shader } from 'toolkit/rendering/shader';
 import { createWebGPURenderer } from 'toolkit/rendering/webgpuRenderer';
 import { createSceneGraph } from 'toolkit/sceneGraph';
@@ -29,15 +28,28 @@ import {
 } from 'types/ecs/component';
 
 import type { EntityManager } from 'types/ecs/entity';
-import type { ReadonlySceneGraph, SceneGraphNode } from 'types/sceneGraph';
+import type { SceneGraph, SceneGraphNode } from 'types/sceneGraph';
 
 export interface WebGPUApplication {
+  readonly renderer: Renderer;
   readonly cameraController: CameraController;
-  readonly sceneGraph: ReadonlySceneGraph;
+  readonly sceneGraph: SceneGraph;
   readonly entityManager: EntityManager;
+  readonly bufferManager: BufferManager;
   readonly shaderManager: ShaderManager;
 
   loadScene(url: string): Promise<void>;
+
+  /**
+   * Adds a callback that will be executed after the renderer.start() call,
+   * but before any objects are renderered
+   */
+  onPreRender(cb: () => void): Unsubscriber;
+  /**
+   * Adds a callback that will be executed before the renderer.end() call,
+   * but after all objects are renderered
+   */
+  onPostRender(cb: () => void): Unsubscriber;
 
   start(): void;
   destroy(): void;
@@ -46,6 +58,7 @@ export interface WebGPUApplication {
 export async function createWebGPUApplication(
   appId: string,
   canvas: HTMLCanvasElement,
+  opts?: { rendererType?: RendererType },
 ): Promise<WebGPUApplication> {
   console.log('creating webgpu application', appId);
   const sceneGraph = createSceneGraph();
@@ -56,7 +69,7 @@ export async function createWebGPUApplication(
   });
   resizer.observe(canvas);
 
-  const renderer = await createWebGPURenderer(canvas);
+  const renderer = await createWebGPURenderer(canvas, opts);
   const entityManager = createEntityManager();
   const bufferManager = createBufferManager(renderer.device);
   const textureManager = createTextureManager(renderer.device);
@@ -107,7 +120,8 @@ export async function createWebGPUApplication(
   function isMaterialTransparent(material: MaterialComponent) {
     if (
       material.subtype !== MaterialComponentType.MeshBasic &&
-      material.subtype !== MaterialComponentType.MeshDiffuse
+      material.subtype !== MaterialComponentType.MeshDiffuse &&
+      material.subtype !== MaterialComponentType.LineBasic
     ) {
       throw new Error(`[isMaterialTransparent] subtype: ${material.subtype} not implemented yet!`);
     }
@@ -118,7 +132,8 @@ export async function createWebGPUApplication(
   function getShaderForMaterial(material: MaterialComponent) {
     if (
       material.subtype !== MaterialComponentType.MeshBasic &&
-      material.subtype !== MaterialComponentType.MeshDiffuse
+      material.subtype !== MaterialComponentType.MeshDiffuse &&
+      material.subtype !== MaterialComponentType.LineBasic
     ) {
       throw new Error(`[getShaderForMaterial] subtype: ${material.subtype} not implemented yet!`);
     }
@@ -192,6 +207,8 @@ export async function createWebGPUApplication(
           material.shader = shaderManager.create(DefaultShaders.MeshDiffuse);
         } else if (material.subtype === MaterialComponentType.MeshPhong) {
           material.shader = shaderManager.create(DefaultShaders.MeshPhong) as number;
+        } else if (material.subtype === MaterialComponentType.LineBasic) {
+          material.shader = shaderManager.create(DefaultShaders.LineBasic);
         } else if (material.subtype === MaterialComponentType.RawShader) {
           material.shader = shaderManager.create(material.descriptor) as number;
         } else {
@@ -221,6 +238,14 @@ export async function createWebGPUApplication(
         });
       } else if (material.subtype === MaterialComponentType.MeshPhong) {
         throw new Error('Phong: Not implemented Yet');
+      } else if (material.subtype === MaterialComponentType.LineBasic) {
+        transparent = isMaterialTransparent(material);
+        shader = getShaderForMaterial(material);
+        shader.update({
+          model: transform.matrix,
+          opacity: material.opacity,
+          colour: material.colour,
+        });
       } else if (material.subtype === MaterialComponentType.RawShader) {
         shader = shaderManager.get<Shader>(material.shader!);
         if (material.uniforms) {
@@ -311,6 +336,9 @@ export async function createWebGPUApplication(
   stats.dom.style.right = '0px';
   document.body.appendChild(stats.dom);
 
+  const preRenderCallbacks: (() => void)[] = [];
+  const postRenderCallbacks: (() => void)[] = [];
+
   function render() {
     stats.begin();
 
@@ -321,6 +349,8 @@ export async function createWebGPUApplication(
     cameraController.update(dt);
 
     renderer.begin();
+
+    preRenderCallbacks.forEach((cb) => cb());
 
     // TODO: only write if the buffer is dirty
     const matricesBuffer = bufferManager.get<UniformBuffer>(DefaultBuffers.ViewProjection);
@@ -368,8 +398,12 @@ export async function createWebGPUApplication(
     transparent.forEach(renderNode);
 
     if (boundingBoxes.length > 0) {
-      boundingBoxRenderer.render(boundingBoxes);
+      // TODO: only do this when they change
+      boundingBoxRenderer.setBoundingBoxes(boundingBoxes);
+      boundingBoxRenderer.render();
     }
+
+    postRenderCallbacks.forEach((cb) => cb());
 
     renderer.end();
 
@@ -387,6 +421,27 @@ export async function createWebGPUApplication(
         return;
       }
       render();
+    },
+
+    onPreRender(cb: () => void) {
+      preRenderCallbacks.push(cb);
+
+      return () => {
+        const idx = preRenderCallbacks.findIndex(cb);
+        if (idx != -1) {
+          preRenderCallbacks.splice(idx, 1);
+        }
+      };
+    },
+    onPostRender(cb: () => void) {
+      postRenderCallbacks.push(cb);
+
+      return () => {
+        const idx = postRenderCallbacks.findIndex(cb);
+        if (idx != -1) {
+          postRenderCallbacks.splice(idx, 1);
+        }
+      };
     },
 
     destroy() {
@@ -407,9 +462,11 @@ export async function createWebGPUApplication(
       document.body.removeChild(stats.dom);
     },
 
+    renderer,
     cameraController,
     sceneGraph,
     entityManager,
+    bufferManager,
     shaderManager,
   };
 }

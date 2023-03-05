@@ -3,12 +3,18 @@ import { RendererType, type Renderer } from 'toolkit/rendering/renderer';
 import {
   cloneShader,
   createShader,
+  isShaderDescriptor,
   ShaderBindingType,
   type Shader,
   type ShaderBindGroupEntry,
   type ShaderBindingDescriptor,
   type ShaderDescriptor,
+  type WeightedBlendedShaderDescriptor,
 } from 'toolkit/rendering/shader';
+import {
+  createDefaultLineBasicShaderDescriptor,
+  createWeightedBlendedLineBasicShaderDescriptor,
+} from 'toolkit/rendering/shaders/lineBasicShader';
 import {
   createDefaultMeshBasicShaderDescriptor,
   createWeightedBlendedMeshBasicShaderDescriptor,
@@ -25,7 +31,9 @@ export enum DefaultShaders {
   MeshBasic = 0,
   MeshDiffuse = 1,
   MeshPhong = 2,
-  BoundingBox = 3,
+  LineBasic = 3,
+
+  BoundingBox = 4,
 
   Count,
 }
@@ -54,108 +62,53 @@ export function createShaderManager(
   function create(id: DefaultShaders): ShaderId;
   function create(descriptor: ShaderDescriptor): number;
   function create(param: DefaultShaders | ShaderDescriptor): ShaderId {
-    let descriptor: Maybe<ShaderDescriptor>;
+    let descriptor: Maybe<ShaderDescriptor | WeightedBlendedShaderDescriptor>;
     if (typeof param === 'number') {
-      if (param === DefaultShaders.MeshBasic) {
-        if (renderer.type === RendererType.Default) {
-          descriptor = createDefaultMeshBasicShaderDescriptor();
-        } else if (renderer.type === RendererType.WeightedBlended) {
-          const { opaque, transparent } = createWeightedBlendedMeshBasicShaderDescriptor();
-
-          const result = {
-            opaque: -1,
-            transparent: -1,
-          };
-          {
-            const { bindings, uniformBuffers, textures } = processBindings(opaque.bindings, {
-              bufferManager,
-              textureManager,
-            });
-
-            storage[next] = createShader(next, device, opaque, bindings, uniformBuffers, textures);
-            result.opaque = next;
-            next++;
-          }
-          {
-            const { bindings, uniformBuffers, textures } = processBindings(transparent.bindings, {
-              bufferManager,
-              textureManager,
-            });
-
-            storage[next] = createShader(
-              next,
-              device,
-              transparent,
-              bindings,
-              uniformBuffers,
-              textures,
-            );
-            result.transparent = next;
-            next++;
-          }
-          return result;
-        } else {
-          throw new Error(`Unknown renderer type: ${renderer.type}`);
-        }
-      } else if (param === DefaultShaders.MeshDiffuse) {
-        if (renderer.type === RendererType.Default) {
-          descriptor = createDefaultMeshDiffuseShaderDescriptor();
-        } else if (renderer.type === RendererType.WeightedBlended) {
-          const { opaque, transparent } = createWeightedBlendedMeshDiffuseShaderDescriptor();
-
-          const result = {
-            opaque: -1,
-            transparent: -1,
-          };
-          {
-            const { bindings, uniformBuffers, textures } = processBindings(opaque.bindings, {
-              bufferManager,
-              textureManager,
-            });
-
-            storage[next] = createShader(next, device, opaque, bindings, uniformBuffers, textures);
-            result.opaque = next;
-            next++;
-          }
-          {
-            const { bindings, uniformBuffers, textures } = processBindings(transparent.bindings, {
-              bufferManager,
-              textureManager,
-            });
-
-            storage[next] = createShader(
-              next,
-              device,
-              transparent,
-              bindings,
-              uniformBuffers,
-              textures,
-            );
-            result.transparent = next;
-            next++;
-          }
-          return result;
-        } else {
-          throw new Error(`Unknown renderer type: ${renderer.type}`);
-        }
-      } else if (param === DefaultShaders.MeshPhong) {
-        descriptor = getMeshPhongShaderDescriptor();
+      if (renderer.type === RendererType.Default) {
+        descriptor = createDefaultRendererShaderDescriptor(param);
       } else {
-        throw new Error(`Unknown DefaultShaders value: ${param}`);
+        descriptor = createWeightedBlendedShaderDescriptor(param);
       }
     } else {
       descriptor = param;
     }
 
-    if ('bindings' in descriptor) {
+    if (isShaderDescriptor(descriptor)) {
       const { bindings, uniformBuffers, textures } = processBindings(descriptor.bindings, {
         bufferManager,
         textureManager,
       });
 
       storage[next] = createShader(next, device, descriptor, bindings, uniformBuffers, textures);
+      return next++;
     }
-    return next++;
+
+    const { opaque, transparent } = descriptor;
+    const result = {
+      opaque: -1,
+      transparent: -1,
+    };
+    {
+      const { bindings, uniformBuffers, textures } = processBindings(opaque.bindings, {
+        bufferManager,
+        textureManager,
+      });
+
+      storage[next] = createShader(next, device, opaque, bindings, uniformBuffers, textures);
+      result.opaque = next;
+      next++;
+    }
+    {
+      const { bindings, uniformBuffers, textures } = processBindings(transparent.bindings, {
+        bufferManager,
+        textureManager,
+      });
+
+      storage[next] = createShader(next, device, transparent, bindings, uniformBuffers, textures);
+      result.transparent = next;
+      next++;
+    }
+    return result;
   }
 
   return {
@@ -164,10 +117,6 @@ export function createShaderManager(
     get<T extends Shader>(id: number) {
       const shader = storage[id];
       if (!shader) {
-        if (id === DefaultShaders.MeshBasic) {
-          // storage[id] = c;
-        }
-
         throw new Error(`Unknown shader id: ${id}`);
       }
 
@@ -194,6 +143,40 @@ export function createShaderManager(
       storage = {};
     },
   };
+}
+
+function createDefaultRendererShaderDescriptor(param: DefaultShaders) {
+  switch (param) {
+    case DefaultShaders.MeshBasic: {
+      return createDefaultMeshBasicShaderDescriptor();
+    }
+    case DefaultShaders.MeshDiffuse: {
+      return createDefaultMeshDiffuseShaderDescriptor();
+    }
+    case DefaultShaders.LineBasic: {
+      return createDefaultLineBasicShaderDescriptor();
+    }
+
+    default:
+  }
+  throw new Error(`[createDefaultRendererShaderDescriptor] Unknown param: ${param}`);
+}
+
+function createWeightedBlendedShaderDescriptor(param: DefaultShaders) {
+  switch (param) {
+    case DefaultShaders.MeshBasic: {
+      return createWeightedBlendedMeshBasicShaderDescriptor();
+    }
+    case DefaultShaders.MeshDiffuse: {
+      return createWeightedBlendedMeshDiffuseShaderDescriptor();
+    }
+    case DefaultShaders.LineBasic: {
+      return createWeightedBlendedLineBasicShaderDescriptor();
+    }
+
+    default:
+  }
+  throw new Error(`[createWeightedBlendedShaderDescriptor] Unknown param: ${param}`);
 }
 
 function processBindings(
@@ -247,97 +230,98 @@ function processBindings(
   };
 }
 
-function getMeshPhongShaderDescriptor(): ShaderDescriptor {
-  const shaderSource = `
-struct UBO {
-  model: mat4x4<f32>,
-
-  // material
-  diffuse: vec3<f32>,
-  specular: vec3<f32>,
-  shininess: f32,
-
-  // temp lights
-  light_ambient: vec3<f32>,
-
-  light_position: vec3<f32>,
-  light_colour: vec3<f32>,
-}
-
-struct Matrices {
-  view: mat4x4<f32>,
-  projection: mat4x4<f32>,
-}
-
-@group(0) @binding(0)
-var<uniform> ubo: UBO;
-@group(0) @binding(1)
-var<uniform> matrices: Matrices;
-
-struct VertexOutput {
-  @builtin(position) position: vec4<f32>,
-  @location(0) position_eye: vec4<f32>,
-  @location(1) normal: vec3<f32>,
-}
-
-@vertex
-fn vertex_main(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>) -> VertexOutput {
-  var out : VertexOutput;
-  out.position = matrices.projection * matrices.view * ubo.model * vec4<f32>(position, 1.0);
-  out.position_eye = matrices.view * ubo.model * vec4<f32>(position, 1.0);
-  out.normal = normal;
-  return out;
-}
-
-@fragment
-fn fragment_main(
-  @builtin(position) frag_position: vec4<f32>,
-  @location(0) position_eye: vec4<f32>, 
-  @location(1) normal: vec3<f32>
-) -> @location(0) vec4<f32> {
-  var n = normalize(normal);
-  var light_dir = normalize(ubo.light_position - frag_position.xyz);
-  var diff = max(dot(n, light_dir), 0.0);
-  var diffuse = ubo.light_colour * diff * ubo.diffuse;
-
-  var final_colour = diffuse;
-  return vec4<f32>(final_colour, 1.0);
-
-  // return vec4<f32>(abs(normal), 1.0);
-  // return vec4<f32>(ubo.diffuse, 1.0);
-}
-`;
-
-  return {
-    source: shaderSource,
-    vertex: {
-      entryPoint: 'vertex_main',
-    },
-    fragment: {
-      entryPoint: 'fragment_main',
-    },
-    bindings: [
-      {
-        type: ShaderBindingType.UniformBuffer,
-        descriptor: {
-          model: UniformType.Mat4,
-          diffuse: UniformType.Vec3,
-          specular: UniformType.Vec3,
-          shininess: UniformType.Scalar,
-
-          light_ambient: UniformType.Vec3,
-          light_position: UniformType.Vec3,
-          light_colour: UniformType.Vec3,
-        },
-      },
-      {
-        type: ShaderBindingType.UniformBuffer,
-        resource: DefaultBuffers.ViewProjection,
-        descriptor: {
-          view: UniformType.Mat4,
-          projection: UniformType.Mat4,
-        },
-      },
-    ],
-  };
-}
+// // TODO: move this
+// function getMeshPhongShaderDescriptor(): ShaderDescriptor {
+//   const shaderSource = `
+// struct UBO {
+//   model: mat4x4<f32>,
+//
+//   // material
+//   diffuse: vec3<f32>,
+//   specular: vec3<f32>,
+//   shininess: f32,
+//
+//   // temp lights
+//   light_ambient: vec3<f32>,
+//
+//   light_position: vec3<f32>,
+//   light_colour: vec3<f32>,
+// }
+//
+// struct Matrices {
+//   view: mat4x4<f32>,
+//   projection: mat4x4<f32>,
+// }
+//
+// @group(0) @binding(0)
+// var<uniform> ubo: UBO;
+// @group(0) @binding(1)
+// var<uniform> matrices: Matrices;
+//
+// struct VertexOutput {
+//   @builtin(position) position: vec4<f32>,
+//   @location(0) position_eye: vec4<f32>,
+//   @location(1) normal: vec3<f32>,
+// }
+//
+// @vertex
+// fn vertex_main(@location(0) position: vec3<f32>, @location(1) normal: vec3<f32>) -> VertexOutput {
+//   var out : VertexOutput;
+//   out.position = matrices.projection * matrices.view * ubo.model * vec4<f32>(position, 1.0);
+//   out.position_eye = matrices.view * ubo.model * vec4<f32>(position, 1.0);
+//   out.normal = normal;
+//   return out;
+// }
+//
+// @fragment
+// fn fragment_main(
+//   @builtin(position) frag_position: vec4<f32>,
+//   @location(0) position_eye: vec4<f32>,
+//   @location(1) normal: vec3<f32>
+// ) -> @location(0) vec4<f32> {
+//   var n = normalize(normal);
+//   var light_dir = normalize(ubo.light_position - frag_position.xyz);
+//   var diff = max(dot(n, light_dir), 0.0);
+//   var diffuse = ubo.light_colour * diff * ubo.diffuse;
+//
+//   var final_colour = diffuse;
+//   return vec4<f32>(final_colour, 1.0);
+//
+//   // return vec4<f32>(abs(normal), 1.0);
+//   // return vec4<f32>(ubo.diffuse, 1.0);
+// }
+// `;
+//
+//   return {
+//     source: shaderSource,
+//     vertex: {
+//       entryPoint: 'vertex_main',
+//     },
+//     fragment: {
+//       entryPoint: 'fragment_main',
+//     },
+//     bindings: [
+//       {
+//         type: ShaderBindingType.UniformBuffer,
+//         descriptor: {
+//           model: UniformType.Mat4,
+//           diffuse: UniformType.Vec3,
+//           specular: UniformType.Vec3,
+//           shininess: UniformType.Scalar,
+//
+//           light_ambient: UniformType.Vec3,
+//           light_position: UniformType.Vec3,
+//           light_colour: UniformType.Vec3,
+//         },
+//       },
+//       {
+//         type: ShaderBindingType.UniformBuffer,
+//         resource: DefaultBuffers.ViewProjection,
+//         descriptor: {
+//           view: UniformType.Mat4,
+//           projection: UniformType.Mat4,
+//         },
+//       },
+//     ],
+//   };
+// }
