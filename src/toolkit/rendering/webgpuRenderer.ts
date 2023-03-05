@@ -40,7 +40,7 @@ fn fragment_main(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {
 
 export async function createWebGPURenderer(
   canvas: HTMLCanvasElement,
-  opts?: { type?: RendererType },
+  opts?: { rendererType?: RendererType },
 ) {
   const gpu = navigator.gpu;
   const adapter = await gpu.requestAdapter();
@@ -99,7 +99,7 @@ export async function createWebGPURenderer(
     return createDefaultRenderer(device, { clearColour, size: presentationSize });
   }
 
-  let renderer = createRenderer(opts?.type);
+  let renderer = createRenderer(opts?.rendererType);
 
   // setup screen quad
   const screenSampler = device.createSampler();
@@ -166,7 +166,6 @@ export async function createWebGPURenderer(
     set type(value: RendererType) {
       if (value !== renderer.type) {
         renderer.destroy();
-
         renderer = createRenderer(value);
       }
     },

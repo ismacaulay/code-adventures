@@ -248,4 +248,4 @@
   onDestroy(() => {});
 </script>
 
-<WebGpuScene bind:app opts={{ type: RendererType.WeightedBlended }} />
+<WebGpuScene bind:app opts={{ rendererType: RendererType.WeightedBlended }} />
