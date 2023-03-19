@@ -1,6 +1,9 @@
 import { vec3 } from 'gl-matrix';
-import { Intersection } from 'toolkit/math/intersection';
+import { intersectAABB } from 'toolkit/math/intersect/aabb';
+import { intersectTriangleAABB } from 'toolkit/math/intersect/triangleAABB';
 import { BoundingBox } from './boundingBox';
+
+// TODO: can we store the octree in some form of flat buffers?
 
 export type OctreeNode = {
   aabb: BoundingBox;
@@ -13,7 +16,6 @@ export type Octree = {
 
   intersect(aabb: BoundingBox): boolean;
 };
-
 export namespace Octree {
   namespace OctreeNode {
     export function create(aabb: BoundingBox): OctreeNode {
@@ -25,12 +27,27 @@ export namespace Octree {
     }
   }
 
+  let v0: vec3;
+  let v1: vec3;
+  let v2: vec3;
+  let centre: vec3;
+  let halfSize: vec3;
+
   export function fromMesh(mesh: {
+    aabb: BoundingBox;
     vertices: number[] | Float32Array | Float64Array;
     triangles: Uint32Array;
   }): Octree {
-    const aabb = BoundingBox.fromMesh(mesh);
-    const centre = BoundingBox.centre(aabb);
+    v0 = vec3.create();
+    v1 = vec3.create();
+    v2 = vec3.create();
+    centre = vec3.create();
+    halfSize = vec3.create();
+
+    const aabb = BoundingBox.create();
+    vec3.copy(aabb.min, mesh.aabb.min);
+    vec3.copy(aabb.max, mesh.aabb.max);
+    BoundingBox.centre(aabb, centre);
 
     const diff = vec3.create();
     vec3.sub(diff, aabb.max, aabb.min);
@@ -47,8 +64,7 @@ export namespace Octree {
       root,
 
       intersect(aabb: BoundingBox) {
-        // aabb octree intersection
-        return false;
+        return intersectOctreeAABB(root, aabb);
       },
     };
   }
@@ -62,9 +78,6 @@ export namespace Octree {
   ) {
     const parentAABB = parent.aabb;
     const offset = 0.5 * (parentAABB.max[0] - parentAABB.min[0]);
-    const v0 = vec3.create();
-    const v1 = vec3.create();
-    const v2 = vec3.create();
     let t0: number, t1: number, t2: number;
 
     for (let childIdx = 0; childIdx < 8; ++childIdx) {
@@ -119,8 +132,8 @@ export namespace Octree {
       );
 
       const child = OctreeNode.create(childAABB);
-      const centre = BoundingBox.centre(childAABB);
-      const halfSize = BoundingBox.halfSize(childAABB);
+      BoundingBox.centre(childAABB, centre);
+      BoundingBox.halfSize(childAABB, halfSize);
 
       // TODO: should this be a "resizable" ArrayBuffer?
       const childTris: number[] = [];
@@ -141,7 +154,7 @@ export namespace Octree {
         v2[1] = vertices[t2 * 3 + 1];
         v2[2] = vertices[t2 * 3 + 2];
 
-        if (Intersection.triangleAABB(v0, v1, v2, centre, halfSize)) {
+        if (intersectTriangleAABB(v0, v1, v2, centre, halfSize)) {
           childTris.push(t0, t1, t2);
         }
       }
@@ -157,5 +170,21 @@ export namespace Octree {
         subdivide(child, vertices, childTris, depth + 1, maxDepth);
       }
     }
+  }
+
+  function intersectOctreeAABB(node: OctreeNode, aabb: BoundingBox): boolean {
+    let child: OctreeNode;
+    for (let childIdx = 0; childIdx < 8; ++childIdx) {
+      child = node.children[childIdx];
+      if (intersectAABB(aabb, child.aabb)) {
+        if (child.children.length > 0 && intersectOctreeAABB(child, aabb)) {
+          return true;
+        } else if (child.triangles !== undefined && child.triangles.length > 0) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

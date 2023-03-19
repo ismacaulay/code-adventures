@@ -109,13 +109,14 @@ export module BoundingBox {
     return { min, max };
   }
 
-  export function centre(bb: BoundingBox): vec3 {
-    const result = halfSize(bb);
+  export function centre(bb: BoundingBox, out?: vec3): vec3 {
+    const result = out ?? vec3.create();
+    halfSize(bb, result);
     return vec3.add(result, bb.min, result);
   }
 
-  export function halfSize(bb: BoundingBox): vec3 {
-    const result = vec3.create();
+  export function halfSize(bb: BoundingBox, out?: vec3): vec3 {
+    const result = out ?? vec3.create();
     vec3.sub(result, bb.max, bb.min);
     vec3.scale(result, result, 0.5);
     return result;

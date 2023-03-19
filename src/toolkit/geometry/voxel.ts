@@ -6,7 +6,7 @@ export interface VoxelChunk {
   hasVoxel(i: number, j: number, k: number): boolean;
 }
 
-export namespace VoxelChunk {
+export module VoxelChunk {
   export const CHUNK_SIZE = vec3.fromValues(16, 16, 16);
 
   function index(i: number, j: number, k: number) {
@@ -53,22 +53,21 @@ export namespace VoxelChunk {
   }
 }
 
-export namespace VoxelContainer {
-  export function create() {
-    const storage = new Map<{ i: number; j: number; k: number }, VoxelChunk>();
+export function createVoxelContainer() {
+  const storage = new Map<{ i: number; j: number; k: number }, VoxelChunk>();
 
-    return {
-      insert(i: number, j: number, k: number, chunk: VoxelChunk) {
-        storage.set({ i, j, k }, chunk);
-      },
+  return {
+    storage,
+    insert(i: number, j: number, k: number, chunk: VoxelChunk) {
+      storage.set({ i, j, k }, chunk);
+    },
 
-      get(i: number, j: number, k: number): Maybe<VoxelChunk> {
-        return storage.get({ i, j, k });
-      },
+    get(i: number, j: number, k: number): Maybe<VoxelChunk> {
+      return storage.get({ i, j, k });
+    },
 
-      has(i: number, j: number, k: number): boolean {
-        return storage.has({ i, j, k });
-      },
-    };
-  }
+    has(i: number, j: number, k: number): boolean {
+      return storage.has({ i, j, k });
+    },
+  };
 }
