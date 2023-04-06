@@ -1,6 +1,7 @@
 import { vec3 } from 'gl-matrix';
-import { intersectAABB } from 'toolkit/math/intersect/aabb';
+import { intersectAABB, intersectRayAABB } from 'toolkit/math/intersect/aabb';
 import { intersectTriangleAABB } from 'toolkit/math/intersect/triangleAABB';
+import type { Ray } from 'toolkit/math/ray';
 import { BoundingBox } from './boundingBox';
 
 // TODO: can we store the octree in some form of flat buffers?
@@ -14,8 +15,10 @@ export type OctreeNode = {
 export type Octree = {
   root: OctreeNode;
 
-  intersect(aabb: BoundingBox): boolean;
+  intersectAABB(aabb: BoundingBox): boolean;
+  intersectRay(ray: Ray): boolean;
 };
+
 export namespace Octree {
   namespace OctreeNode {
     export function create(aabb: BoundingBox): OctreeNode {
@@ -63,8 +66,11 @@ export namespace Octree {
     return {
       root,
 
-      intersect(aabb: BoundingBox) {
+      intersectAABB(aabb: BoundingBox) {
         return intersectOctreeAABB(root, aabb);
+      },
+      intersectRay(ray: Ray) {
+        return intersectOctreeRay(root, ray);
       },
     };
   }
@@ -161,27 +167,61 @@ export namespace Octree {
 
       parent.children.push(child);
 
-      // we are at a leaf node so save the triangles
-      if (depth === maxDepth || childTris.length === 0) {
-        child.triangles = childTris;
-      }
-
-      if (childTris.length > 0 && depth < maxDepth) {
-        subdivide(child, vertices, childTris, depth + 1, maxDepth);
+      if (childTris.length > 0) {
+        if (depth === maxDepth) {
+          child.triangles = childTris;
+        } else {
+          subdivide(child, vertices, childTris, depth + 1, maxDepth);
+        }
       }
     }
   }
 
   function intersectOctreeAABB(node: OctreeNode, aabb: BoundingBox): boolean {
+    if (!intersectAABB(node.aabb, aabb)) {
+      return false;
+    }
+
+    if (node.children.length === 0) {
+      if (node.triangles !== undefined && node.triangles.length > 0) {
+        return true;
+      }
+      return false;
+    }
+
     let child: OctreeNode;
-    for (let childIdx = 0; childIdx < 8; ++childIdx) {
+    let result: boolean;
+    for (let childIdx = 0; childIdx < node.children.length; ++childIdx) {
       child = node.children[childIdx];
-      if (intersectAABB(aabb, child.aabb)) {
-        if (child.children.length > 0 && intersectOctreeAABB(child, aabb)) {
-          return true;
-        } else if (child.triangles !== undefined && child.triangles.length > 0) {
-          return true;
-        }
+      result = intersectOctreeAABB(child, aabb);
+      if (result) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function intersectOctreeRay(node: OctreeNode, ray: Ray): boolean {
+    if (!intersectRayAABB(ray, node.aabb)) {
+      return false;
+    }
+
+    if (node.children.length === 0) {
+      if (node.triangles !== undefined && node.triangles.length > 0) {
+        return true;
+      }
+      return false;
+    }
+
+    let child: OctreeNode;
+    let result: boolean;
+    for (let childIdx = 0; childIdx < node.children.length; ++childIdx) {
+      child = node.children[childIdx];
+
+      result = intersectOctreeRay(child, ray);
+      if (result) {
+        return result;
       }
     }
 

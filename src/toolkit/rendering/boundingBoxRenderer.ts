@@ -75,7 +75,10 @@ export function createBoundingBoxRenderer({
 
   return {
     setBoundingBoxes(boundingBoxes: RenderableBoundingBox[]) {
-      console.log(boundingBoxes.length);
+      if (boundingBoxes.length === 0) {
+        return;
+      }
+
       if (boundingBoxes.length > transforms.length / 16) {
         transforms = new Float32Array(boundingBoxes.length * 16);
         if (transformsBuffer !== undefined) {
@@ -153,7 +156,6 @@ export function createBoundingBoxRenderer({
 
       const transformsVertexBuffer = bufferManager.get<VertexBuffer>(transformsBuffer);
       if (transformsChanged) {
-        console.log(transformsChanged);
         renderer.submit({
           type: CommandType.WriteBuffer,
           src: transforms,
@@ -163,7 +165,6 @@ export function createBoundingBoxRenderer({
 
       const coloursVertexBuffer = bufferManager.get<VertexBuffer>(coloursBuffer);
       if (coloursChanged) {
-        console.log(coloursChanged);
         renderer.submit({
           type: CommandType.WriteBuffer,
           src: colours,
@@ -174,6 +175,10 @@ export function createBoundingBoxRenderer({
       instanceCount = boundingBoxes.length;
     },
     render() {
+      if (!transformsBuffer || !coloursBuffer) {
+        return;
+      }
+
       const transformsVertexBuffer = bufferManager.get<VertexBuffer>(transformsBuffer);
       const coloursVertexBuffer = bufferManager.get<VertexBuffer>(coloursBuffer);
 
