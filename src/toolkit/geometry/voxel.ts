@@ -7,6 +7,8 @@ export enum VoxelState {
 }
 
 export interface VoxelChunk {
+  buffer: Uint8Array;
+
   addVoxel(i: number, j: number, k: number, state: VoxelState): void;
   isEmpty(): boolean;
   hasVoxel(i: number, j: number, k: number): boolean;
@@ -14,7 +16,8 @@ export interface VoxelChunk {
 }
 
 export module VoxelChunk {
-  export const CHUNK_SIZE = vec3.fromValues(16, 16, 16);
+  // export const CHUNK_SIZE = vec3.fromValues(16, 16, 16);
+  export const CHUNK_SIZE = vec3.fromValues(8, 8, 8);
 
   function index(i: number, j: number, k: number) {
     return k * CHUNK_SIZE[1] * CHUNK_SIZE[2] + j * CHUNK_SIZE[2] + i;
@@ -26,6 +29,31 @@ export module VoxelChunk {
     let isEmpty = true;
 
     return {
+      get buffer() {
+        if (!buffer) {
+          return new Uint8Array();
+        }
+
+        return buffer;
+      },
+      set buffer(buf: Uint8Array) {
+        if (buf.length === 0) {
+          buffer = undefined;
+          isEmpty = true;
+        } else if (buf.length < CHUNK_SIZE[0] * CHUNK_SIZE[1] * CHUNK_SIZE[2]) {
+          throw new Error('Buffer is too small');
+        }
+
+        buffer = buf;
+        isEmpty = true;
+        for (let i = 0; i < buffer.length; ++i) {
+          if (buffer[i] !== 0) {
+            isEmpty = false;
+            break;
+          }
+        }
+      },
+
       addVoxel(i: number, j: number, k: number, state: VoxelState) {
         if (!buffer) {
           buffer = new Uint8Array(CHUNK_SIZE[0] * CHUNK_SIZE[1] * CHUNK_SIZE[2]);

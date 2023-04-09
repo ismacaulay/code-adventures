@@ -9,7 +9,7 @@
   import { createMeshDiffuseMaterialComponent } from 'toolkit/ecs/components/material';
   import { createTransformComponent } from 'toolkit/ecs/components/transform';
   import { BoundingBox } from 'toolkit/geometry/boundingBox';
-  import { Octree, type OctreeNode } from 'toolkit/geometry/octree';
+  import { NodeType, Octree, type MeshOctreeNode } from 'toolkit/geometry/octree';
   import { loadObj } from 'toolkit/loaders/objLoader';
   import {
     createBoundingBoxRenderer,
@@ -18,9 +18,10 @@
   import { BufferAttributeFormat } from 'toolkit/rendering/buffers/vertexBuffer';
   import { RendererType } from 'toolkit/rendering/renderer';
   import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
-  import { voxelizeMesh } from 'toolkit/voxelization';
+  import { voxelizeMesh, voxelizeMeshSync } from 'toolkit/voxelization/voxelization';
 
   let app: Maybe<WebGPUApplication>;
+  let unsubscribers: Unsubscriber[] = [];
   $: {
     if (app) {
       loadObj('/models/bunny.obj').then((data) => {
@@ -47,15 +48,21 @@
         console.log('Building octree');
         const start = performance.now();
         const octree = Octree.fromMesh(mesh);
+        console.log(octree);
         let t1 = performance.now();
         console.log('Octree:', t1 - start);
         t1 = performance.now();
 
         // TODO handle result of the voxelization
-        const voxels = voxelizeMesh(mesh, octree, voxelSize);
+        // const voxels = voxelizeMeshSync(mesh, octree, voxelSize);
+        // const t2 = performance.now();
+        // console.log('voxels:', t2 - t1);
 
-        const t2 = performance.now();
-        console.log('voxels:', t2 - t1);
+        voxelizeMesh(mesh, octree, voxelSize).then((voxels) => {
+          const t2 = performance.now();
+          console.log('voxels:', t2 - t1);
+        });
+
 
         const {
           entityManager,
@@ -110,9 +117,11 @@
         entityManager.addComponent(entityId, material);
         sceneGraph.root.add(createSceneGraphNode({ uid: entityId, renderOrder: 0 }));
 
-        // // render the bounding box for now
+        const root = octree.getRoot();
+
+        // render the bounding box for now
         const bbTransform = mat4.create();
-        const octreeCentre = BoundingBox.centre(octree.root.aabb);
+        const octreeCentre = BoundingBox.centre(root.aabb);
         vec3.negate(octreeCentre, octreeCentre);
         mat4.translate(bbTransform, bbTransform, octreeCentre);
 
@@ -123,29 +132,58 @@
         const colours = [red, green, blue, yellow];
 
         const octreeBoxes: RenderableBoundingBox[] = [
-          { boundingBox: octree.root.aabb, transform: bbTransform, colour: red },
+          // { boundingBox: root.aabb, transform: bbTransform, colour: red },
         ];
 
-        function addChildBoundingBoxes(node: OctreeNode, depth: number) {
-          node.children.forEach((child) => {
-            if (child.children.length > 0) {
-              addChildBoundingBoxes(child, depth + 1);
-              // if (depth === 0 && idx === 0) {
-              //   addChildBoundingBoxes(child, depth + 1);
-              // } else if (depth > 0) {
-              //   addChildBoundingBoxes(child, depth + 1);
-              // }
-            } else {
-              octreeBoxes.push({
-                boundingBox: child.aabb,
-                transform: bbTransform,
-                // colour: colours[depth % 4],
-                colour: [1.0, 0.0, 0.0],
-              });
-             }
-          });
+        function addChildBoundingBoxes(node: MeshOctreeNode, depth: number) {
+          if (node.type === NodeType.Leaf) {
+            if (node.indices.length !== node.count) {
+              throw new Error('Invlaid count');
+            }
+            octreeBoxes.push({
+              boundingBox: node.aabb,
+              transform: bbTransform,
+              colour: colours[depth % 4],
+            });
+          } else {
+            // if (depth === 7) {
+            //   octreeBoxes.push({
+            //     boundingBox: node.aabb,
+            //     transform: bbTransform,
+            //     colour: colours[depth % 4],
+            //   });
+            // }
+            let child: number;
+            if (node.children.length !== 8) {
+              throw new Error('Invlaid children');
+            }
+            for (let i = 0; i < node.children.length; ++i) {
+              child = node.children[i];
+              if (child === -1) {
+                continue;
+              }
+              addChildBoundingBoxes(octree.getNode(child), depth + 1);
+            }
+            // node.children.forEach((child) => {
+            //   if (child.children.length > 0) {
+            //     addChildBoundingBoxes(child, depth + 1);
+            //     // if (depth === 0 && idx === 0) {
+            //     //   addChildBoundingBoxes(child, depth + 1);
+            //     // } else if (depth > 0) {
+            //     //   addChildBoundingBoxes(child, depth + 1);
+            //     // }
+            //   } else {
+            //     octreeBoxes.push({
+            //       boundingBox: child.aabb,
+            //       transform: bbTransform,
+            //       // colour: colours[depth % 4],
+            //       colour: [1.0, 0.0, 0.0],
+            //     });
+            //   }
+            // });
+          }
         }
-        addChildBoundingBoxes(octree.root, 0);
+        addChildBoundingBoxes(root, 0);
 
         const boundingBoxRenderer = createBoundingBoxRenderer({
           renderer,
@@ -153,7 +191,8 @@
           shaderManager,
         });
 
-        boundingBoxRenderer.setBoundingBoxes(voxels);
+        // boundingBoxRenderer.setBoundingBoxes(octreeBoxes);
+        // boundingBoxRenderer.setBoundingBoxes(voxels);
 
         app.onPostRender(() => {
           boundingBoxRenderer.render();
@@ -162,7 +201,10 @@
     }
   }
 
-  onDestroy(() => {});
+  onDestroy(() => {
+    unsubscribers.forEach((cb) => cb());
+    unsubscribers.length = 0;
+  });
 </script>
 
 <WebGpuScene bind:app opts={{ rendererType: RendererType.WeightedBlended }} />

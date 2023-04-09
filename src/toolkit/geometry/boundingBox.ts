@@ -7,6 +7,13 @@ export module BoundingBox {
     return { min: vec3.create(), max: vec3.create() };
   }
 
+  export function clone(bb: BoundingBox): BoundingBox {
+    return {
+      min: vec3.clone(bb.min),
+      max: vec3.clone(bb.max),
+    };
+  }
+
   export function fromMesh(mesh: {
     vertices: number[] | Float32Array | Float64Array;
     triangles: Uint32Array;
