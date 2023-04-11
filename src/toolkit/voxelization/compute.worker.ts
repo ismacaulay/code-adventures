@@ -9,6 +9,7 @@ let context:
   | {
       octree: MeshOctree;
       voxelSize: vec3;
+      isAABBInsideMesh: (aabb: BoundingBox) => boolean;
     }
   | undefined = undefined;
 
@@ -18,9 +19,13 @@ onmessage = function handleWorkerMessage(msg: MessageEvent) {
   const { workerId, name, args } = data;
   if (name === 'init') {
     const [buffer, voxelSize] = args;
+    const octree = createMeshOctree(buffer);
+    const isAABBInsideMesh = createIsAABBInsideMesh(octree);
+
     context = {
-      octree: createMeshOctree(buffer),
+      octree,
       voxelSize,
+      isAABBInsideMesh,
     };
     // console.log(context.octree.buffer);
   } else if (name === 'processChunk') {
@@ -35,8 +40,7 @@ onmessage = function handleWorkerMessage(msg: MessageEvent) {
     const chunk = VoxelChunk.create();
     const chunkBlockCount = VoxelChunk.CHUNK_SIZE;
     const blockAABB = BoundingBox.create();
-    const { octree, voxelSize } = context;
-    const isAABBInsideMesh = createIsAABBInsideMesh(octree);
+    const { octree, voxelSize, isAABBInsideMesh } = context;
 
     // if the chunkAABB intersects with the mesh, build the chunk leaf nodes
     // by checking if each block intersects with the mesh

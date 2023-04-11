@@ -1,17 +1,38 @@
+type Node<T> = {
+  value: T;
+  next: Node<T> | undefined;
+};
+
 export function createQueue<T>() {
-  const queue: T[] = [];
+  let head: Node<T> | undefined = undefined;
+  let tail: Node<T> | undefined = undefined;
 
   return {
     enqueue(item: T) {
-      queue.unshift(item);
+      const node: Node<T> = { value: item, next: undefined };
+
+      if (!tail) {
+        tail = node;
+        head = node;
+        return;
+      }
+
+      tail.next = node;
+      tail = node;
     },
 
     dequeue() {
-      return queue.shift();
-    },
+      if (!head) {
+        return undefined;
+      }
 
-    empty() {
-      return queue.length === 0;
+      const node = head;
+      head = head.next;
+      if (head === undefined) {
+        tail = undefined;
+      }
+
+      return node.value;
     },
   };
 }

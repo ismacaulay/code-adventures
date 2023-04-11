@@ -309,6 +309,9 @@ export type MeshOctree = {
 export function createMeshOctree(buf: Float32Array): MeshOctree {
   const buffer = buf;
 
+  let root: MeshOctreeInternalNode | undefined;
+  const cache: Map<number, MeshOctreeNode> = new Map();
+
   return {
     get buffer() {
       return buffer;
@@ -316,7 +319,11 @@ export function createMeshOctree(buf: Float32Array): MeshOctree {
 
     // Assumes the buffer will not change
     getRoot() {
-      return {
+      if (root) {
+        return root;
+      }
+
+      root = {
         type: NodeType.Internal,
         aabb: {
           min: vec3.fromValues(buffer[1], buffer[2], buffer[3]),
@@ -324,10 +331,16 @@ export function createMeshOctree(buf: Float32Array): MeshOctree {
         },
         children: buffer.subarray(7, 15),
       };
+      return root;
     },
 
     // Assumes the buffer will not change
     getNode(ptr: number) {
+      let node = cache.get(ptr);
+      if (node) {
+        return node;
+      }
+
       // TODO: validate ptr;
       const type = buffer[ptr];
       const aabb = {
@@ -335,26 +348,27 @@ export function createMeshOctree(buf: Float32Array): MeshOctree {
         max: vec3.fromValues(buffer[ptr + 4], buffer[ptr + 5], buffer[ptr + 6]),
       };
 
-      // [ptr: type, ptr+1: aabb, ptr+7: children]
       if (type === NodeType.Internal) {
-        return {
+        // [ptr: type, ptr+1: aabb, ptr+7: children]
+        node = {
           type,
           aabb,
           children: buffer.subarray(ptr + 7, ptr + 15), // start: inclusive, end: exclusive,
         };
-      }
-
-      // [ptr: type, ptr+1: aabb, ptr+7: count, ptr+8: indices]
-      if (type === NodeType.Leaf) {
-        return {
+      } else if (type === NodeType.Leaf) {
+        // [ptr: type, ptr+1: aabb, ptr+7: count, ptr+8: indices]
+        node = {
           type,
           aabb,
           count: buffer[ptr + 7],
           indices: buffer.subarray(ptr + 8, ptr + 8 + buffer[ptr + 7]), // start: inclusive, end: exclusive,
         };
+      } else {
+        throw new Error(`Unknown node type: ${type}`);
       }
 
-      throw new Error(`Unknown node type: ${type}`);
+      cache.set(ptr, node);
+      return node;
     },
   };
 }

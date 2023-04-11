@@ -39,40 +39,4 @@ export function intersectRayAABB(ray: Ray, aabb: BoundingBox): boolean {
   }
 
   return true;
-
-  // function intersectRayAABB(rayOrigin, rayDirection, aabbMin, aabbMax) {
-  //   // Calculate the inverse direction of the ray direction vector
-  //   var invDirX = 1.0 / rayDirection[0];
-  //   var invDirY = 1.0 / rayDirection[1];
-  //   var invDirZ = 1.0 / rayDirection[2];
-  //
-  //   // Calculate the t-values for the two planes intersected by the ray and the AABB
-  //   var txMin = (aabbMin[0] - rayOrigin[0]) * invDirX;
-  //   var txMax = (aabbMax[0] - rayOrigin[0]) * invDirX;
-  //   var tyMin = (aabbMin[1] - rayOrigin[1]) * invDirY;
-  //   var tyMax = (aabbMax[1] - rayOrigin[1]) * invDirY;
-  //   var tzMin = (aabbMin[2] - rayOrigin[2]) * invDirZ;
-  //   var tzMax = (aabbMax[2] - rayOrigin[2]) * invDirZ;
-  //
-  //   // Find the maximum and minimum t-values for the AABB intersection
-  //   var tMin = Math.max(Math.max(Math.min(txMin, txMax), Math.min(tyMin, tyMax)), Math.min(tzMin, tzMax));
-  //   var tMax = Math.min(Math.min(Math.max(txMin, txMax), Math.max(tyMin, tyMax)), Math.max(tzMin, tzMax));
-  //
-  //   // Check if the ray actually intersects the AABB
-  //   if (tMax < 0 || tMin > tMax) {
-  //     return null;
-  //   }
-  //
-  //   // If tMin is negative, the ray originates inside the AABB
-  //   var distance = tMin >= 0 ? tMin : tMax;
-  //
-  //   // Calculate the point of intersection
-  //   var intersection = [
-  //     rayOrigin[0] + distance * rayDirection[0],
-  //     rayOrigin[1] + distance * rayDirection[1],
-  //     rayOrigin[2] + distance * rayDirection[2]
-  //   ];
-  //
-  //   return intersection;
-  // }
 }
