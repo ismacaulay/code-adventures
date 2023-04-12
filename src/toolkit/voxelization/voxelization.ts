@@ -1,11 +1,18 @@
-import ComputeWorker from './compute.worker?worker';
+import ComputeWorker from './voxelization.worker?worker';
 
 import { mat4, vec3 } from 'gl-matrix';
 import { BoundingBox } from 'toolkit/geometry/boundingBox';
-import { createVoxelContainer, VoxelChunk, VoxelState } from 'toolkit/geometry/voxel';
+import {
+  createVoxelContainer,
+  VoxelChunk,
+  VoxelState,
+  type VoxelContainer,
+} from 'toolkit/geometry/voxel';
 import { createWorkerPool, type WorkerPool } from 'toolkit/workers/workerPool';
 import { createIsAABBInsideMesh } from './utils';
 import { intersectOctreeAABB, type MeshOctree } from 'toolkit/geometry/octree';
+
+// TODO: Deduplicate the generation logic
 
 enum ComputeFunctionKeys {
   ProcessChunk = 'processChunk',
@@ -18,30 +25,27 @@ type ComputeFunctions = {
 export function voxelizeMeshSync(
   mesh: { aabb: BoundingBox; triangles: Uint32Array; vertices: Float32Array | Float64Array },
   octree: MeshOctree,
-  voxelSize: number,
-) {
-  const blockSize = vec3.fromValues(voxelSize, voxelSize, voxelSize);
-  return generateVoxelMesh(mesh, octree, blockSize);
+  voxelSize: vec3,
+): VoxelContainer {
+  return generateVoxelMesh(mesh, octree, voxelSize);
 }
 
 export async function voxelizeMesh(
   mesh: { aabb: BoundingBox; triangles: Uint32Array; vertices: Float32Array | Float64Array },
   octree: MeshOctree,
-  voxelSize: number,
-) {
-  const blockSize = vec3.fromValues(voxelSize, voxelSize, voxelSize);
-
+  voxelSize: vec3,
+): Promise<VoxelContainer> {
   const workerPool = createWorkerPool<ComputeFunctions>(
     function createWorker() {
       const worker = new ComputeWorker();
       // TODO: used a shared array buffer for the octree buffer
-      worker.postMessage({ name: 'init', args: [octree.buffer, blockSize] });
+      worker.postMessage({ name: 'init', args: [octree.buffer, voxelSize] });
       return worker;
     },
     { concurrency: 8 },
   );
 
-  return generateVoxelMeshParallel(workerPool, mesh, blockSize).then((result) => {
+  return generateVoxelMeshParallel(workerPool, mesh, voxelSize).then((result) => {
     workerPool.destroy();
     return result;
   });
@@ -166,11 +170,13 @@ async function generateVoxelMeshParallel(
       Math.ceil(blockCount[1] / voxelSize[1]),
       Math.ceil(blockCount[2] / voxelSize[2]),
     );
+    console.log(blockCount);
     const chunks = vec3.fromValues(
       Math.ceil(blockCount[0] / chunkBlockCount[0]),
       Math.ceil(blockCount[1] / chunkBlockCount[1]),
       Math.ceil(blockCount[2] / chunkBlockCount[2]),
     );
+    console.log(chunks);
 
     const voxels = createVoxelContainer();
 

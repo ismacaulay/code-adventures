@@ -18,6 +18,7 @@
   import { BufferAttributeFormat } from 'toolkit/rendering/buffers/vertexBuffer';
   import { RendererType } from 'toolkit/rendering/renderer';
   import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
+  import { generateMeshFromVoxels } from 'toolkit/voxelization/meshGenerator';
   import { voxelizeMesh, voxelizeMeshSync } from 'toolkit/voxelization/voxelization';
 
   let app: Maybe<WebGPUApplication>;
@@ -41,28 +42,69 @@
         vec3.scale(scale, diff, 0.5);
 
         const longest = Math.max(diff[0], Math.max(diff[1], diff[2]));
-        const voxelSize = longest / 100.0;
+        const voxelWidth = longest / 100.0;
+        const voxelSize: vec3 = [voxelWidth, voxelWidth, voxelWidth];
 
         const mesh = { aabb: boundingBox, triangles: data.faces, vertices: data.vertices };
 
         console.log('Building octree');
-        const start = performance.now();
+        console.time('[octree]');
         const octree = Octree.fromMesh(mesh);
-        console.log(octree);
-        let t1 = performance.now();
-        console.log('Octree:', t1 - start);
-        t1 = performance.now();
+        console.timeEnd('[octree]');
 
         // TODO handle result of the voxelization
         // const voxels = voxelizeMeshSync(mesh, octree, voxelSize);
         // const t2 = performance.now();
         // console.log('voxels:', t2 - t1);
 
+        console.log('Building voxels');
+        console.time('[voxels]');
         voxelizeMesh(mesh, octree, voxelSize).then((voxels) => {
-          const t2 = performance.now();
-          console.log('voxels:', t2 - t1);
-        });
+          console.timeEnd('[voxels]');
+          console.log('voxels:', voxels);
 
+          console.log('Building mesh');
+          console.time('[mesh]');
+          generateMeshFromVoxels(voxels, voxelSize, boundingBox).then((buffers: any) => {
+            console.timeEnd('[mesh]');
+            const transform = createTransformComponent({
+              position: [-centre[0], -centre[1], -centre[2]],
+            });
+            const material = createMeshDiffuseMaterialComponent({
+              transparent: true,
+              opacity: 1.0,
+              colour: [0.0, 1.0, 0.0],
+            });
+
+            for (let i = 0; i < buffers.length; ++i) {
+              const buffer = buffers[i];
+              const entityId = `bunny - voxel mesh - ${i}`;
+              entityManager.add(entityId);
+              entityManager.addComponent(entityId, transform);
+
+              const geometry = createBufferGeometryComponent({
+                boundingBox,
+                count: buffer.length / 3,
+                buffers: [
+                  {
+                    array: new Float32Array(buffer.buffer.subarray(0, buffer.length)),
+                    attributes: [
+                      {
+                        format: BufferAttributeFormat.Float32x3,
+                        location: 0,
+                      },
+                    ],
+                  },
+                ],
+              });
+              entityManager.addComponent(entityId, geometry);
+
+              entityManager.addComponent(entityId, material);
+
+              sceneGraph.root.add(createSceneGraphNode({ uid: entityId, renderOrder: 0 }));
+            }
+          });
+        });
 
         const {
           entityManager,

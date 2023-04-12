@@ -3,7 +3,6 @@ import { BoundingBox } from 'toolkit/geometry/boundingBox';
 import { createMeshOctree, intersectOctreeAABB, type MeshOctree } from 'toolkit/geometry/octree';
 import { VoxelChunk, VoxelState } from 'toolkit/geometry/voxel';
 import { createIsAABBInsideMesh } from './utils';
-// import { createIsAABBInsideMesh } from './utils';
 
 let context:
   | {
@@ -74,4 +73,4 @@ onmessage = function handleWorkerMessage(msg: MessageEvent) {
   }
 };
 
-export {};
+export default null;

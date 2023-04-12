@@ -15,12 +15,17 @@ export interface VoxelChunk {
   setAllVoxels(state: VoxelState): void;
 }
 
+// TODO: Alot of these can be made, should we change this to a Class?
 export module VoxelChunk {
+  // TODO: What is the most optimal chunk size? or is it different
+  //       for different block counts?
   // export const CHUNK_SIZE = vec3.fromValues(16, 16, 16);
   export const CHUNK_SIZE = vec3.fromValues(8, 8, 8);
+  // export const CHUNK_SIZE = vec3.fromValues(4, 4, 4);
 
   function index(i: number, j: number, k: number) {
-    return k * CHUNK_SIZE[1] * CHUNK_SIZE[2] + j * CHUNK_SIZE[2] + i;
+    // return k * CHUNK_SIZE[1] * CHUNK_SIZE[2] + j * CHUNK_SIZE[2] + i;
+    return k * CHUNK_SIZE[0] * CHUNK_SIZE[1] + j * CHUNK_SIZE[0] + i;
   }
 
   export function create(): VoxelChunk {
@@ -115,3 +120,4 @@ export function createVoxelContainer() {
     },
   };
 }
+export type VoxelContainer = ReturnType<typeof createVoxelContainer>;
