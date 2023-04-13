@@ -31,40 +31,59 @@ export async function generateMeshFromVoxels(
       voxelSize[1] * VoxelChunk.CHUNK_SIZE[1],
       voxelSize[2] * VoxelChunk.CHUNK_SIZE[2],
     ];
-    const buffers = [
-      createDynamicFloat64Array()
-    ]
+    const buffers = [createDynamicFloat64Array()];
     let buffer = buffers[0];
 
-    for (const [{ i, j, k }, chunk] of voxels.storage.entries()) {
-      if (chunk.isEmpty()) {
-        continue;
+    const chunkCount = voxels.chunkCount;
+    let chunk: VoxelChunk | undefined;
+
+    for (let k = 0; k < chunkCount[2]; ++k) {
+      for (let j = 0; j < chunkCount[1]; ++j) {
+        for (let i = 0; i < chunkCount[0]; ++i) {
+          chunk = voxels.get(i, j, k);
+          if (!chunk || chunk.isEmpty()) {
+            continue;
+          }
+
+          chunkAABB.min[0] = aabb.min[0] + i * chunkSize[0];
+          chunkAABB.min[1] = aabb.min[1] + j * chunkSize[1];
+          chunkAABB.min[2] = aabb.min[2] + k * chunkSize[2];
+
+          // TODO: Dont need this
+          chunkAABB.max[0] = chunkAABB.min[0] + chunkSize[0];
+          chunkAABB.max[1] = chunkAABB.min[1] + chunkSize[1];
+          chunkAABB.max[2] = chunkAABB.min[2] + chunkSize[2];
+
+          tasks.push(
+            workerPool
+              .enqueue(ComputeFunctionKeys.GenerateMeshForChunk, {
+                args: [
+                  i,
+                  j,
+                  k,
+                  voxelSize,
+                  chunk.buffer,
+                  BoundingBox.clone(chunkAABB),
+                  voxels.get(i - 1, j, k)?.buffer,
+                  voxels.get(i + 1, j, k)?.buffer,
+                  voxels.get(i, j - 1, k)?.buffer,
+                  voxels.get(i, j + 1, k)?.buffer,
+                  voxels.get(i, j, k - 1)?.buffer,
+                  voxels.get(i, j, k + 1)?.buffer,
+                ],
+              })
+              .then((mesh) => {
+                if (mesh) {
+                  if (buffer.length >= 9000000) {
+                    buffer = createDynamicFloat64Array();
+                    buffers.push(buffer);
+                  }
+                  buffer.append(mesh.vertices);
+                }
+              }),
+          );
+        }
       }
-
-      chunkAABB.min[0] = aabb.min[0] + i * chunkSize[0];
-      chunkAABB.min[1] = aabb.min[1] + j * chunkSize[1];
-      chunkAABB.min[2] = aabb.min[2] + k * chunkSize[2];
-
-      // TODO: Dont need this
-      chunkAABB.max[0] = chunkAABB.min[0] + chunkSize[0];
-      chunkAABB.max[1] = chunkAABB.min[1] + chunkSize[1];
-      chunkAABB.max[2] = chunkAABB.min[2] + chunkSize[2];
-
-      tasks.push(
-        workerPool
-          .enqueue(ComputeFunctionKeys.GenerateMeshForChunk, {
-            args: [i, j, k, voxelSize, chunk.buffer, BoundingBox.clone(chunkAABB)],
-          })
-          .then((mesh) => {
-            if (mesh) {
-              if (buffer.length >= 9000000) {
-                buffer = createDynamicFloat64Array();
-                buffers.push(buffer);
-              }
-              buffer.append(mesh.vertices);
-            }
-          }),
-      );
     }
 
     Promise.all(tasks).then(() => {

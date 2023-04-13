@@ -67,9 +67,13 @@ onmessage = function handleWorkerMessage(msg: MessageEvent) {
       chunk.setAllVoxels(VoxelState.Inside);
     }
 
-    (postMessage as any)({ workerId, result: { x, y, z, buffer: chunk.buffer } }, [
-      chunk.buffer.buffer,
-    ]);
+    const buffer = chunk.buffer;
+    const transferables: Transferable[] = [];
+    if (buffer) {
+      transferables.push(buffer.buffer);
+    }
+
+    (postMessage as any)({ workerId, result: { x, y, z, buffer } }, transferables);
   }
 };
 

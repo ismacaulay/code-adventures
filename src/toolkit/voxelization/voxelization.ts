@@ -85,7 +85,7 @@ function generateVoxelMesh(
     Math.ceil(blockCount[1] / chunkBlockCount[1]),
     Math.ceil(blockCount[2] / chunkBlockCount[2]),
   );
-  const voxels = createVoxelContainer();
+  const voxels = createVoxelContainer(chunks);
   const isAABBInsideMesh = createIsAABBInsideMesh(octree);
 
   const aabb = mesh.aabb;
@@ -178,7 +178,7 @@ async function generateVoxelMeshParallel(
     );
     console.log(chunks);
 
-    const voxels = createVoxelContainer();
+    const voxels = createVoxelContainer(chunks);
 
     const aabb = mesh.aabb;
     const chunkAABB = BoundingBox.create();
@@ -202,7 +202,17 @@ async function generateVoxelMeshParallel(
                 args: [x, y, z, BoundingBox.clone(chunkAABB)],
               })
               .then(
-                ({ x, y, z, buffer }: { x: number; y: number; z: number; buffer: Uint8Array }) => {
+                ({
+                  x,
+                  y,
+                  z,
+                  buffer,
+                }: {
+                  x: number;
+                  y: number;
+                  z: number;
+                  buffer: Uint8Array | undefined;
+                }) => {
                   const chunk = VoxelChunk.create();
                   chunk.buffer = buffer;
                   voxels.insert(x, y, z, chunk);
