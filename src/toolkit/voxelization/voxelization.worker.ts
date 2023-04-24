@@ -1,6 +1,12 @@
 import { vec3 } from 'gl-matrix';
 import { BoundingBox } from 'toolkit/geometry/boundingBox';
-import { createMeshOctree, intersectOctreeAABB, type MeshOctree } from 'toolkit/geometry/octree';
+import {
+  createMeshOctree,
+  intersectOctreeAABB,
+  NodeType,
+  type MeshOctree,
+  type MeshOctreeNode,
+} from 'toolkit/geometry/octree';
 import { VoxelChunk, VoxelState } from 'toolkit/geometry/voxel';
 import { createIsAABBInsideMesh } from './utils';
 
@@ -20,6 +26,28 @@ onmessage = function handleWorkerMessage(msg: MessageEvent) {
     const [buffer, voxelSize] = args;
     const octree = createMeshOctree(buffer);
     const isAABBInsideMesh = createIsAABBInsideMesh(octree);
+
+    // prime the node cache
+    const stack: number[] = [];
+    const root = octree.getRoot();
+    for (let i = 0; i < root.children.length; ++i) {
+      stack.push(root.children[i]);
+    }
+    let nodePtr: number;
+    let node: MeshOctreeNode;
+    while (stack.length > 0) {
+      nodePtr = stack.pop()!;
+      if (nodePtr === -1) {
+        continue;
+      }
+
+      node = octree.getNode(nodePtr);
+      if (node.type === NodeType.Internal) {
+        for (let i = 0; i < node.children.length; ++i) {
+          stack.push(node.children[i]);
+        }
+      }
+    }
 
     context = {
       octree,

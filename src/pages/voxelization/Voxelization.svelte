@@ -24,9 +24,28 @@
 
   let app: Maybe<WebGPUApplication>;
   let unsubscribers: Unsubscriber[] = [];
+  async function loadBunny() {
+    return loadObj('/models/bunny.obj').then((data) => {
+      data.vertices = data.vertices.map((v) => v * 1000);
+      return { data, camera: { position: [0, 0, 1] as vec3, zoom: 0.01 } };
+    });
+  }
+
+  async function loadDragon() {
+    return loadObj('/models/dragon.obj').then((data) => {
+      return { data, camera: { position: [0, 0, -1] as vec3, zoom: 0.025 } };
+    });
+  }
+
+  const loaders = {
+    bunny: loadBunny,
+    dragon: loadDragon,
+  };
+  const id = 'dragon';
+
   $: {
     if (app) {
-      loadObj('/models/bunny.obj').then((data) => {
+      loaders[id]().then(({ data, camera }) => {
         if (!app) {
           console.log('App destroyed while loading obj');
           return;
@@ -43,7 +62,7 @@
         vec3.scale(scale, diff, 0.5);
 
         const longest = Math.max(diff[0], Math.max(diff[1], diff[2]));
-        const voxelWidth = longest / 100.0;
+        const voxelWidth = longest / 200.0;
         const voxelSize: vec3 = [voxelWidth, voxelWidth, voxelWidth];
 
         const mesh = { aabb: boundingBox, triangles: data.faces, vertices: data.vertices };
@@ -135,7 +154,7 @@
 
             for (let i = 0; i < buffers.length; ++i) {
               const buffer = buffers[i];
-              const entityId = `bunny - voxel mesh - ${i}`;
+              const entityId = `${id} - voxel mesh - ${i}`;
               entityManager.add(entityId);
               entityManager.addComponent(entityId, transform);
 
@@ -174,14 +193,14 @@
 
         cameraController.cameraType = CameraType.Orthographic;
         cameraController.controlType = CameraControlType.Orbit;
-        cameraController.position = [0, 0, 1];
+        cameraController.position = camera.position;
         if (cameraController.camera.type === CameraType.Orthographic) {
-          cameraController.camera.zoom = 12;
+          cameraController.camera.zoom = camera.zoom;
           cameraController.camera.updateProjectionMatrix();
         }
 
         // render the bunny
-        const entityId = 'bunny';
+        const entityId = id;
         entityManager.add(entityId);
         const transform = createTransformComponent({
           position: [-centre[0], -centre[1], -centre[2]],

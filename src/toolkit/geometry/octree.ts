@@ -404,7 +404,8 @@ function intersectOctreeNodeAABB(octree: MeshOctree, node: MeshOctreeNode, aabb:
 }
 
 export function intersectOctreeRay(octree: MeshOctree, ray: Ray): boolean {
-  return intersectOctreeNodeRay(octree, octree.getRoot(), ray);
+  // return intersectOctreeNodeRay(octree, octree.getRoot(), ray);
+  return intersectOctreeNodeRay2(octree, ray);
 }
 
 function intersectOctreeNodeRay(octree: MeshOctree, node: MeshOctreeNode, ray: Ray): boolean {
@@ -413,6 +414,7 @@ function intersectOctreeNodeRay(octree: MeshOctree, node: MeshOctreeNode, ray: R
   }
 
   if (node.type === NodeType.Leaf) {
+    // TODO: this should technically check all the of child triangles in the octree
     return true;
   }
 
@@ -427,6 +429,39 @@ function intersectOctreeNodeRay(octree: MeshOctree, node: MeshOctreeNode, ray: R
     result = intersectOctreeNodeRay(octree, octree.getNode(child), ray);
     if (result) {
       return result;
+    }
+  }
+
+  return false;
+}
+
+function intersectOctreeNodeRay2(octree: MeshOctree, ray: Ray): boolean {
+  const stack: number[] = [];
+  const root = octree.getRoot();
+  for (let i = 0; i < root.children.length; ++i) {
+    stack.push(root.children[i]);
+  }
+
+  let nodePtr: number;
+  let node: MeshOctreeNode;
+
+  while (stack.length > 0) {
+    nodePtr = stack.pop()!;
+    if (nodePtr === -1) {
+      continue;
+    }
+
+    node = octree.getNode(nodePtr);
+    if (!intersectRayAABB(ray, node.aabb)) {
+      continue;
+    }
+
+    if (node.type === NodeType.Leaf) {
+      return true;
+    }
+
+    for (let i = 0; i < node.children.length; ++i) {
+      stack.push(node.children[i]);
     }
   }
 
