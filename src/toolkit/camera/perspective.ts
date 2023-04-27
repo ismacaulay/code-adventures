@@ -14,9 +14,9 @@ export function createPerspectiveCamera(params: PerspectiveCameraParams): Perspe
   const _position = vec3.fromValues(0, 0, 0);
   const _up = vec3.fromValues(0, 1, 0);
 
-  const fov = params.fov;
-  const znear = params.znear;
-  const zfar = params.zfar;
+  let fov = params.fov;
+  let znear = params.znear;
+  let zfar = params.zfar;
   let aspect = params.aspect;
 
   const view = mat4.create();
@@ -47,9 +47,26 @@ export function createPerspectiveCamera(params: PerspectiveCameraParams): Perspe
     view,
     projection,
 
-    fov,
-    znear,
-    zfar,
+    get fov() {
+      return fov;
+    },
+    set fov(value: number) {
+      fov = value;
+    },
+
+    get znear() {
+      return znear;
+    },
+    set znear(value: number) {
+      znear = value;
+    },
+
+    get zfar() {
+      return zfar;
+    },
+    set zfar(value: number) {
+      zfar = value;
+    },
 
     get aspect() {
       return aspect;

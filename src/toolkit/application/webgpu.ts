@@ -159,7 +159,10 @@ export async function createWebGPUApplication(
   }
 
   function renderNode(node: SceneGraphNode) {
-    const { uid, children } = node;
+    const { uid, visible, children } = node;
+    if (!visible) {
+      return;
+    }
 
     const transform = entityManager.getComponent(uid, ComponentType.Transform);
     const geometry = entityManager.getComponent(uid, ComponentType.Geometry);

@@ -12,6 +12,8 @@
     "wasm:game-of-life": "wasm-pack build ./wasm/game-of-life --target web"
   },
   "devDependencies": {
+    "@loaders.gl/core": "^3.3.3",
+    "@loaders.gl/obj": "^3.3.3",
     "@sveltejs/vite-plugin-svelte": "^1.0.1",
     "@tsconfig/svelte": "^3.0.0",
     "@tweakpane/core": "^1.1.0",
@@ -27,9 +29,9 @@
     "prettier-plugin-svelte": "^2.7.0",
     "seedrandom": "^3.0.5",
     "stats.js": "^0.17.0",
-    "svelte": "^3.49.0",
-    "svelte-check": "^2.8.0",
-    "svelte-preprocess": "^4.10.7",
+    "svelte": "^3.58.0",
+    "svelte-check": "^3.2.0",
+    "svelte-preprocess": "^5.0.3",
     "tslib": "^2.4.0",
     "typescript": "^4.6.4",
     "vite": "^3.0.7",

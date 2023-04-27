@@ -1,6 +1,7 @@
 export interface ReadonlySceneGraphNode {
   readonly uid: string;
   readonly renderOrder: number;
+  readonly visible: boolean;
 
   readonly children: readonly ReadonlySceneGraphNode[];
   onChange(cb: () => void): () => void;
@@ -9,6 +10,7 @@ export interface ReadonlySceneGraphNode {
 export interface SceneGraphNode extends ReadonlySceneGraphNode {
   children: readonly SceneGraphNode[];
   renderOrder: number;
+  visible: boolean;
 
   add(child: SceneGraphNode): void;
   remove(child: SceneGraphNode): void;

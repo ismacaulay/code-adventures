@@ -34,12 +34,41 @@ function process(text: string) {
     firstChar = line.charAt(0);
     if (firstChar === '#') continue;
 
-    // TODO: is it better to check chars over whole strings?
-    const data = line.split(/\s+/);
-    if (data[0] === 'v') {
-      vertices.push(parseFloat(data[1]), parseFloat(data[2]), parseFloat(data[3]));
-    } else if (data[0] === 'f') {
-      faces.push(parseFace(data[1]).face, parseFace(data[2]).face, parseFace(data[3]).face);
+    if (firstChar === 'v') {
+      const data = line.split(/\s+/);
+
+      if (data[0] === 'v') {
+        vertices.push(parseFloat(data[1]), parseFloat(data[2]), parseFloat(data[3]));
+      }
+    } else if (firstChar === 'f') {
+      const lineData = line.slice(1).trim();
+      const vertexData = lineData.split(/\s+/);
+      const faceVertices: string[][] = [];
+
+      for (let j = 0; j < vertexData.length; ++j) {
+        const vertex = vertexData[j];
+
+        if (vertex.length > 0) {
+          const vertexParts = vertex.split('/');
+          faceVertices.push(vertexParts);
+        }
+      }
+
+      // Draw an edge between the first vertex and all subsequent vertices to form an n-gon
+      const v1 = faceVertices[0];
+      let v2: string[];
+      let v3: string[];
+
+      for (let j = 1; j < faceVertices.length - 1; ++j) {
+        v2 = faceVertices[j];
+        v3 = faceVertices[j + 1];
+
+        faces.push(parseInt(v1[0], 10) - 1, parseInt(v2[0], 10) - 1, parseInt(v3[0], 10) - 1);
+
+        // state.addFace(v1[0], v2[0], v3[0], v1[1], v2[1], v3[1], v1[2], v2[2], v3[2]);
+      }
+
+      // faces.push(parseFace(data[1]).face, parseFace(data[2]).face, parseFace(data[3]).face);
     }
   }
 

@@ -1,5 +1,5 @@
 import { mat4, vec3, glMatrix } from 'gl-matrix';
-import { ComponentType } from 'types/ecs/component';
+import { ComponentType, type MatrixTransformComponent } from 'types/ecs/component';
 import type { TransformComponent } from 'types/ecs/component';
 import { isAxisRotation, type Rotation } from 'toolkit/math/rotation';
 
@@ -38,6 +38,18 @@ export function createTransformComponent({
     scale,
 
     updateMatrix,
+
+    get matrix() {
+      return matrix;
+    },
+  };
+}
+
+export function transformComponentFromMatrix(fromMatrix: mat4): MatrixTransformComponent {
+  let matrix = mat4.clone(fromMatrix);
+
+  return {
+    type: ComponentType.Transform,
 
     get matrix() {
       return matrix;

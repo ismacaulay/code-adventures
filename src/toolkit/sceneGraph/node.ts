@@ -1,12 +1,13 @@
 import type { SceneGraphNode } from 'types/sceneGraph';
 
-export function createSceneGraphNode({
-  uid,
-  renderOrder,
-}: {
+export function createSceneGraphNode(params: {
   uid: string;
-  renderOrder: number;
+  visible?: boolean;
+  renderOrder?: number;
 }): SceneGraphNode {
+  const { uid, renderOrder = 0 } = params;
+  let { visible = true } = params;
+
   const children: SceneGraphNode[] = [];
 
   const unsubscribers = [];
@@ -20,6 +21,14 @@ export function createSceneGraphNode({
     uid,
     children,
     renderOrder,
+
+    get visible() {
+      return visible;
+    },
+    set visible(value: boolean) {
+      visible = value;
+      changed();
+    },
 
     add(child) {
       children.push(child);

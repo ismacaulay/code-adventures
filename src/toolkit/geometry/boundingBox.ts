@@ -116,6 +116,46 @@ export module BoundingBox {
     return { min, max };
   }
 
+  export function fromBoundingBoxes(boxes: BoundingBox[]): BoundingBox {
+    if (boxes.length <= 0) {
+      throw new Error('No bounding boxes');
+    }
+
+    const min = vec3.clone(boxes[0].min);
+    const max = vec3.clone(boxes[0].max);
+
+    let box: BoundingBox;
+    for (let i = 1; i < boxes.length; ++i) {
+      box = boxes[i];
+
+      if (box.min[0] < min[0]) {
+        min[0] = box.min[0];
+      }
+
+      if (box.max[0] > max[0]) {
+        max[0] = box.max[0];
+      }
+
+      if (box.min[1] < min[1]) {
+        min[1] = box.min[1];
+      }
+
+      if (box.max[1] > max[1]) {
+        max[1] = box.max[1];
+      }
+
+      if (box.min[2] < min[2]) {
+        min[2] = box.min[2];
+      }
+
+      if (box.max[2] > max[2]) {
+        max[2] = box.max[2];
+      }
+    }
+
+    return { min, max };
+  }
+
   export function centre(bb: BoundingBox, out?: vec3): vec3 {
     const result = out ?? vec3.create();
     halfSize(bb, result);
@@ -127,5 +167,9 @@ export module BoundingBox {
     vec3.sub(result, bb.max, bb.min);
     vec3.scale(result, result, 0.5);
     return result;
+  }
+
+  export function diagonal(bb: BoundingBox): number {
+    return Math.hypot(bb.max[0] - bb.min[0], bb.max[1] - bb.min[1], bb.max[2] - bb.min[2]);
   }
 }

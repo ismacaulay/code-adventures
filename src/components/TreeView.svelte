@@ -1,6 +1,9 @@
 <script lang="ts">
   import type { TreeViewNode } from 'types/components/tree';
   import TreeNode from './TreeNode.svelte';
+  import { createEventDispatcher } from 'svelte';
+
+  const dispatch = createEventDispatcher();
 
   export let tree: Maybe<TreeViewNode>;
   export let onSelected: (uid: string) => void;
@@ -13,9 +16,13 @@
   }
 
   // TODO: allow arrow key input
-  function handleClick(e: Event) {
-    e.stopPropagation();
-    e.preventDefault();
+  // function handleClick(e: Event) {
+  //   // e.stopPropagation();
+  //   // e.preventDefault();
+  // }
+
+  function handleToggle(e: CustomEvent) {
+    dispatch('toggle', e.detail);
   }
 </script>
 
@@ -25,7 +32,7 @@
   }
 </style>
 
-<div class="container noselect" on:click={handleClick}>
+<div class="container noselect">
   {#if tree}
     {#each tree.children as node}
       <TreeNode
@@ -34,6 +41,8 @@
         level={0}
         {selected}
         onSelected={handleSelected}
+        checked={node.checked}
+        on:toggle={handleToggle}
       />
     {/each}
   {/if}

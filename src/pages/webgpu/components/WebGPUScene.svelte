@@ -17,6 +17,7 @@
   import { createMaterialViewModel, type MaterialViewModel } from '../models/material';
   import { createGeometryViewModel, type GeometryViewModel } from '../models/geometry';
   import type { RendererType } from 'toolkit/rendering/renderer';
+  import { findNodeByUid } from 'toolkit/sceneGraph/search';
 
   export let app: Maybe<WebGPUApplication> = undefined;
   export let scene: Maybe<string> = undefined;
@@ -79,6 +80,8 @@
     return {
       uid: node.uid,
       children: node.children.map(processSceneGraphNode),
+
+      checked: node.visible,
     };
   }
 
@@ -99,6 +102,17 @@
         ...root.children.map(processSceneGraphNode),
       ],
     };
+  }
+
+  function handleVisibilityToggle(e: CustomEvent) {
+    if (!app) {
+      return;
+    }
+
+    const node = findNodeByUid(app.sceneGraph.root, e.detail.text);
+    if (node) {
+      node.visible = e.detail.value;
+    }
   }
 
   onMount(() => {
@@ -212,7 +226,7 @@
     <div class="left-split-view-container">
       <div class="vertical-split-view-container">
         <div class="top-split-view-container">
-          <TreeView {tree} onSelected={handleTreeItemSelected} />
+          <TreeView {tree} onSelected={handleTreeItemSelected} on:toggle={handleVisibilityToggle} />
         </div>
 
         <Resizer direction="vertical" />
