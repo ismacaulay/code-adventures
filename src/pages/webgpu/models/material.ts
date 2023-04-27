@@ -1,5 +1,6 @@
 import { vec3 } from 'gl-matrix';
 import { writable, type Writable } from 'svelte/store';
+import { hexToRgb, rgbToHex } from 'toolkit/colour';
 import { MaterialComponentType, type MaterialComponent } from 'types/ecs/component';
 
 export interface BaseMaterialViewModel {
@@ -13,7 +14,7 @@ export interface MeshBasicMaterialViewModel extends BaseMaterialViewModel {
 
   transparent: Writable<boolean>;
   opacity: Writable<number>;
-  colour: Writable<vec3>;
+  colour: Writable<string>;
 }
 
 export interface MeshDiffuseMaterialViewModel extends BaseMaterialViewModel {
@@ -21,7 +22,7 @@ export interface MeshDiffuseMaterialViewModel extends BaseMaterialViewModel {
 
   transparent: Writable<boolean>;
   opacity: Writable<number>;
-  colour: Writable<vec3>;
+  colour: Writable<string>;
 }
 
 export interface RawShaderMaterialViewModel extends BaseMaterialViewModel {
@@ -44,7 +45,8 @@ export function createMaterialViewModel(component: MaterialComponent): MaterialV
   ) {
     const transparent = writable(component.transparent);
     const opacity = writable(component.opacity);
-    const colour = writable(vec3.clone(component.colour));
+    const rgbColour = vec3.create();
+    const colour = writable(rgbToHex(component.colour));
 
     unsubscribers.push(
       transparent.subscribe((value) => {
@@ -56,8 +58,10 @@ export function createMaterialViewModel(component: MaterialComponent): MaterialV
       }),
 
       colour.subscribe((value) => {
-        if (!vec3.equals(value, component.colour)) {
-          vec3.copy(component.colour, value);
+        hexToRgb(value, rgbColour);
+
+        if (!vec3.equals(rgbColour, component.colour)) {
+          vec3.copy(component.colour, rgbColour);
         }
       }),
     );

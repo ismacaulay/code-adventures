@@ -30,7 +30,7 @@
 
   let transparent: Maybe<Writable<boolean>>;
   let opacity: Maybe<Writable<number>>;
-  let colour: Maybe<string>;
+  let colour: Maybe<Writable<string>>;
 
   $: {
     transparent = model.transparent;
@@ -40,23 +40,10 @@
       model.type === MaterialComponentType.MeshDiffuse
     ) {
       opacity = model.opacity;
-      colour = rgbToHex(get(model.colour));
+      colour = model.colour;
     } else {
       opacity = undefined;
       colour = undefined;
-    }
-  }
-
-  function handleColourInput() {
-    if (
-      colour &&
-      (model.type === MaterialComponentType.MeshBasic ||
-        model.type === MaterialComponentType.MeshDiffuse)
-    ) {
-      const rgb = hexToRgb(colour);
-      if (rgb) {
-        model.colour.set(rgb);
-      }
     }
   }
 
@@ -104,7 +91,7 @@
     {#if colour}
       <div class="inputContainer">
         <span class="label">colour:</span>
-        <input type="color" bind:value={colour} on:input={handleColourInput} />
+        <input type="color" bind:value={$colour} />
       </div>
     {/if}
   </div>
