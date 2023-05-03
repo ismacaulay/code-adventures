@@ -1,7 +1,7 @@
 import { vec3 } from 'gl-matrix';
 import { radians } from 'toolkit/math';
 import type { Camera } from './camera';
-import { CameraControlType, type CameraControls } from './controls';
+import { CameraControlType, type FreeCameraControls } from './controls';
 
 const W_KEY_BIT = 1 << 1;
 const A_KEY_BIT = 1 << 2;
@@ -26,8 +26,8 @@ export function createFreeControls(
     mouseSensitivity: 0.1,
     moveSensitivity: 2.5,
   },
-): CameraControls {
-  const { mouseSensitivity, moveSensitivity } = options;
+): FreeCameraControls {
+  let { mouseSensitivity, moveSensitivity } = options;
 
   let camera: Camera = initial.camera;
 
@@ -166,6 +166,14 @@ export function createFreeControls(
 
     set camera(value: Camera) {
       camera = value;
+    },
+
+    set moveSensitivity(value: number) {
+      moveSensitivity = value;
+    },
+
+    set mouseSensitivity(value: number) {
+      mouseSensitivity = value;
     },
 
     // TODO: dt is always 0

@@ -16,6 +16,7 @@ export interface CameraState {
 
 export interface CameraController {
   camera: Camera;
+  controls: CameraControls;
 
   cameraType: CameraType;
   controlType: CameraControlType;
@@ -88,6 +89,10 @@ export function createCameraController(
   return {
     get camera() {
       return camera;
+    },
+
+    get controls() {
+      return controls;
     },
 
     get cameraType() {

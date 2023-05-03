@@ -64,26 +64,12 @@ function process(text: string) {
         v3 = faceVertices[j + 1];
 
         faces.push(parseInt(v1[0], 10) - 1, parseInt(v2[0], 10) - 1, parseInt(v3[0], 10) - 1);
-
-        // state.addFace(v1[0], v2[0], v3[0], v1[1], v2[1], v3[1], v1[2], v2[2], v3[2]);
       }
-
-      // faces.push(parseFace(data[1]).face, parseFace(data[2]).face, parseFace(data[3]).face);
     }
   }
 
   return {
     vertices: Float64Array.from(vertices),
     faces: Uint32Array.from(faces),
-  };
-}
-
-function parseFace(face: string) {
-  const [f, t, n] = face.split('/');
-
-  return {
-    face: parseInt(f, 10) - 1,
-    uv: parseInt(t, 10) - 1,
-    normal: parseInt(n, 10) - 1,
   };
 }

@@ -5,9 +5,23 @@ export enum CameraControlType {
   Orbit = 'orbit',
 }
 
-export interface CameraControls {
-  type: CameraControlType;
+export type FreeCameraControls = {
+  type: CameraControlType.Free;
+
+  moveSensitivity: number;
+  mouseSensitivity: number;
+
   update(dt: number): void;
   camera: Camera;
   destroy(): void;
-}
+};
+
+export type OrbitCameraControls = {
+  type: CameraControlType.Orbit;
+
+  update(dt: number): void;
+  camera: Camera;
+  destroy(): void;
+};
+
+export type CameraControls = FreeCameraControls | OrbitCameraControls;

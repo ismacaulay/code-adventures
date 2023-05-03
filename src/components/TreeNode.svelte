@@ -43,6 +43,10 @@
     user-select: none; /* Chrome, Edge, Opera and Firefox */
   }
 
+  .text {
+    padding-left: 3px;
+  }
+
   .selected {
     background-color: #ccc;
   }
@@ -57,9 +61,9 @@
   <div class={selected === text ? 'selected' : ''} style:padding-left="{level * 10}px">
     <div class="container">
       {#if checked !== undefined}
-        <input type="checkbox" {checked} on:change={toggle} />
+        <input type="checkbox" on:keydown|preventDefault {checked} on:change={toggle} />
       {/if}
-      <span class="noselect" on:click={handleClick}>{text}</span>
+      <span class="noselect text" on:click={handleClick}>{text}</span>
     </div>
   </div>
   {#each children as node}
