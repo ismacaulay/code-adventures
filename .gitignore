@@ -34,3 +34,6 @@ wasm/**/bin/
 wasm/**/pkg/
 wasm/**/wasm-pack.log
 
+# tools builds
+tools/bin
+tools/build
