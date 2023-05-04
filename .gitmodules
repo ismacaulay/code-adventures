@@ -1,0 +1,3 @@
+[submodule "tools/meshopt/vendor/meshoptimizer"]
+	path = tools/meshopt/vendor/meshoptimizer
+	url = https://github.com/zeux/meshoptimizer.git
