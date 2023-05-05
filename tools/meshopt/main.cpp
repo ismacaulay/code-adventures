@@ -2,6 +2,7 @@
 #include <cstring>
 #include <fstream>
 #include <stdio.h>
+#include <unordered_map>
 #include <vector>
 
 #include <assimp/Importer.hpp>
@@ -10,13 +11,6 @@
 #include <meshoptimizer.h>
 
 static const char* model = "../../public/models/bunny.obj";
-
-struct colour_t
-{
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-};
 
 int main()
 {
@@ -101,35 +95,52 @@ int main()
     //                                  3 * sizeof(float));
 
     // TODO: write meshlet info to disk and load in JS
-    //       
+    //
     std::vector<float> o_vertices;
     std::vector<uint32_t> o_triangles;
+    std::vector<uint32_t> o_colours;
+    std::srand(42);
 
-    colour_t c;
     for (int i = 0; i < meshlet_count; ++i) {
         const meshopt_Meshlet& m = meshlets[i];
         const unsigned int* m_vertices = &meshlet_vertices[m.vertex_offset];
         const unsigned char* m_triangles =
             &meshlet_triangles[m.triangle_offset];
-        c.r = std::rand() % 256;
-        c.g = std::rand() % 256;
-        c.b = std::rand() % 256;
+
+        uint32_t c = 0;
+        c |= (std::rand() % 256);
+        c |= ((std::rand() % 256) << 8);
+        c |= ((std::rand() % 256) << 16);
+        c |= (255 << 24);
+        // if (i < 10) {
+        //     printf("meshlet: %d, colour: %u\n", i, c);
+        // }
+
+        std::unordered_map<uint32_t, uint32_t> vertex_mapping;
 
         for (int t = 0; t < m.triangle_count * 3; ++t) {
-            unsigned int idx = m_vertices[m_triangles[t]];
-            assert(idx < vertices.size());
-            if (i == 0) {
-                printf("idx: %d\n", idx);
+            uint32_t idx = m_vertices[m_triangles[t]];
+            auto it = vertex_mapping.find(idx);
+            if (it != vertex_mapping.end()) {
+                o_triangles.push_back(it->second);
+                continue;
             }
+            assert(idx < vertices.size());
 
-            o_triangles.push_back(idx);
+            uint32_t vidx = o_vertices.size() / 3;
+            vertex_mapping.insert({ idx, vidx });
+
+            float* v = &vertices[idx * 3];
+            o_vertices.insert(o_vertices.end(), { v[0], v[1], v[2] });
+            o_colours.insert(o_colours.end(), c);
+            o_triangles.push_back(vidx);
         }
     }
 
     {
         std::ofstream out("../../public/generated/bunny/vertices.bin",
                           std::ios::out | std::ios::binary);
-        out.write((char*)vertices.data(), vertices.size() * sizeof(float));
+        out.write((char*)o_vertices.data(), o_vertices.size() * sizeof(float));
         out.close();
     }
     {
@@ -142,7 +153,7 @@ int main()
     {
         std::ofstream out("../../public/generated/bunny/colours.bin",
                           std::ios::out | std::ios::binary);
-        out.write((char*)o_colours.data(), o_colours.size() * sizeof(colour_t));
+        out.write((char*)o_colours.data(), o_colours.size() * sizeof(uint32_t));
         out.close();
     }
 
