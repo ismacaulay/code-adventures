@@ -23,6 +23,6 @@ set(MESHOPTIMIZER_SRCS
 )
 
 add_library(meshoptimizer STATIC "${MESHOPTIMIZER_SRCS}")
-target_include_directories(meshoptimizer INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/src>")
+target_include_directories(meshoptimizer INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/meshoptimizer/src>")
 target_compile_features(meshoptimizer PUBLIC cxx_std_17)
 set_target_properties(meshoptimizer PROPERTIES CXX_EXTENSIONS OFF)

@@ -37,3 +37,6 @@ wasm/**/wasm-pack.log
 # tools builds
 tools/bin
 tools/build
+tools/.cache
+compile_commands.json
+public/generated

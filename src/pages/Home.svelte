@@ -4,6 +4,7 @@
   import Wasm from './wasm/index.svelte';
   import Voxelization from './voxelization/index.svelte';
   import MoanaIsland from './moanaIsland/index.svelte';
+  import Advanced from './advanced/index.svelte';
 </script>
 
 <style>
@@ -19,4 +20,5 @@
   <ComputationalGeometry />
   <Voxelization />
   <MoanaIsland />
+  <Advanced />
 </div>

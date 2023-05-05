@@ -1,3 +1,6 @@
-[submodule "tools/meshopt/vendor/meshoptimizer"]
-	path = tools/meshopt/vendor/meshoptimizer
+[submodule "tools/vendor/vcpkg"]
+	path = tools/vendor/vcpkg
+	url = https://github.com/microsoft/vcpkg
+[submodule "tools/vendor/meshoptimizer"]
+	path = tools/vendor/meshoptimizer
 	url = https://github.com/zeux/meshoptimizer.git

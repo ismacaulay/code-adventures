@@ -5,12 +5,18 @@ if(EXISTS "${LOC_PATH}")
     message(FATAL_ERROR "You cannot build in a source directory (or any directory with a CMakeLists.txt file). Please make a build subdirectory. Feel free to remove CMakeCache.txt and CMakeFiles.")
 endif()
 
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vendor/vcpkg/scripts/buildsystems/vcpkg.cmake"
+  CACHE STRING "Vcpkg toolchain file")
+
 project(code-adventures-tools
     DESCRIPTION "code adventures tools"
     LANGUAGES C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+find_package(assimp CONFIG REQUIRED)
+
+add_subdirectory(vendor)
 add_subdirectory(meshopt)
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)

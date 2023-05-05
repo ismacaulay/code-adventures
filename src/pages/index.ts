@@ -3,5 +3,6 @@ import webgpu from './webgpu/pages';
 import wasm from './wasm/pages';
 import voxelization from './voxelization/pages';
 import moanaIsland from './moanaIsland/pages';
+import advanced from './advanced/pages';
 
-export default { computationalGeometry, webgpu, wasm, voxelization, moanaIsland };
+export default { computationalGeometry, webgpu, wasm, voxelization, moanaIsland, advanced };
