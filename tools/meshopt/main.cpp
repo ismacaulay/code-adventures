@@ -60,8 +60,8 @@ int main()
         }
     }
 
-    const size_t max_vertices = 64;
-    const size_t max_triangles = 124;
+    const size_t max_vertices = 255;
+    const size_t max_triangles = 128;
     const float cone_weight = 0.0f;
 
     size_t max_meshlets =
@@ -101,8 +101,10 @@ int main()
     std::vector<uint32_t> o_colours;
     std::srand(42);
 
+    uint32_t total_tris = 0;
     for (int i = 0; i < meshlet_count; ++i) {
         const meshopt_Meshlet& m = meshlets[i];
+        total_tris += m.triangle_count;
         const unsigned int* m_vertices = &meshlet_vertices[m.vertex_offset];
         const unsigned char* m_triangles =
             &meshlet_triangles[m.triangle_offset];
@@ -136,6 +138,9 @@ int main()
             o_triangles.push_back(vidx);
         }
     }
+
+    printf("Average tris per meshlet: %u\n",
+           (uint32_t)(total_tris / meshlet_count));
 
     {
         std::ofstream out("../../public/generated/bunny/vertices.bin",
