@@ -23,9 +23,9 @@ export interface BaseComponent {
 export interface TransformComponent extends BaseComponent {
   type: ComponentType.Transform;
 
-  position?: vec3;
-  rotation?: Rotation;
-  scale?: vec3;
+  position: vec3;
+  rotation: Rotation;
+  scale: vec3;
 
   updateMatrix(): void;
   readonly matrix: mat4;

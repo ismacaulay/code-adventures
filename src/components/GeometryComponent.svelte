@@ -59,8 +59,16 @@
     <div>
       <span class="label">bounding box:</span>
       <div class="boundingBoxContainer">
-        <span>min: {boundingBox.min[0]} {boundingBox.min[1]} {boundingBox.min[2]}</span>
-        <span>max: {boundingBox.max[0]} {boundingBox.max[1]} {boundingBox.max[2]}</span>
+        <span
+          >min: {boundingBox.min[0].toFixed(6)}
+          {boundingBox.min[1].toFixed(6)}
+          {boundingBox.min[2].toFixed(6)}</span
+        >
+        <span
+          >max: {boundingBox.max[0].toFixed(6)}
+          {boundingBox.max[1].toFixed(6)}
+          {boundingBox.max[2].toFixed(6)}</span
+        >
         <div class="inputContainer">
           <span class="label">show:</span>
           <input type="checkbox" on:keydown={handleKeypress} bind:checked={$showBoundingBox} />

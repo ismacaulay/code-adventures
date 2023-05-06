@@ -1,5 +1,4 @@
 import { mat4, vec3 } from 'gl-matrix';
-import Stats from 'stats.js';
 import { createCameraController, type CameraController } from 'toolkit/camera/cameraController';
 import { createBufferManager, DefaultBuffers, type BufferManager } from 'toolkit/ecs/bufferManager';
 import { createComponentManager } from 'toolkit/ecs/componentManager';
@@ -20,6 +19,7 @@ import type { Shader } from 'toolkit/rendering/shader';
 import { createWebGPURenderer } from 'toolkit/rendering/webgpuRenderer';
 import { createSceneGraph } from 'toolkit/sceneGraph';
 import { createSceneLoader } from 'toolkit/scenes/loader';
+import { createFrameStats } from 'toolkit/stats';
 import {
   ComponentType,
   isWeightedBlendedShaderId,
@@ -114,6 +114,8 @@ export async function createWebGPUApplication(
   let frameTime = 0;
   let lastFrameTime = performance.now();
   let dt = 0;
+  const stats = createFrameStats();
+
   const tmp = vec3.create();
   const boundingBoxes: RenderableBoundingBox[] = [];
 
@@ -290,6 +292,8 @@ export async function createWebGPUApplication(
         });
       });
 
+      stats.addTriangles(geometry.count / 3);
+
       renderer.submit({
         type: CommandType.Draw,
         shader,
@@ -333,11 +337,11 @@ export async function createWebGPUApplication(
     );
   }
 
-  const stats = new Stats();
-  stats.showPanel(0);
-  stats.dom.style.left = '';
-  stats.dom.style.right = '0px';
-  document.body.appendChild(stats.dom);
+  // const stats = new Stats();
+  // stats.showPanel(0);
+  // stats.dom.style.left = '';
+  // stats.dom.style.right = '0px';
+  // document.body.appendChild(stats.dom);
 
   const preRenderCallbacks: (() => void)[] = [];
   const postRenderCallbacks: (() => void)[] = [];
@@ -462,7 +466,7 @@ export async function createWebGPUApplication(
       cameraController.destroy();
 
       resizer.unobserve(canvas);
-      document.body.removeChild(stats.dom);
+      // document.body.removeChild(stats.dom);
     },
 
     renderer,
@@ -471,5 +475,6 @@ export async function createWebGPUApplication(
     entityManager,
     bufferManager,
     shaderManager,
+    stats,
   };
 }

@@ -18,6 +18,8 @@
   import { createGeometryViewModel, type GeometryViewModel } from '../models/geometry';
   import type { RendererType } from 'toolkit/rendering/renderer';
   import { findNodeByUid } from 'toolkit/sceneGraph/search';
+  import ComponentContainer from 'components/Component.svelte';
+  import { writable, type Writable } from 'svelte/store';
 
   export let app: Maybe<WebGPUApplication> = undefined;
   export let scene: Maybe<string> = undefined;
@@ -115,6 +117,9 @@
     }
   }
 
+  let fps: Writable<number>;
+  let triangles: Writable<number>;
+
   onMount(() => {
     const unsubscribers: Unsubscriber[] = [];
 
@@ -128,6 +133,8 @@
             cameraViewModel = createCameraViewModel(app.cameraController);
 
             unsubscribers.push(app.sceneGraph.onChange(handleSceneGraphChanged));
+            fps = app.stats.fps;
+            triangles = app.stats.triangles;
 
             if (scene) {
               await app.loadScene(scene);
@@ -179,6 +186,7 @@
 
   .right-split-view-container {
     flex: 1 1 0%;
+    position: relative;
   }
 
   .vertical-split-view-container {
@@ -214,6 +222,18 @@
     display: block;
     width: 100%;
     height: 100%;
+  }
+
+  .stats-container {
+    border: 1px solid black;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    width: 150px;
+    padding: 2px;
+    background-color: #fff;
   }
 </style>
 
@@ -257,6 +277,16 @@
       {#if webGPUSupported}
         <div class="canvas-container">
           <canvas bind:this={canvas} />
+        </div>
+        <div class="stats-container">
+          <ComponentContainer title="Statistics">
+            {#if fps}
+              <span>fps: {$fps}</span>
+            {/if}
+            {#if triangles}
+              <span>triangles: {$triangles}</span>
+            {/if}
+          </ComponentContainer>
         </div>
       {:else}
         <div class="unsupported-container">

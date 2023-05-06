@@ -20,7 +20,7 @@
     width: 100%;
     height: 16px;
     display: flex;
-    min-width: 360px;
+    /* min-width: 360px; */
   }
 
   .arrowContainer {

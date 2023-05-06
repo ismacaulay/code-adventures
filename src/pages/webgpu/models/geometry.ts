@@ -26,7 +26,7 @@ export function createGeometryViewModel(component: GeometryComponent): GeometryV
   );
 
   return {
-    triangles: component.count,
+    triangles: component.count / 3,
     buffers: component.buffers.length,
     boundingBox: component.boundingBox,
     showBoundingBox,

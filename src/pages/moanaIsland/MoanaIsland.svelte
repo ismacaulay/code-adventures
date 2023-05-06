@@ -5,10 +5,7 @@
   import { RendererType } from 'toolkit/rendering/renderer';
   import { transformComponentFromMatrix } from 'toolkit/ecs/components/transform';
   import { vec3, type mat4 } from 'gl-matrix';
-  import {
-    createMeshBasicMaterialComponent,
-    createMeshDiffuseMaterialComponent,
-  } from 'toolkit/ecs/components/material';
+  import { createMeshDiffuseMaterialComponent } from 'toolkit/ecs/components/material';
   import { createBufferGeometryComponent } from 'toolkit/ecs/components/geometry';
   import { BoundingBox } from 'toolkit/geometry/boundingBox';
   import { BufferAttributeFormat } from 'toolkit/rendering/buffers/vertexBuffer';
