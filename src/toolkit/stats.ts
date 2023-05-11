@@ -34,3 +34,5 @@ export function createFrameStats() {
     triangles,
   };
 }
+
+export type FrameStats = ReturnType<typeof createFrameStats>;

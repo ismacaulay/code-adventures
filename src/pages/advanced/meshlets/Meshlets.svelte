@@ -76,18 +76,24 @@ fn fragment_main(@location(0) position_eye: vec4<f32>, @location(1) @interpolate
 `;
 
   async function run(app: WebGPUApplication) {
-    const [verticesBuf, trianglesBuf, coloursBuf] = await Promise.all([
+    const [verticesBuf, trianglesBuf, coloursBuf, boundsBuf, countsBuf] = await Promise.all([
       fetchBinary(`${base}/vertices.bin`),
       fetchBinary(`${base}/triangles.bin`),
       fetchBinary(`${base}/colours.bin`),
+      fetchBinary(`${base}/bounds.bin`),
+      fetchBinary(`${base}/counts.bin`),
     ]);
 
     const name = 'bunny';
     const vertices = new Float32Array(verticesBuf);
     const triangles = new Uint32Array(trianglesBuf);
     const colours = new Uint32Array(coloursBuf);
+    const bounds = new Float32Array(boundsBuf);
+    const counts = new Uint32Array(countsBuf);
 
-    console.log(vertices, triangles, colours);
+    // const meshletCount = bounds.length / 4; // { centre: vec3, radius: float }
+    // console.log(bounds, meshletCount);
+    console.log(counts, counts.length / 4);
 
     const { cameraController, entityManager, sceneGraph } = app;
 
@@ -95,13 +101,6 @@ fn fragment_main(@location(0) position_eye: vec4<f32>, @location(1) @interpolate
 
     const transform = createTransformComponent({});
     entityManager.addComponent(name, transform);
-
-    // TODO: load material
-    // const material = createMeshDiffuseMaterialComponent({
-    //   transparent: false,
-    //   opacity: 1,
-    //   colour: [1.0, 0.0, 1.0],
-    // });
 
     const material = createRawShaderMaterialComponent({
       source: shaderSource,

@@ -34,21 +34,42 @@ export interface TransformComponent extends BaseComponent {
 /**
  * Geometry
  */
+export enum GeometryComponentType {
+  Buffer = 0,
+  Cluster = 1,
+}
+
 export interface BaseGeometryComponent extends BaseComponent {
   type: ComponentType.Geometry;
+  subtype: GeometryComponentType;
+
+  boundingBox: BoundingBox;
+  showBoundingBox: boolean;
 }
 
 export interface MeshGeometryComponent extends BaseGeometryComponent {
-  boundingBox: BoundingBox;
+  subtype: GeometryComponentType.Buffer;
+
   indices?: IndexBufferDescriptor;
   buffers: VertexBufferDescriptor[];
   count: number;
   instances: number;
-
-  showBoundingBox: boolean;
 }
 
-export type GeometryComponent = MeshGeometryComponent;
+export interface ClusterGeometryComponent extends BaseGeometryComponent {
+  subtype: GeometryComponentType.Cluster;
+
+  clusters: {
+    counts: Uint32Array;
+    bounds: Float32Array | Float64Array;
+    indices: Uint32Array;
+    vertices: Float32Array | Float64Array;
+
+    attributes: VertexBufferDescriptor[];
+  };
+}
+
+export type GeometryComponent = MeshGeometryComponent | ClusterGeometryComponent;
 
 /**
  * Material

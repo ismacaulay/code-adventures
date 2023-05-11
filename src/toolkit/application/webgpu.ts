@@ -19,9 +19,10 @@ import type { Shader } from 'toolkit/rendering/shader';
 import { createWebGPURenderer } from 'toolkit/rendering/webgpuRenderer';
 import { createSceneGraph } from 'toolkit/sceneGraph';
 import { createSceneLoader } from 'toolkit/scenes/loader';
-import { createFrameStats } from 'toolkit/stats';
+import { createFrameStats, type FrameStats } from 'toolkit/stats';
 import {
   ComponentType,
+  GeometryComponentType,
   isWeightedBlendedShaderId,
   MaterialComponentType,
   type MaterialComponent,
@@ -37,6 +38,7 @@ export interface WebGPUApplication {
   readonly entityManager: EntityManager;
   readonly bufferManager: BufferManager;
   readonly shaderManager: ShaderManager;
+  readonly stats: FrameStats;
 
   loadScene(url: string): Promise<void>;
 
@@ -176,32 +178,41 @@ export async function createWebGPUApplication(
     }
 
     if (transform && geometry && material) {
-      const vertexBuffers = geometry.buffers.map((buffer) => {
-        // TODO: should the buffers on the geometry have a needsUpdate?
-        if (buffer.id === undefined) {
-          buffer.id = bufferManager.createVertexBuffer(buffer);
-          renderer.submit({
-            type: CommandType.WriteBuffer,
-            src: buffer.array,
-            dst: bufferManager.get<VertexBuffer>(buffer.id).buffer,
-          });
-        }
-
-        return bufferManager.get<VertexBuffer>(buffer.id);
-      });
-
+      let buffers: VertexBuffer[] = [];
       let indices: Maybe<IndexBuffer> = undefined;
-      if (geometry.indices) {
-        if (geometry.indices.id === undefined) {
-          geometry.indices.id = bufferManager.createIndexBuffer(geometry.indices);
-          renderer.submit({
-            type: CommandType.WriteBuffer,
-            src: geometry.indices.array,
-            dst: bufferManager.get<VertexBuffer>(geometry.indices.id).buffer,
-          });
+      let count = 0;
+      let instances = 0;
+      if (geometry.subtype === GeometryComponentType.Buffer) {
+        for (let i = 0; i < geometry.buffers.length; ++i) {
+          const buffer = geometry.buffers[i];
+          // TODO: should the buffers on the geometry have a needsUpdate?
+          if (buffer.id === undefined) {
+            buffer.id = bufferManager.createVertexBuffer(buffer);
+            renderer.submit({
+              type: CommandType.WriteBuffer,
+              src: buffer.array,
+              dst: bufferManager.get<VertexBuffer>(buffer.id).buffer,
+            });
+          }
+
+          buffers.push(bufferManager.get<VertexBuffer>(buffer.id));
+
+          if (geometry.indices) {
+            if (geometry.indices.id === undefined) {
+              geometry.indices.id = bufferManager.createIndexBuffer(geometry.indices);
+              renderer.submit({
+                type: CommandType.WriteBuffer,
+                src: geometry.indices.array,
+                dst: bufferManager.get<VertexBuffer>(geometry.indices.id).buffer,
+              });
+            }
+
+            indices = bufferManager.get<IndexBuffer>(geometry.indices.id);
+          }
         }
 
-        indices = bufferManager.get<IndexBuffer>(geometry.indices.id);
+        count = geometry.count;
+        instances = geometry.instances;
       }
 
       if (material.shader === undefined) {
@@ -292,15 +303,15 @@ export async function createWebGPUApplication(
         });
       });
 
-      stats.addTriangles(geometry.count / 3);
+      stats.addTriangles(count / 3);
 
       renderer.submit({
         type: CommandType.Draw,
         shader,
         indices,
-        buffers: vertexBuffers,
-        count: geometry.count,
-        instances: geometry.instances,
+        buffers: buffers ?? [],
+        count,
+        instances,
         transparent,
       });
 
@@ -336,12 +347,6 @@ export async function createWebGPUApplication(
       { opaque: [] as SceneGraphNode[], transparent: [] as SceneGraphNode[] },
     );
   }
-
-  // const stats = new Stats();
-  // stats.showPanel(0);
-  // stats.dom.style.left = '';
-  // stats.dom.style.right = '0px';
-  // document.body.appendChild(stats.dom);
 
   const preRenderCallbacks: (() => void)[] = [];
   const postRenderCallbacks: (() => void)[] = [];
@@ -466,7 +471,6 @@ export async function createWebGPUApplication(
       cameraController.destroy();
 
       resizer.unobserve(canvas);
-      // document.body.removeChild(stats.dom);
     },
 
     renderer,

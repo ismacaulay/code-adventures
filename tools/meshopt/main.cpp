@@ -1,3 +1,4 @@
+#include <_types/_uint32_t.h>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -11,6 +12,28 @@
 #include <meshoptimizer.h>
 
 static const char* model = "../../public/models/bunny.obj";
+
+struct sphere
+{
+    float centre[3];
+    float radius;
+
+    sphere(float c[3], float r)
+    {
+        centre[0] = c[0];
+        centre[1] = c[1];
+        centre[2] = c[2];
+        radius = r;
+    }
+};
+
+template <typename T>
+void write_binary(const std::string& path, const std::vector<T>& data)
+{
+    std::ofstream out(path, std::ios::out | std::ios::binary);
+    out.write((char*)data.data(), data.size() * sizeof(T));
+    out.close();
+}
 
 int main()
 {
@@ -86,19 +109,16 @@ int main()
     printf("Generated %d meshlets\n", (int)meshlet_count);
 
     // const meshopt_Meshlet& m = meshlets[0];
-    // meshopt_Bounds bounds =
-    //     meshopt_computeMeshletBounds(&meshlet_vertices[m.vertex_offset],
-    //                                  &meshlet_triangles[m.triangle_offset],
-    //                                  m.triangle_count,
-    //                                  vertices.data(),
-    //                                  vertices.size(),
-    //                                  3 * sizeof(float));
 
     // TODO: write meshlet info to disk and load in JS
     //
     std::vector<float> o_vertices;
     std::vector<uint32_t> o_triangles;
     std::vector<uint32_t> o_colours;
+    std::vector<sphere> o_bounds;
+    o_bounds.reserve(meshlet_count);
+    std::vector<uint32_t> o_counts;
+
     std::srand(42);
 
     uint32_t total_tris = 0;
@@ -114,11 +134,19 @@ int main()
         c |= ((std::rand() % 256) << 8);
         c |= ((std::rand() % 256) << 16);
         c |= (255 << 24);
-        // if (i < 10) {
-        //     printf("meshlet: %d, colour: %u\n", i, c);
-        // }
+
+        meshopt_Bounds bounds =
+            meshopt_computeMeshletBounds(&meshlet_vertices[m.vertex_offset],
+                                         &meshlet_triangles[m.triangle_offset],
+                                         m.triangle_count,
+                                         vertices.data(),
+                                         vertices.size(),
+                                         3 * sizeof(float));
+        o_bounds.push_back({ bounds.center, bounds.radius });
 
         std::unordered_map<uint32_t, uint32_t> vertex_mapping;
+        uint32_t triangle_offset = o_triangles.size() / 3;
+        uint32_t vertex_offset = o_vertices.size() / 3;
 
         for (int t = 0; t < m.triangle_count * 3; ++t) {
             uint32_t idx = m_vertices[m_triangles[t]];
@@ -134,33 +162,26 @@ int main()
 
             float* v = &vertices[idx * 3];
             o_vertices.insert(o_vertices.end(), { v[0], v[1], v[2] });
-            o_colours.insert(o_colours.end(), c);
+            o_colours.push_back(c);
             o_triangles.push_back(vidx);
         }
+
+        uint32_t triangle_count = m.triangle_count;
+        uint32_t vertex_count = (o_vertices.size() / 3) - vertex_offset;
+
+        o_counts.insert(
+            o_counts.end(),
+            { triangle_offset, triangle_count, vertex_offset, vertex_count });
     }
 
     printf("Average tris per meshlet: %u\n",
            (uint32_t)(total_tris / meshlet_count));
 
-    {
-        std::ofstream out("../../public/generated/bunny/vertices.bin",
-                          std::ios::out | std::ios::binary);
-        out.write((char*)o_vertices.data(), o_vertices.size() * sizeof(float));
-        out.close();
-    }
-    {
-        std::ofstream out("../../public/generated/bunny/triangles.bin",
-                          std::ios::out | std::ios::binary);
-        out.write((char*)o_triangles.data(),
-                  o_triangles.size() * sizeof(uint32_t));
-        out.close();
-    }
-    {
-        std::ofstream out("../../public/generated/bunny/colours.bin",
-                          std::ios::out | std::ios::binary);
-        out.write((char*)o_colours.data(), o_colours.size() * sizeof(uint32_t));
-        out.close();
-    }
+    write_binary("../../public/generated/bunny/vertices.bin", o_vertices);
+    write_binary("../../public/generated/bunny/triangles.bin", o_triangles);
+    write_binary("../../public/generated/bunny/colours.bin", o_colours);
+    write_binary("../../public/generated/bunny/bounds.bin", o_bounds);
+    write_binary("../../public/generated/bunny/counts.bin", o_counts);
 
     return 0;
 }
