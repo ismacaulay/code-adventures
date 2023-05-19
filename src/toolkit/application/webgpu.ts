@@ -6,6 +6,9 @@ import { createEntityManager } from 'toolkit/ecs/entityManager';
 import { createScriptManager } from 'toolkit/ecs/scriptManager';
 import { createShaderManager, DefaultShaders, type ShaderManager } from 'toolkit/ecs/shaderManager';
 import { createTextureManager } from 'toolkit/ecs/textureManager';
+import { BoundingBox } from 'toolkit/geometry/boundingBox';
+import { Frustum } from 'toolkit/math/frustum';
+import { FrustumIntersection, intersectFrustumAABB } from 'toolkit/math/intersect/frustum';
 import {
   createBoundingBoxRenderer,
   type RenderableBoundingBox,
@@ -121,6 +124,9 @@ export async function createWebGPUApplication(
   const tmp = vec3.create();
   const boundingBoxes: RenderableBoundingBox[] = [];
 
+  const frustum = Frustum.create();
+  const transformedBoundingBox = BoundingBox.create();
+
   function isMaterialTransparent(material: MaterialComponent) {
     if (
       material.subtype !== MaterialComponentType.MeshBasic &&
@@ -183,6 +189,14 @@ export async function createWebGPUApplication(
       let count = 0;
       let instances = 0;
       if (geometry.subtype === GeometryComponentType.Buffer) {
+        // TODO: there is a bug with perspective orbit controls where the culling does work.
+        // It would be good to be able to switch to a debug scene where we can see the scene and the camera
+        vec3.transformMat4(transformedBoundingBox.min, geometry.boundingBox.min, transform.matrix);
+        vec3.transformMat4(transformedBoundingBox.max, geometry.boundingBox.max, transform.matrix);
+        if (intersectFrustumAABB(frustum, transformedBoundingBox) == FrustumIntersection.Outside) {
+          return;
+        }
+
         for (let i = 0; i < geometry.buffers.length; ++i) {
           const buffer = geometry.buffers[i];
           // TODO: should the buffers on the geometry have a needsUpdate?
@@ -316,6 +330,7 @@ export async function createWebGPUApplication(
       });
 
       if (geometry.showBoundingBox) {
+        // TODO: use the transformed BB from Frustum culling
         boundingBoxes.push({ boundingBox: geometry.boundingBox, transform: transform.matrix });
       }
     }
@@ -359,6 +374,7 @@ export async function createWebGPUApplication(
     lastFrameTime = frameTime;
 
     cameraController.update(dt);
+    Frustum.setFromMatrix(frustum, cameraController.camera.viewProjection);
 
     renderer.begin();
 

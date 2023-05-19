@@ -22,12 +22,16 @@ export function createPerspectiveCamera(params: PerspectiveCameraParams): Perspe
   const view = mat4.create();
   const projection = mat4.create();
 
+  let vpNeedsUpdate = false;
+  const viewProjection = mat4.create();
+
   function lookat(eye: vec3, target: vec3, up: vec3) {
     vec3.copy(_position, eye);
     vec3.copy(_target, target);
     vec3.copy(_up, up);
 
     mat4.lookAt(view, eye, target, up);
+    vpNeedsUpdate = true;
   }
 
   function updateViewMatrix() {
@@ -36,6 +40,7 @@ export function createPerspectiveCamera(params: PerspectiveCameraParams): Perspe
 
   function updateProjectionMatrix() {
     mat4.perspectiveZO(projection, (fov * Math.PI) / 180.0, aspect, znear, zfar);
+    vpNeedsUpdate = true;
   }
 
   updateViewMatrix();
@@ -46,6 +51,13 @@ export function createPerspectiveCamera(params: PerspectiveCameraParams): Perspe
 
     view,
     projection,
+    get viewProjection() {
+      if (vpNeedsUpdate) {
+        mat4.multiply(viewProjection, projection, view);
+        vpNeedsUpdate = false;
+      }
+      return viewProjection;
+    },
 
     get fov() {
       return fov;

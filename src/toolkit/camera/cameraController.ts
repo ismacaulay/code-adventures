@@ -1,4 +1,5 @@
-import { vec3 } from 'gl-matrix';
+import { mat4, vec3 } from 'gl-matrix';
+import { Frustum } from 'toolkit/math/frustum';
 import { createSignal } from 'toolkit/signal';
 import { CameraType, type Camera } from './camera';
 import { CameraControlType, type CameraControls } from './controls';

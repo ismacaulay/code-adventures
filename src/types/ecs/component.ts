@@ -1,6 +1,7 @@
 import type { mat4, vec3 } from 'gl-matrix';
 import type { BoundingBox } from 'toolkit/geometry/boundingBox';
 import type { Rotation } from 'toolkit/math/rotation';
+import type { Sphere } from 'toolkit/math/sphere';
 import type { IndexBufferDescriptor } from 'toolkit/rendering/buffers/indexBuffer';
 import type { UniformDictionary } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { VertexBufferDescriptor } from 'toolkit/rendering/buffers/vertexBuffer';
@@ -45,6 +46,8 @@ export interface BaseGeometryComponent extends BaseComponent {
 
   boundingBox: BoundingBox;
   showBoundingBox: boolean;
+
+  boundingSphere: Sphere;
 }
 
 export interface MeshGeometryComponent extends BaseGeometryComponent {

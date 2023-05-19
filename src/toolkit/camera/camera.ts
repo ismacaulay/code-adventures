@@ -10,6 +10,7 @@ export interface BaseCamera {
 
   view: mat4;
   projection: mat4;
+  viewProjection: mat4;
 
   aspect: number;
   znear: number;

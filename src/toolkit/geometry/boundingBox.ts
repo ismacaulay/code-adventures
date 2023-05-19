@@ -14,6 +14,12 @@ export module BoundingBox {
     };
   }
 
+  export function copy(out: BoundingBox, bb: BoundingBox): BoundingBox {
+    vec3.copy(out.min, bb.min);
+    vec3.copy(out.max, bb.max);
+    return out;
+  }
+
   export function fromMesh(mesh: {
     vertices: number[] | Float32Array | Float64Array;
     triangles: Uint32Array;
@@ -171,5 +177,45 @@ export module BoundingBox {
 
   export function diagonal(bb: BoundingBox): number {
     return Math.hypot(bb.max[0] - bb.min[0], bb.max[1] - bb.min[1], bb.max[2] - bb.min[2]);
+  }
+
+  export function getPositiveVertex(out: vec3, bb: BoundingBox, n: vec3): vec3 {
+    out[0] = bb.min[0];
+    out[1] = bb.min[1];
+    out[2] = bb.min[2];
+
+    if (n[0] >= 0) {
+      out[0] = bb.max[0];
+    }
+
+    if (n[1] >= 0) {
+      out[1] = bb.max[1];
+    }
+
+    if (n[2] >= 0) {
+      out[2] = bb.max[2];
+    }
+
+    return out;
+  }
+
+  export function getNegativeVertex(out: vec3, bb: BoundingBox, n: vec3): vec3 {
+    out[0] = bb.max[0];
+    out[1] = bb.max[1];
+    out[2] = bb.max[2];
+
+    if (n[0] >= 0) {
+      out[0] = bb.min[0];
+    }
+
+    if (n[1] >= 0) {
+      out[1] = bb.min[1];
+    }
+
+    if (n[2] >= 0) {
+      out[2] = bb.min[2];
+    }
+
+    return out;
   }
 }
