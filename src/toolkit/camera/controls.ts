@@ -7,6 +7,7 @@ export enum CameraControlType {
 
 export type FreeCameraControls = {
   type: CameraControlType.Free;
+  enabled: boolean;
 
   moveSensitivity: number;
   mouseSensitivity: number;
@@ -18,6 +19,7 @@ export type FreeCameraControls = {
 
 export type OrbitCameraControls = {
   type: CameraControlType.Orbit;
+  enabled: boolean;
 
   update(dt: number): void;
   camera: Camera;

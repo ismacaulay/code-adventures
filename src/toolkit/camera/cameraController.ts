@@ -1,4 +1,4 @@
-import { mat4, vec3 } from 'gl-matrix';
+import { vec3 } from 'gl-matrix';
 import { Frustum } from 'toolkit/math/frustum';
 import { createSignal } from 'toolkit/signal';
 import { CameraType, type Camera } from './camera';
@@ -15,7 +15,7 @@ export interface CameraState {
   up: vec3;
 }
 
-export interface CameraController {
+export type CameraController = {
   camera: Camera;
   controls: CameraControls;
 
@@ -25,12 +25,13 @@ export interface CameraController {
   target: vec3;
   position: vec3;
   up: vec3;
+  frustum: Frustum;
 
   update(dt: number): void;
   destroy(): void;
 
   subscribe(cb: VoidFunction): Unsubscriber;
-}
+};
 
 export function createCameraController(
   canvas: HTMLElement,
@@ -49,19 +50,24 @@ export function createCameraController(
     top: 2.5,
     bottom: -2.5,
 
-    znear: -1000,
-    zfar: 1000,
+    znear: 0,
+    zfar: 2,
   });
 
   const perspective = createPerspectiveCamera({
     aspect: canvas.clientWidth / canvas.clientHeight,
     fov: 45,
     znear: 0.1,
-    zfar: 1000,
+    zfar: 2,
   });
 
   let currentType: CameraType = initial.type;
   let camera: Camera = currentType === CameraType.Orthographic ? orthographic : perspective;
+
+  const frustum = Frustum.create();
+  signal.subscribe(() => {
+    Frustum.setFromMatrix(frustum, camera.viewProjection);
+  });
 
   let currentControlType: CameraControlType;
   let controls: CameraControls;
@@ -165,6 +171,10 @@ export function createCameraController(
       vec3.copy(camera.up, up);
       camera.updateViewMatrix();
       signal.emit();
+    },
+
+    get frustum() {
+      return frustum;
     },
 
     update(dt) {

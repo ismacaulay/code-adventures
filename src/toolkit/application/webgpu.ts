@@ -1,5 +1,8 @@
 import { mat4, vec3 } from 'gl-matrix';
+import { get, writable, type Writable } from 'svelte/store';
+import { CameraType } from 'toolkit/camera/camera';
 import { createCameraController, type CameraController } from 'toolkit/camera/cameraController';
+import { CameraControlType } from 'toolkit/camera/controls';
 import { createBufferManager, DefaultBuffers, type BufferManager } from 'toolkit/ecs/bufferManager';
 import { createComponentManager } from 'toolkit/ecs/componentManager';
 import { createEntityManager } from 'toolkit/ecs/entityManager';
@@ -7,7 +10,6 @@ import { createScriptManager } from 'toolkit/ecs/scriptManager';
 import { createShaderManager, DefaultShaders, type ShaderManager } from 'toolkit/ecs/shaderManager';
 import { createTextureManager } from 'toolkit/ecs/textureManager';
 import { BoundingBox } from 'toolkit/geometry/boundingBox';
-import { Frustum } from 'toolkit/math/frustum';
 import { FrustumIntersection, intersectFrustumAABB } from 'toolkit/math/intersect/frustum';
 import {
   createBoundingBoxRenderer,
@@ -17,6 +19,7 @@ import type { IndexBuffer } from 'toolkit/rendering/buffers/indexBuffer';
 import type { UniformBuffer } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { VertexBuffer } from 'toolkit/rendering/buffers/vertexBuffer';
 import { CommandType } from 'toolkit/rendering/commands';
+import { createDebugRenderSystem } from 'toolkit/rendering/debugRenderSystem';
 import { RendererType, type Renderer } from 'toolkit/rendering/renderer';
 import type { Shader } from 'toolkit/rendering/shader';
 import { createWebGPURenderer } from 'toolkit/rendering/webgpuRenderer';
@@ -34,7 +37,7 @@ import {
 import type { EntityManager } from 'types/ecs/entity';
 import type { SceneGraph, SceneGraphNode } from 'types/sceneGraph';
 
-export interface WebGPUApplication {
+export type WebGPUApplication = {
   readonly renderer: Renderer;
   readonly cameraController: CameraController;
   readonly sceneGraph: SceneGraph;
@@ -42,6 +45,9 @@ export interface WebGPUApplication {
   readonly bufferManager: BufferManager;
   readonly shaderManager: ShaderManager;
   readonly stats: FrameStats;
+
+  readonly debugMode: Writable<boolean>;
+  readonly debugCameraController: CameraController;
 
   loadScene(url: string): Promise<void>;
 
@@ -58,7 +64,7 @@ export interface WebGPUApplication {
 
   start(): void;
   destroy(): void;
-}
+};
 
 export async function createWebGPUApplication(
   appId: string,
@@ -68,11 +74,13 @@ export async function createWebGPUApplication(
   console.log('creating webgpu application', appId);
   const sceneGraph = createSceneGraph();
   const cameraController = createCameraController(canvas);
-
-  const resizer = new ResizeObserver(() => {
-    cameraController.aspect = canvas.clientWidth / canvas.clientHeight;
+  const debugCameraController = createCameraController(canvas, {
+    type: CameraType.Perspective,
+    control: CameraControlType.Free,
   });
-  resizer.observe(canvas);
+  debugCameraController.camera.znear = 0.01;
+  debugCameraController.camera.zfar = 1000;
+  debugCameraController.camera.updateProjectionMatrix();
 
   const renderer = await createWebGPURenderer(canvas, opts);
   const entityManager = createEntityManager();
@@ -113,6 +121,19 @@ export async function createWebGPUApplication(
     shaderManager,
   });
 
+  const debugRenderSystem = createDebugRenderSystem({
+    cameraController,
+    renderer,
+    bufferManager,
+    shaderManager,
+  });
+
+  const resizer = new ResizeObserver(() => {
+    cameraController.aspect = canvas.clientWidth / canvas.clientHeight;
+    debugCameraController.aspect = canvas.clientWidth / canvas.clientHeight;
+  });
+  resizer.observe(canvas);
+
   // TODO: implement a needs update system so that it only rerenders
   // as necessary
   let frameId = -1;
@@ -120,11 +141,15 @@ export async function createWebGPUApplication(
   let lastFrameTime = performance.now();
   let dt = 0;
   const stats = createFrameStats();
+  const debugMode = writable(false);
+  debugMode.subscribe((enabled) => {
+    cameraController.controls.enabled = !enabled;
+    debugCameraController.controls.enabled = enabled;
+  });
 
   const tmp = vec3.create();
   const boundingBoxes: RenderableBoundingBox[] = [];
 
-  const frustum = Frustum.create();
   const transformedBoundingBox = BoundingBox.create();
 
   function isMaterialTransparent(material: MaterialComponent) {
@@ -193,7 +218,10 @@ export async function createWebGPUApplication(
         // It would be good to be able to switch to a debug scene where we can see the scene and the camera
         vec3.transformMat4(transformedBoundingBox.min, geometry.boundingBox.min, transform.matrix);
         vec3.transformMat4(transformedBoundingBox.max, geometry.boundingBox.max, transform.matrix);
-        if (intersectFrustumAABB(frustum, transformedBoundingBox) == FrustumIntersection.Outside) {
+        if (
+          intersectFrustumAABB(cameraController.frustum, transformedBoundingBox) ==
+          FrustumIntersection.Outside
+        ) {
           return;
         }
 
@@ -284,11 +312,22 @@ export async function createWebGPUApplication(
           }
 
           if ('view' in material.uniforms) {
-            mat4.copy(material.uniforms.view as mat4, cameraController.camera.view);
+            if (get(debugMode)) {
+              mat4.copy(material.uniforms.view as mat4, debugCameraController.camera.view);
+            } else {
+              mat4.copy(material.uniforms.view as mat4, cameraController.camera.view);
+            }
           }
 
           if ('projection' in material.uniforms) {
-            mat4.copy(material.uniforms.projection as mat4, cameraController.camera.projection);
+            if (get(debugMode)) {
+              mat4.copy(
+                material.uniforms.projection as mat4,
+                debugCameraController.camera.projection,
+              );
+            } else {
+              mat4.copy(material.uniforms.projection as mat4, cameraController.camera.projection);
+            }
           }
 
           if ('view_position' in material.uniforms) {
@@ -373,8 +412,12 @@ export async function createWebGPUApplication(
     dt = (frameTime - lastFrameTime) / 1000;
     lastFrameTime = frameTime;
 
-    cameraController.update(dt);
-    Frustum.setFromMatrix(frustum, cameraController.camera.viewProjection);
+    if (get(debugMode)) {
+      debugCameraController.update(dt);
+      debugRenderSystem.update();
+    } else {
+      cameraController.update(dt);
+    }
 
     renderer.begin();
 
@@ -382,10 +425,17 @@ export async function createWebGPUApplication(
 
     // TODO: only write if the buffer is dirty
     const matricesBuffer = bufferManager.get<UniformBuffer>(DefaultBuffers.ViewProjection);
-    matricesBuffer.updateUniforms({
-      view: cameraController.camera.view,
-      projection: cameraController.camera.projection,
-    });
+    if (get(debugMode)) {
+      matricesBuffer.updateUniforms({
+        view: debugCameraController.camera.view,
+        projection: debugCameraController.camera.projection,
+      });
+    } else {
+      matricesBuffer.updateUniforms({
+        view: cameraController.camera.view,
+        projection: cameraController.camera.projection,
+      });
+    }
 
     renderer.submit({
       type: CommandType.WriteBuffer,
@@ -403,7 +453,6 @@ export async function createWebGPUApplication(
     // separating transparent and non transparent objects
     // TODO: There is probably a way to cache this
     const { opaque, transparent } = separateOpaqueAndTransparentNodes(sceneGraph.root.children);
-
     opaque.forEach(renderNode);
 
     transparent.sort((a, b) => {
@@ -415,8 +464,15 @@ export async function createWebGPUApplication(
       const transformA = entityManager.getComponent(a.uid, ComponentType.Transform);
       const transformB = entityManager.getComponent(b.uid, ComponentType.Transform);
       if (transformA && transformB) {
-        const distA = vec3.length(vec3.sub(tmp, cameraController.position, transformA.position));
-        const distB = vec3.length(vec3.sub(tmp, cameraController.position, transformB.position));
+        let cameraPosition: vec3;
+        if (get(debugMode)) {
+          cameraPosition = debugCameraController.position;
+        } else {
+          cameraPosition = cameraController.position;
+        }
+
+        const distA = vec3.length(vec3.sub(tmp, cameraPosition, transformA.position));
+        const distB = vec3.length(vec3.sub(tmp, cameraPosition, transformB.position));
 
         return distB - distA;
       }
@@ -429,6 +485,10 @@ export async function createWebGPUApplication(
       // TODO: only do this when they change
       boundingBoxRenderer.setBoundingBoxes(boundingBoxes);
       boundingBoxRenderer.render();
+    }
+
+    if (get(debugMode)) {
+      debugRenderSystem.render();
     }
 
     postRenderCallbacks.forEach((cb) => cb());
@@ -485,16 +545,19 @@ export async function createWebGPUApplication(
       bufferManager.destroy();
       entityManager.destroy();
       cameraController.destroy();
+      debugCameraController.destroy();
 
-      resizer.unobserve(canvas);
+      resizer.disconnect();
     },
 
     renderer,
     cameraController,
+    debugCameraController,
     sceneGraph,
     entityManager,
     bufferManager,
     shaderManager,
     stats,
+    debugMode,
   };
 }

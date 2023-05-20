@@ -1,7 +1,7 @@
 <script lang="ts">
   export let title: string;
 
-  let collapsed = false;
+  export let collapsed = false;
   function handleHeaderClick(e: Event) {
     e.preventDefault();
     e.stopPropagation();

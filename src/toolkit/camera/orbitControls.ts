@@ -19,6 +19,8 @@ export function createOrbitControls(
   element: HTMLElement,
   initial: { camera: Camera },
 ): OrbitCameraControls {
+  let enabled = false;
+
   let state = State.None;
   let camera: Camera = initial.camera;
 
@@ -154,8 +156,15 @@ export function createOrbitControls(
     }
   }
 
-  element.addEventListener('pointerdown', handlePointerDown, true);
-  element.addEventListener('wheel', handleMouseWheel, true);
+  function addEventListeners() {
+    element.addEventListener('pointerdown', handlePointerDown, true);
+    element.addEventListener('wheel', handleMouseWheel, true);
+  }
+
+  function removeEventListeners() {
+    element.removeEventListener('pointerdown', handlePointerDown);
+    element.removeEventListener('wheel', handleMouseWheel, true);
+  }
 
   const q = quat.create();
   const invQ = quat.create();
@@ -168,6 +177,8 @@ export function createOrbitControls(
   let radius = 0;
 
   function update(_dt: number) {
+    if (!enabled) return;
+
     quat.rotationTo(q, camera.up, yUp);
     quat.invert(invQ, q);
 
@@ -216,6 +227,18 @@ export function createOrbitControls(
   return {
     type: CameraControlType.Orbit,
 
+    get enabled() {
+      return enabled;
+    },
+    set enabled(value: boolean) {
+      enabled = value;
+      if (enabled) {
+        addEventListeners();
+      } else {
+        removeEventListeners();
+      }
+    },
+
     update,
 
     set camera(value: Camera) {
@@ -223,8 +246,7 @@ export function createOrbitControls(
     },
 
     destroy() {
-      element.removeEventListener('pointerdown', handlePointerDown);
-      element.removeEventListener('wheel', handleMouseWheel, true);
+      removeEventListeners();
     },
   };
 }

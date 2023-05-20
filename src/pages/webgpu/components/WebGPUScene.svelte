@@ -19,7 +19,7 @@
   import type { RendererType } from 'toolkit/rendering/renderer';
   import { findNodeByUid } from 'toolkit/sceneGraph/search';
   import ComponentContainer from 'components/Component.svelte';
-  import { writable, type Writable } from 'svelte/store';
+  import type { Writable } from 'svelte/store';
 
   export let app: Maybe<WebGPUApplication> = undefined;
   export let scene: Maybe<string> = undefined;
@@ -119,6 +119,7 @@
 
   let fps: Writable<number>;
   let triangles: Writable<number>;
+  let debugMode: Writable<boolean>;
 
   onMount(() => {
     const unsubscribers: Unsubscriber[] = [];
@@ -135,6 +136,7 @@
             unsubscribers.push(app.sceneGraph.onChange(handleSceneGraphChanged));
             fps = app.stats.fps;
             triangles = app.stats.triangles;
+            debugMode = app.debugMode;
 
             if (scene) {
               await app.loadScene(scene);
@@ -286,6 +288,14 @@
             {#if triangles}
               <span>triangles: {$triangles}</span>
             {/if}
+          </ComponentContainer>
+          <ComponentContainer title="Debug" collapsed={true}>
+            <button
+              on:mousedown|preventDefault
+              on:click={() => {
+                debugMode.update((value) => !value);
+              }}>{$debugMode ? 'Normal Mode' : 'Debug Mode'}</button
+            >
           </ComponentContainer>
         </div>
       {:else}

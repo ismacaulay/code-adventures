@@ -99,7 +99,12 @@ fn fragment_main(@location(0) position_eye: vec4<f32>, @location(1) @interpolate
 
     entityManager.add(name);
 
-    const transform = createTransformComponent({});
+    const boundingBox = BoundingBox.fromVertices(vertices);
+    const result = BoundingBox.centre(boundingBox);
+
+    const transform = createTransformComponent({
+      position: [-result[0], -result[1], -result[2]],
+    });
     entityManager.addComponent(name, transform);
 
     const material = createRawShaderMaterialComponent({
@@ -121,7 +126,6 @@ fn fragment_main(@location(0) position_eye: vec4<f32>, @location(1) @interpolate
     });
     entityManager.addComponent(name, material);
 
-    const boundingBox = BoundingBox.fromVertices(vertices);
     const geometry = createBufferGeometryComponent({
       boundingBox,
       count: triangles.length,
@@ -150,14 +154,14 @@ fn fragment_main(@location(0) position_eye: vec4<f32>, @location(1) @interpolate
     entityManager.addComponent(name, geometry);
     sceneGraph.root.add(createSceneGraphNode({ uid: name }));
 
-    cameraController.cameraType = CameraType.Orthographic;
+    cameraController.cameraType = CameraType.Perspective;
     cameraController.controlType = CameraControlType.Orbit;
     cameraController.position = [0, 0, 1];
-    (cameraController.camera as OrthographicCamera).zoom = 12;
-    cameraController.camera.updateProjectionMatrix();
+    // (cameraController.camera as OrthographicCamera).zoom = 12;
+    // cameraController.camera.updateProjectionMatrix();
 
-    const result = BoundingBox.centre(boundingBox);
-    cameraController.target = vec3.clone(result);
+    // const result = BoundingBox.centre(boundingBox);
+    // cameraController.target = vec3.clone(result);
   }
 </script>
 

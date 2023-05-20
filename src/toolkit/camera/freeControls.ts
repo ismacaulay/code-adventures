@@ -30,6 +30,7 @@ export function createFreeControls(
   let { mouseSensitivity, moveSensitivity } = options;
 
   let camera: Camera = initial.camera;
+  let enabled = false;
 
   let keys = 0;
   let locked = false;
@@ -149,12 +150,24 @@ export function createFreeControls(
     updateCamera();
   }
 
-  canvas.addEventListener('click', onClick, false);
-  document.addEventListener('pointerlockchange', onPointerLockChanged, false);
-  document.addEventListener('pointerlockerror', onPointerLockError, false);
-  document.addEventListener('keydown', onKeyDown, false);
-  document.addEventListener('keyup', onKeyUp, false);
-  document.addEventListener('mousemove', onMouseMove, false);
+  function addEventListeners() {
+    canvas.addEventListener('click', onClick, false);
+    document.addEventListener('pointerlockchange', onPointerLockChanged, false);
+    document.addEventListener('pointerlockerror', onPointerLockError, false);
+    document.addEventListener('keydown', onKeyDown, false);
+    document.addEventListener('keyup', onKeyUp, false);
+    document.addEventListener('mousemove', onMouseMove, false);
+  }
+
+  function removeEventListeners() {
+    canvas.removeEventListener('click', onClick, false);
+    document.removeEventListener('keydown', onKeyDown, false);
+    document.removeEventListener('keyup', onKeyUp, false);
+    document.removeEventListener('mousemove', onMouseMove, false);
+    document.removeEventListener('pointerlockchange', onPointerLockChanged, false);
+    document.removeEventListener('pointerlockerror', onPointerLockError, false);
+    locked = false;
+  }
 
   const _front = vec3.create();
   const _right = vec3.create();
@@ -163,6 +176,19 @@ export function createFreeControls(
 
   return {
     type: CameraControlType.Free,
+
+    get enabled() {
+      return enabled;
+    },
+    set enabled(value: boolean) {
+      enabled = value;
+
+      if (enabled) {
+        addEventListeners();
+      } else {
+        removeEventListeners();
+      }
+    },
 
     set camera(value: Camera) {
       camera = value;
@@ -178,6 +204,7 @@ export function createFreeControls(
 
     // TODO: dt is always 0
     update(dt: number) {
+      if (!enabled) return;
       if (!locked) return;
 
       vec3.scale(_front, front, dt * directionValue(keys, S_KEY_BIT, W_KEY_BIT) * moveSensitivity);
@@ -196,12 +223,7 @@ export function createFreeControls(
     },
 
     destroy() {
-      canvas.removeEventListener('click', onClick, false);
-      document.removeEventListener('keydown', onKeyDown, false);
-      document.removeEventListener('keyup', onKeyUp, false);
-      document.removeEventListener('mousemove', onMouseMove, false);
-      document.removeEventListener('pointerlockchange', onPointerLockChanged, false);
-      document.removeEventListener('pointerlockerror', onPointerLockError, false);
+      removeEventListeners();
     },
   };
 }
