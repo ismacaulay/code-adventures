@@ -47,7 +47,6 @@ export type WebGPUApplication = {
   readonly stats: FrameStats;
 
   readonly debugMode: Writable<boolean>;
-  readonly debugCameraController: CameraController;
 
   loadScene(url: string): Promise<void>;
 
@@ -74,13 +73,6 @@ export async function createWebGPUApplication(
   console.log('creating webgpu application', appId);
   const sceneGraph = createSceneGraph();
   const cameraController = createCameraController(canvas);
-  const debugCameraController = createCameraController(canvas, {
-    type: CameraType.Perspective,
-    control: CameraControlType.Free,
-  });
-  debugCameraController.camera.znear = 0.01;
-  debugCameraController.camera.zfar = 1000;
-  debugCameraController.camera.updateProjectionMatrix();
 
   const renderer = await createWebGPURenderer(canvas, opts);
   const entityManager = createEntityManager();
@@ -122,6 +114,7 @@ export async function createWebGPUApplication(
   });
 
   const debugRenderSystem = createDebugRenderSystem({
+    canvas,
     cameraController,
     renderer,
     bufferManager,
@@ -130,7 +123,7 @@ export async function createWebGPUApplication(
 
   const resizer = new ResizeObserver(() => {
     cameraController.aspect = canvas.clientWidth / canvas.clientHeight;
-    debugCameraController.aspect = canvas.clientWidth / canvas.clientHeight;
+    debugRenderSystem.resize(canvas.clientWidth, canvas.clientHeight);
   });
   resizer.observe(canvas);
 
@@ -144,7 +137,7 @@ export async function createWebGPUApplication(
   const debugMode = writable(false);
   debugMode.subscribe((enabled) => {
     cameraController.controls.enabled = !enabled;
-    debugCameraController.controls.enabled = enabled;
+    debugRenderSystem.enabled = enabled;
   });
 
   const tmp = vec3.create();
@@ -313,7 +306,10 @@ export async function createWebGPUApplication(
 
           if ('view' in material.uniforms) {
             if (get(debugMode)) {
-              mat4.copy(material.uniforms.view as mat4, debugCameraController.camera.view);
+              mat4.copy(
+                material.uniforms.view as mat4,
+                debugRenderSystem.cameraController.camera.view,
+              );
             } else {
               mat4.copy(material.uniforms.view as mat4, cameraController.camera.view);
             }
@@ -323,7 +319,7 @@ export async function createWebGPUApplication(
             if (get(debugMode)) {
               mat4.copy(
                 material.uniforms.projection as mat4,
-                debugCameraController.camera.projection,
+                debugRenderSystem.cameraController.camera.projection,
               );
             } else {
               mat4.copy(material.uniforms.projection as mat4, cameraController.camera.projection);
@@ -413,8 +409,7 @@ export async function createWebGPUApplication(
     lastFrameTime = frameTime;
 
     if (get(debugMode)) {
-      debugCameraController.update(dt);
-      debugRenderSystem.update();
+      debugRenderSystem.update(dt);
     } else {
       cameraController.update(dt);
     }
@@ -427,8 +422,8 @@ export async function createWebGPUApplication(
     const matricesBuffer = bufferManager.get<UniformBuffer>(DefaultBuffers.ViewProjection);
     if (get(debugMode)) {
       matricesBuffer.updateUniforms({
-        view: debugCameraController.camera.view,
-        projection: debugCameraController.camera.projection,
+        view: debugRenderSystem.cameraController.camera.view,
+        projection: debugRenderSystem.cameraController.camera.projection,
       });
     } else {
       matricesBuffer.updateUniforms({
@@ -466,7 +461,7 @@ export async function createWebGPUApplication(
       if (transformA && transformB) {
         let cameraPosition: vec3;
         if (get(debugMode)) {
-          cameraPosition = debugCameraController.position;
+          cameraPosition = debugRenderSystem.cameraController.position;
         } else {
           cameraPosition = cameraController.position;
         }
@@ -545,14 +540,13 @@ export async function createWebGPUApplication(
       bufferManager.destroy();
       entityManager.destroy();
       cameraController.destroy();
-      debugCameraController.destroy();
+      debugRenderSystem.destroy();
 
       resizer.disconnect();
     },
 
     renderer,
     cameraController,
-    debugCameraController,
     sceneGraph,
     entityManager,
     bufferManager,

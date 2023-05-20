@@ -70,7 +70,6 @@ export function createCameraFrustumRenderer(params: {
   const u2: vec3 = vertices.subarray(33, 36);
 
   const inverseProjection = mat4.create();
-  const model = mat4.create();
   const tmp = vec3.create();
 
   return {
@@ -115,17 +114,6 @@ export function createCameraFrustumRenderer(params: {
 
       vec3.set(tmp, 0, 1.7, -1);
       vec3.transformMat4(u2, tmp, inverseProjection);
-
-      // mat4.identity(model);
-      // mat4.lookAt(
-      //   model,
-      //   cameraController.camera.position,
-      //   cameraController.camera.target,
-      //   cameraController.camera.up,
-      // );
-      // debugger;
-      // mat4.translate(model, model, cameraController.camera.position);
-      shader.update({ model });
     },
 
     render() {
@@ -154,25 +142,23 @@ export function createCameraFrustumRenderer(params: {
         transparent: false,
       });
     },
+
+    destroy() {
+      bufferManager.destroy(linesIndexBufferId);
+      bufferManager.destroy(linesVertexBufferId);
+    },
   };
 }
 
 function createShaderDescriptor(): SingleSourceShaderDescriptor {
   const shaderSource = `
-struct UBO {
-  model: mat4x4<f32>,
-}
-
 struct Matrices {
   view: mat4x4<f32>,
   projection: mat4x4<f32>,
 }
 
 @group(0) @binding(0)
-var<uniform> ubo: UBO;
-@group(0) @binding(1)
 var<uniform> matrices: Matrices;
-
 
 struct VertexOutput {
   @builtin(position) position: vec4<f32>,
@@ -181,7 +167,7 @@ struct VertexOutput {
 @vertex
 fn vertex_main(@location(0) position: vec3<f32>) -> VertexOutput {
   var out: VertexOutput;
-  out.position = matrices.projection * matrices.view * ubo.model * vec4<f32>(position, 1.0);
+  out.position = matrices.projection * matrices.view * vec4<f32>(position, 1.0);
   return out;
 }
 
@@ -200,23 +186,7 @@ fn fragment_main() -> @location(0) vec4<f32> {
       entryPoint: 'fragment_main',
     },
     topology: 'line-list',
-    // blend: {
-    //   color: {
-    //     srcFactor: 'src-alpha',
-    //     dstFactor: 'one-minus-src-alpha',
-    //   },
-    //   alpha: {
-    //     srcFactor: 'src-alpha',
-    //     dstFactor: 'one-minus-src-alpha',
-    //   },
-    // },
     bindings: [
-      {
-        type: ShaderBindingType.UniformBuffer,
-        descriptor: {
-          model: UniformType.Mat4,
-        },
-      },
       {
         type: ShaderBindingType.UniformBuffer,
         resource: DefaultBuffers.ViewProjection,
