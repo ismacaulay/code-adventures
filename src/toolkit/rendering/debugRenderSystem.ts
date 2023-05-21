@@ -7,11 +7,8 @@ import { createCameraFrustumRenderer } from './cameraFrustumRenderer';
 import type { Renderer } from './renderer';
 
 // TODO
-// - sync debug camera to current camera on first launch
-// - home key should restore the debug camera somewhere (and the normal camera)
-// - dont copy the buffers all the time
-// - add colours to frustum renderer
 // - dynamic camera since now the near and far planes will be messy
+// - home key should restore the debug camera somewhere (and the normal camera)
 // - clean up debugMode?
 
 export function createDebugRenderSystem(params: {

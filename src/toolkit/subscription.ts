@@ -1,3 +1,5 @@
+export const noop = () => {};
+
 export function createCallbackHandler() {
   let callbacks: VoidFunction[] = [];
 

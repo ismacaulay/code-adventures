@@ -1,4 +1,5 @@
 import { quat, vec2, vec3 } from 'gl-matrix';
+import { createSignal } from 'toolkit/signal';
 import { type Camera, CameraType } from './camera';
 import { CameraControlType, type OrbitCameraControls } from './controls';
 
@@ -20,6 +21,8 @@ export function createOrbitControls(
   initial: { camera: Camera },
 ): OrbitCameraControls {
   let enabled = false;
+  let changed = false;
+  let signal = createSignal();
 
   let state = State.None;
   let camera: Camera = initial.camera;
@@ -108,6 +111,8 @@ export function createOrbitControls(
       // set the start to the end
       vec2.copy(panStart, panEnd);
     }
+
+    changed = true;
   }
 
   function handlePointerDown(e: PointerEvent) {
@@ -154,6 +159,8 @@ export function createOrbitControls(
       }
       camera.updateProjectionMatrix();
     }
+
+    changed = true;
   }
 
   function addEventListeners() {
@@ -178,6 +185,7 @@ export function createOrbitControls(
 
   function update(_dt: number) {
     if (!enabled) return;
+    if (!changed) return;
 
     quat.rotationTo(q, camera.up, yUp);
     quat.invert(invQ, q);
@@ -222,6 +230,9 @@ export function createOrbitControls(
     vec2.set(rotateDelta, 0, 0);
     vec3.set(panDelta, 0, 0, 0);
     scale = 1.0;
+
+    changed = false;
+    signal.emit();
   }
 
   return {
@@ -245,8 +256,13 @@ export function createOrbitControls(
       camera = value;
     },
 
+    subscribe(cb: VoidFunction) {
+      return signal.subscribe(cb);
+    },
+
     destroy() {
       removeEventListeners();
+      signal.destroy();
     },
   };
 }

@@ -1,4 +1,4 @@
-import { createCallbackHandler } from './callbacks';
+import { createCallbackHandler } from './subscription';
 
 export function createSignal() {
   let callbacks = createCallbackHandler();

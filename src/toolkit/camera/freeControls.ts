@@ -1,5 +1,6 @@
 import { vec3 } from 'gl-matrix';
 import { radians } from 'toolkit/math';
+import { createSignal } from 'toolkit/signal';
 import type { Camera } from './camera';
 import { CameraControlType, type FreeCameraControls } from './controls';
 
@@ -29,10 +30,13 @@ export function createFreeControls(
 ): FreeCameraControls {
   let { mouseSensitivity, moveSensitivity } = options;
 
-  let camera: Camera = initial.camera;
   let enabled = false;
+  let changed = false;
+  let signal = createSignal();
 
-  let keys = 0;
+  let camera: Camera = initial.camera;
+
+  let keys = 0x00;
   let locked = false;
   function onClick() {
     if (locked) return;
@@ -40,7 +44,7 @@ export function createFreeControls(
     (canvas.requestPointerLock() as any).catch(() => {
       console.warn('Failed to requestPointerLock');
     });
-    keys = 0;
+    keys = 0x00;
   }
 
   function onPointerLockChanged() {
@@ -49,6 +53,7 @@ export function createFreeControls(
     } else {
       locked = false;
     }
+    changed = true;
   }
 
   function onPointerLockError() {
@@ -83,6 +88,7 @@ export function createFreeControls(
         keys |= SPACE_KEY_BIT;
         break;
     }
+    changed = true;
   }
 
   function onKeyUp(evt: KeyboardEvent) {
@@ -112,6 +118,7 @@ export function createFreeControls(
         keys &= ~SPACE_KEY_BIT;
         break;
     }
+    changed = true;
   }
 
   let yaw = -90;
@@ -148,6 +155,7 @@ export function createFreeControls(
     if (pitch < -89.0) pitch = -89.0;
 
     updateCamera();
+    changed = true;
   }
 
   function addEventListeners() {
@@ -206,6 +214,7 @@ export function createFreeControls(
     update(dt: number) {
       if (!enabled) return;
       if (!locked) return;
+      if (!changed) return;
 
       vec3.scale(_front, front, dt * directionValue(keys, S_KEY_BIT, W_KEY_BIT) * moveSensitivity);
 
@@ -220,10 +229,18 @@ export function createFreeControls(
       vec3.add(dir, _up, vec3.add(dir, _front, _right));
       vec3.add(camera.position, camera.position, dir);
       updateCamera();
+
+      changed = (keys | 0x00) != 0;
+      signal.emit();
+    },
+
+    subscribe(cb: VoidFunction) {
+      return signal.subscribe(cb);
     },
 
     destroy() {
       removeEventListeners();
+      signal.destroy();
     },
   };
 }

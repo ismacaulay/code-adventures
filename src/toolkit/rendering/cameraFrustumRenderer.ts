@@ -16,6 +16,7 @@ export function createCameraFrustumRenderer(params: {
   shaderManager: ShaderManager;
 }) {
   const { cameraController, renderer, bufferManager, shaderManager } = params;
+  let changed = false;
 
   // take the clip space coordinates and unproject them
   // back into view space based on the camera inverse projection
@@ -72,8 +73,14 @@ export function createCameraFrustumRenderer(params: {
   const inverseProjection = mat4.create();
   const tmp = vec3.create();
 
+  const cameraControllerUnsub = cameraController.subscribe(() => {
+    changed = true;
+  });
+
   return {
     update() {
+      if (!changed) return;
+
       // TODO: all of this happens reguardless of if the projection matrix changed
       mat4.invert(inverseProjection, cameraController.camera.viewProjection);
 
@@ -114,9 +121,7 @@ export function createCameraFrustumRenderer(params: {
 
       vec3.set(tmp, 0, 1.7, -1);
       vec3.transformMat4(u2, tmp, inverseProjection);
-    },
 
-    render() {
       // TODO: This is going to happen all the time
       renderer.submit({
         type: CommandType.WriteBuffer,
@@ -124,14 +129,11 @@ export function createCameraFrustumRenderer(params: {
         dst: linesVertexBuffer.buffer,
       });
 
-      shader.buffers.forEach((buf) => {
-        renderer.submit({
-          type: CommandType.WriteBuffer,
-          src: buf.data,
-          dst: buf.buffer,
-        });
-      });
+      console.log('update');
+      changed = false;
+    },
 
+    render() {
       renderer.submit({
         type: CommandType.Draw,
         shader,
@@ -144,6 +146,8 @@ export function createCameraFrustumRenderer(params: {
     },
 
     destroy() {
+      cameraControllerUnsub();
+
       bufferManager.destroy(linesIndexBufferId);
       bufferManager.destroy(linesVertexBufferId);
     },

@@ -1,6 +1,7 @@
 import { vec3 } from 'gl-matrix';
 import { Frustum } from 'toolkit/math/frustum';
 import { createSignal } from 'toolkit/signal';
+import { noop } from 'toolkit/subscription';
 import { CameraType, type Camera } from './camera';
 import { CameraControlType, type CameraControls } from './controls';
 import { createFreeControls } from './freeControls';
@@ -30,6 +31,9 @@ export type CameraController = {
   update(dt: number): void;
   destroy(): void;
 
+  /**
+   * subscribe to changes to the camera matrices
+   */
   subscribe(cb: VoidFunction): Unsubscriber;
 };
 
@@ -71,22 +75,30 @@ export function createCameraController(
 
   let currentControlType: CameraControlType;
   let controls: CameraControls;
+  let controlsUnsub: Unsubscriber = noop;
   function setControlType(type: CameraControlType) {
     if (type === currentControlType) {
       return;
     }
 
+    const enabled = controls?.enabled ?? true;
     if (controls) {
       controls.destroy();
+      controlsUnsub();
+      controlsUnsub = noop;
     }
 
     if (type === CameraControlType.Free) {
       controls = createFreeControls(canvas, { camera });
+      controlsUnsub = controls.subscribe(signal.emit);
     } else if (type === CameraControlType.Orbit) {
       controls = createOrbitControls(canvas, { camera });
+      controlsUnsub = controls.subscribe(signal.emit);
     } else {
       throw new Error(`[CameraController::setControlType] Unknown control type: ${type}`);
     }
+
+    controls.enabled = enabled;
 
     currentControlType = type;
     signal.emit();
@@ -179,7 +191,6 @@ export function createCameraController(
 
     update(dt) {
       controls.update(dt);
-      signal.emit();
     },
 
     destroy() {

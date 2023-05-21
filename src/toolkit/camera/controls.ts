@@ -15,6 +15,8 @@ export type FreeCameraControls = {
   update(dt: number): void;
   camera: Camera;
   destroy(): void;
+
+  subscribe(cb: VoidFunction): Unsubscriber;
 };
 
 export type OrbitCameraControls = {
@@ -24,6 +26,8 @@ export type OrbitCameraControls = {
   update(dt: number): void;
   camera: Camera;
   destroy(): void;
+
+  subscribe(cb: VoidFunction): Unsubscriber;
 };
 
 export type CameraControls = FreeCameraControls | OrbitCameraControls;
