@@ -21,6 +21,8 @@ export function createDebugRenderSystem(params: {
   bufferManager: BufferManager;
   shaderManager: ShaderManager;
 }) {
+  const { cameraController: normalCameraController } = params;
+
   let enabled = false;
 
   const cameraController = createCameraController(params.canvas, {
@@ -33,12 +35,22 @@ export function createDebugRenderSystem(params: {
 
   const frustumRenderer = createCameraFrustumRenderer(params);
 
+  let firstTime = true;
+
   return {
     get enabled() {
       return enabled;
     },
     set enabled(value: boolean) {
       enabled = value;
+
+      if (enabled && firstTime) {
+        cameraController.position = normalCameraController.position;
+        cameraController.up = normalCameraController.up;
+        cameraController.target = normalCameraController.target;
+
+        firstTime = false;
+      }
 
       cameraController.controls.enabled = value;
     },
