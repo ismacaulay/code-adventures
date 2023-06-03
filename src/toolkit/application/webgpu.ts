@@ -1,12 +1,10 @@
 import { mat4, vec3 } from 'gl-matrix';
 import { get, writable, type Writable } from 'svelte/store';
-import { CameraType } from 'toolkit/camera/camera';
 import { createCameraController, type CameraController } from 'toolkit/camera/cameraController';
-import { CameraControlType } from 'toolkit/camera/controls';
 import { createBufferManager, DefaultBuffers, type BufferManager } from 'toolkit/ecs/bufferManager';
 import { createComponentManager } from 'toolkit/ecs/componentManager';
 import { createEntityManager } from 'toolkit/ecs/entityManager';
-import { createScriptManager } from 'toolkit/ecs/scriptManager';
+import { createScriptManager, type ScriptManager } from 'toolkit/ecs/scriptManager';
 import { createShaderManager, DefaultShaders, type ShaderManager } from 'toolkit/ecs/shaderManager';
 import { createTextureManager } from 'toolkit/ecs/textureManager';
 import { BoundingBox } from 'toolkit/geometry/boundingBox';
@@ -19,7 +17,10 @@ import type { IndexBuffer } from 'toolkit/rendering/buffers/indexBuffer';
 import type { UniformBuffer } from 'toolkit/rendering/buffers/uniformBuffer';
 import type { VertexBuffer } from 'toolkit/rendering/buffers/vertexBuffer';
 import { CommandType } from 'toolkit/rendering/commands';
-import { createDebugRenderSystem } from 'toolkit/rendering/debugRenderSystem';
+import {
+  createDebugRenderSystem,
+  type DebugRenderSystem,
+} from 'toolkit/rendering/debugRenderSystem';
 import { RendererType, type Renderer } from 'toolkit/rendering/renderer';
 import type { Shader } from 'toolkit/rendering/shader';
 import { createWebGPURenderer } from 'toolkit/rendering/webgpuRenderer';
@@ -143,260 +144,21 @@ export async function createWebGPUApplication(
   const tmp = vec3.create();
   const boundingBoxes: RenderableBoundingBox[] = [];
 
-  const transformedBoundingBox = BoundingBox.create();
+  const ctx = {
+    renderer,
 
-  function isMaterialTransparent(material: MaterialComponent) {
-    if (
-      material.subtype !== MaterialComponentType.MeshBasic &&
-      material.subtype !== MaterialComponentType.MeshDiffuse &&
-      material.subtype !== MaterialComponentType.LineBasic
-    ) {
-      throw new Error(`[isMaterialTransparent] subtype: ${material.subtype} not implemented yet!`);
-    }
+    entityManager,
+    bufferManager,
+    shaderManager,
+    scriptManager,
 
-    return material.transparent && material.opacity !== 1.0;
-  }
+    cameraController,
 
-  function getShaderForMaterial(material: MaterialComponent) {
-    if (
-      material.subtype !== MaterialComponentType.MeshBasic &&
-      material.subtype !== MaterialComponentType.MeshDiffuse &&
-      material.subtype !== MaterialComponentType.LineBasic
-    ) {
-      throw new Error(`[getShaderForMaterial] subtype: ${material.subtype} not implemented yet!`);
-    }
-
-    const transparent = isMaterialTransparent(material);
-
-    if (renderer.type === RendererType.Default) {
-      if (typeof material.shader !== 'number') {
-        throw new Error(`Invalid shader for render type: ${material.shader}`);
-      }
-
-      return shaderManager.get<Shader>(material.shader);
-    } else if (renderer.type === RendererType.WeightedBlended) {
-      if (!isWeightedBlendedShaderId(material.shader)) {
-        throw new Error(`Invalid shader for render type: ${material.shader}`);
-      }
-      return transparent
-        ? shaderManager.get<Shader>(material.shader.transparent)
-        : shaderManager.get<Shader>(material.shader.opaque);
-    }
-
-    throw new Error(`Unknown renderer type: ${renderer.type}`);
-  }
-
-  function renderNode(node: SceneGraphNode) {
-    const { uid, visible, children } = node;
-    if (!visible) {
-      return;
-    }
-
-    const transform = entityManager.getComponent(uid, ComponentType.Transform);
-    const geometry = entityManager.getComponent(uid, ComponentType.Geometry);
-    const material = entityManager.getComponent(uid, ComponentType.Material);
-    const script = entityManager.getComponent(uid, ComponentType.Script);
-
-    if (script && script.script !== undefined) {
-      scriptManager.get(script.script).update(dt, uid);
-    }
-
-    if (transform && geometry && material) {
-      let buffers: VertexBuffer[] = [];
-      let indices: Maybe<IndexBuffer> = undefined;
-      let count = 0;
-      let instances = 0;
-      if (geometry.subtype === GeometryComponentType.Buffer) {
-        // TODO: there is a bug with perspective orbit controls where the culling does work.
-        // It would be good to be able to switch to a debug scene where we can see the scene and the camera
-        vec3.transformMat4(transformedBoundingBox.min, geometry.boundingBox.min, transform.matrix);
-        vec3.transformMat4(transformedBoundingBox.max, geometry.boundingBox.max, transform.matrix);
-        if (
-          intersectFrustumAABB(cameraController.frustum, transformedBoundingBox) ==
-          FrustumIntersection.Outside
-        ) {
-          return;
-        }
-
-        for (let i = 0; i < geometry.buffers.length; ++i) {
-          const buffer = geometry.buffers[i];
-          // TODO: should the buffers on the geometry have a needsUpdate?
-          if (buffer.id === undefined) {
-            buffer.id = bufferManager.createVertexBuffer(buffer);
-            renderer.submit({
-              type: CommandType.WriteBuffer,
-              src: buffer.array,
-              dst: bufferManager.get<VertexBuffer>(buffer.id).buffer,
-            });
-          }
-
-          buffers.push(bufferManager.get<VertexBuffer>(buffer.id));
-
-          if (geometry.indices) {
-            if (geometry.indices.id === undefined) {
-              geometry.indices.id = bufferManager.createIndexBuffer(geometry.indices);
-              renderer.submit({
-                type: CommandType.WriteBuffer,
-                src: geometry.indices.array,
-                dst: bufferManager.get<VertexBuffer>(geometry.indices.id).buffer,
-              });
-            }
-
-            indices = bufferManager.get<IndexBuffer>(geometry.indices.id);
-          }
-        }
-
-        count = geometry.count;
-        instances = geometry.instances;
-      }
-
-      if (material.shader === undefined) {
-        // TODO: move the shader creation into a factory
-        if (material.subtype === MaterialComponentType.MeshBasic) {
-          material.shader = shaderManager.create(DefaultShaders.MeshBasic);
-        } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
-          material.shader = shaderManager.create(DefaultShaders.MeshDiffuse);
-        } else if (material.subtype === MaterialComponentType.MeshPhong) {
-          material.shader = shaderManager.create(DefaultShaders.MeshPhong) as number;
-        } else if (material.subtype === MaterialComponentType.LineBasic) {
-          material.shader = shaderManager.create(DefaultShaders.LineBasic);
-        } else if (material.subtype === MaterialComponentType.RawShader) {
-          material.shader = shaderManager.create(material.descriptor) as number;
-        } else {
-          throw new Error(`Unknown MaterialComponentType: ${(material as any).subtype}`);
-        }
-      }
-
-      let shader: Shader;
-      let transparent = material.transparent;
-
-      // TODO: make the material updating cleaner
-      if (material.subtype === MaterialComponentType.MeshBasic) {
-        transparent = isMaterialTransparent(material);
-        shader = getShaderForMaterial(material);
-        shader.update({
-          model: transform.matrix,
-          opacity: material.opacity,
-          colour: material.colour,
-        });
-      } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
-        transparent = isMaterialTransparent(material);
-        shader = getShaderForMaterial(material);
-        shader.update({
-          model: transform.matrix,
-          opacity: material.opacity,
-          colour: material.colour,
-        });
-      } else if (material.subtype === MaterialComponentType.MeshPhong) {
-        throw new Error('Phong: Not implemented Yet');
-      } else if (material.subtype === MaterialComponentType.LineBasic) {
-        transparent = isMaterialTransparent(material);
-        shader = getShaderForMaterial(material);
-        shader.update({
-          model: transform.matrix,
-          opacity: material.opacity,
-          colour: material.colour,
-        });
-      } else if (material.subtype === MaterialComponentType.RawShader) {
-        shader = shaderManager.get<Shader>(material.shader!);
-        if (material.uniforms) {
-          if ('model' in material.uniforms) {
-            mat4.copy(material.uniforms.model as mat4, transform.matrix);
-          }
-
-          if ('view' in material.uniforms) {
-            if (get(debugMode)) {
-              mat4.copy(
-                material.uniforms.view as mat4,
-                debugRenderSystem.cameraController.camera.view,
-              );
-            } else {
-              mat4.copy(material.uniforms.view as mat4, cameraController.camera.view);
-            }
-          }
-
-          if ('projection' in material.uniforms) {
-            if (get(debugMode)) {
-              mat4.copy(
-                material.uniforms.projection as mat4,
-                debugRenderSystem.cameraController.camera.projection,
-              );
-            } else {
-              mat4.copy(material.uniforms.projection as mat4, cameraController.camera.projection);
-            }
-          }
-
-          if ('view_position' in material.uniforms) {
-            vec3.copy(material.uniforms.view_position as vec3, cameraController.camera.position);
-          }
-
-          shader.update(material.uniforms);
-        }
-      } else {
-        throw new Error(`Unknown material subtype: ${(material as any).subtype}`);
-      }
-
-      shader.buffers.forEach((buf) => {
-        renderer.submit({
-          type: CommandType.WriteBuffer,
-          src: buf.data,
-          dst: buf.buffer,
-        });
-      });
-
-      shader.textures.forEach((texture) => {
-        renderer.submit({
-          type: CommandType.CopyToTexture,
-          src: texture.data,
-          dst: texture.texture,
-        });
-      });
-
-      stats.addTriangles(count / 3);
-
-      renderer.submit({
-        type: CommandType.Draw,
-        shader,
-        indices,
-        buffers: buffers ?? [],
-        count,
-        instances,
-        transparent,
-      });
-
-      if (geometry.showBoundingBox) {
-        // TODO: use the transformed BB from Frustum culling
-        boundingBoxes.push({ boundingBox: geometry.boundingBox, transform: transform.matrix });
-      }
-    }
-
-    children.forEach(renderNode);
-  }
-
-  function separateOpaqueAndTransparentNodes(nodes: readonly SceneGraphNode[]) {
-    return nodes.reduce(
-      (acc, cur) => {
-        // TODO: process children
-        const { uid, children } = cur;
-
-        // const transform = entityManager.getComponent(uid, ComponentType.Transform);
-        // const geometry = entityManager.getComponent(uid, ComponentType.Geometry);
-        const material = entityManager.getComponent(uid, ComponentType.Material);
-
-        if (material && material.transparent) {
-          acc.transparent.push(cur);
-        } else {
-          acc.opaque.push(cur);
-        }
-
-        const { opaque, transparent } = separateOpaqueAndTransparentNodes(children);
-        acc.opaque.push(...opaque);
-        acc.transparent.push(...transparent);
-        return acc;
-      },
-      { opaque: [] as SceneGraphNode[], transparent: [] as SceneGraphNode[] },
-    );
-  }
+    debugRenderSystem,
+    debugMode,
+    stats,
+    boundingBoxes,
+  };
 
   const preRenderCallbacks: (() => void)[] = [];
   const postRenderCallbacks: (() => void)[] = [];
@@ -447,8 +209,13 @@ export async function createWebGPUApplication(
     // as an OIT would not need sorting. DWBOIT would still benefit from
     // separating transparent and non transparent objects
     // TODO: There is probably a way to cache this
-    const { opaque, transparent } = separateOpaqueAndTransparentNodes(sceneGraph.root.children);
-    opaque.forEach(renderNode);
+    const { opaque, transparent } = separateOpaqueAndTransparentNodes(
+      ctx,
+      sceneGraph.root.children,
+    );
+    opaque.forEach((node) => {
+      renderNode(ctx, dt, node);
+    });
 
     transparent.sort((a, b) => {
       // sort based on renderOrder, otherwise use distance to viewer
@@ -474,7 +241,9 @@ export async function createWebGPUApplication(
 
       return 0;
     });
-    transparent.forEach(renderNode);
+    transparent.forEach((node) => {
+      renderNode(ctx, dt, node);
+    });
 
     if (boundingBoxes.length > 0) {
       // TODO: only do this when they change
@@ -554,4 +323,285 @@ export async function createWebGPUApplication(
     stats,
     debugMode,
   };
+}
+
+function separateOpaqueAndTransparentNodes(
+  ctx: { entityManager: EntityManager },
+  nodes: readonly SceneGraphNode[],
+) {
+  return nodes.reduce(
+    (acc, cur) => {
+      // TODO: process children
+      const { uid, children } = cur;
+
+      // const transform = entityManager.getComponent(uid, ComponentType.Transform);
+      // const geometry = entityManager.getComponent(uid, ComponentType.Geometry);
+      const material = ctx.entityManager.getComponent(uid, ComponentType.Material);
+
+      if (material && material.transparent) {
+        acc.transparent.push(cur);
+      } else {
+        acc.opaque.push(cur);
+      }
+
+      const { opaque, transparent } = separateOpaqueAndTransparentNodes(ctx, children);
+      acc.opaque.push(...opaque);
+      acc.transparent.push(...transparent);
+      return acc;
+    },
+    { opaque: [] as SceneGraphNode[], transparent: [] as SceneGraphNode[] },
+  );
+}
+
+const transformedBoundingBox = BoundingBox.create();
+function renderNode(
+  ctx: {
+    renderer: Renderer;
+    entityManager: EntityManager;
+    bufferManager: BufferManager;
+    shaderManager: ShaderManager;
+    scriptManager: ScriptManager;
+    cameraController: CameraController;
+
+    debugRenderSystem: DebugRenderSystem;
+    debugMode: Writable<boolean>;
+    stats: FrameStats;
+    boundingBoxes: RenderableBoundingBox[];
+  },
+  dt: number,
+  node: SceneGraphNode,
+) {
+  const { uid, visible, children } = node;
+  if (!visible) {
+    return;
+  }
+
+  const { entityManager, bufferManager, scriptManager, shaderManager, cameraController, renderer } =
+    ctx;
+
+  const transform = entityManager.getComponent(uid, ComponentType.Transform);
+  const geometry = entityManager.getComponent(uid, ComponentType.Geometry);
+  const material = entityManager.getComponent(uid, ComponentType.Material);
+  const script = entityManager.getComponent(uid, ComponentType.Script);
+
+  if (script && script.script !== undefined) {
+    scriptManager.get(script.script).update(dt, uid);
+  }
+
+  if (transform && geometry && material) {
+    let buffers: VertexBuffer[] = [];
+    let indices: Maybe<IndexBuffer> = undefined;
+    let count = 0;
+    let instances = 0;
+    if (geometry.subtype === GeometryComponentType.Buffer) {
+      // TODO: there is a bug with perspective orbit controls where the culling does work.
+      // It would be good to be able to switch to a debug scene where we can see the scene and the camera
+      vec3.transformMat4(transformedBoundingBox.min, geometry.boundingBox.min, transform.matrix);
+      vec3.transformMat4(transformedBoundingBox.max, geometry.boundingBox.max, transform.matrix);
+      if (
+        intersectFrustumAABB(cameraController.frustum, transformedBoundingBox) ==
+        FrustumIntersection.Outside
+      ) {
+        return;
+      }
+
+      for (let i = 0; i < geometry.buffers.length; ++i) {
+        const buffer = geometry.buffers[i];
+        // TODO: should the buffers on the geometry have a needsUpdate?
+        if (buffer.id === undefined) {
+          buffer.id = bufferManager.createVertexBuffer(buffer);
+          renderer.submit({
+            type: CommandType.WriteBuffer,
+            src: buffer.array,
+            dst: bufferManager.get<VertexBuffer>(buffer.id).buffer,
+          });
+        }
+
+        buffers.push(bufferManager.get<VertexBuffer>(buffer.id));
+
+        if (geometry.indices) {
+          if (geometry.indices.id === undefined) {
+            geometry.indices.id = bufferManager.createIndexBuffer(geometry.indices);
+            renderer.submit({
+              type: CommandType.WriteBuffer,
+              src: geometry.indices.array,
+              dst: bufferManager.get<VertexBuffer>(geometry.indices.id).buffer,
+            });
+          }
+
+          indices = bufferManager.get<IndexBuffer>(geometry.indices.id);
+        }
+      }
+
+      count = geometry.count;
+      instances = geometry.instances;
+    }
+
+    if (material.shader === undefined) {
+      // TODO: move the shader creation into a factory
+      if (material.subtype === MaterialComponentType.MeshBasic) {
+        material.shader = shaderManager.create(DefaultShaders.MeshBasic);
+      } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
+        material.shader = shaderManager.create(DefaultShaders.MeshDiffuse);
+      } else if (material.subtype === MaterialComponentType.MeshPhong) {
+        material.shader = shaderManager.create(DefaultShaders.MeshPhong) as number;
+      } else if (material.subtype === MaterialComponentType.LineBasic) {
+        material.shader = shaderManager.create(DefaultShaders.LineBasic);
+      } else if (material.subtype === MaterialComponentType.RawShader) {
+        material.shader = shaderManager.create(material.descriptor) as number;
+      } else {
+        throw new Error(`Unknown MaterialComponentType: ${(material as any).subtype}`);
+      }
+    }
+
+    let shader: Shader;
+    let transparent = material.transparent;
+
+    // TODO: make the material updating cleaner
+    if (material.subtype === MaterialComponentType.MeshBasic) {
+      transparent = isMaterialTransparent(material);
+      shader = getShaderForMaterial(ctx, material);
+      shader.update({
+        model: transform.matrix,
+        opacity: material.opacity,
+        colour: material.colour,
+      });
+    } else if (material.subtype === MaterialComponentType.MeshDiffuse) {
+      transparent = isMaterialTransparent(material);
+      shader = getShaderForMaterial(ctx, material);
+      shader.update({
+        model: transform.matrix,
+        opacity: material.opacity,
+        colour: material.colour,
+      });
+    } else if (material.subtype === MaterialComponentType.MeshPhong) {
+      throw new Error('Phong: Not implemented Yet');
+    } else if (material.subtype === MaterialComponentType.LineBasic) {
+      transparent = isMaterialTransparent(material);
+      shader = getShaderForMaterial(ctx, material);
+      shader.update({
+        model: transform.matrix,
+        opacity: material.opacity,
+        colour: material.colour,
+      });
+    } else if (material.subtype === MaterialComponentType.RawShader) {
+      shader = shaderManager.get<Shader>(material.shader!);
+      if (material.uniforms) {
+        if ('model' in material.uniforms) {
+          mat4.copy(material.uniforms.model as mat4, transform.matrix);
+        }
+
+        if ('view' in material.uniforms) {
+          if (get(ctx.debugMode)) {
+            mat4.copy(
+              material.uniforms.view as mat4,
+              ctx.debugRenderSystem.cameraController.camera.view,
+            );
+          } else {
+            mat4.copy(material.uniforms.view as mat4, cameraController.camera.view);
+          }
+        }
+
+        if ('projection' in material.uniforms) {
+          if (get(ctx.debugMode)) {
+            mat4.copy(
+              material.uniforms.projection as mat4,
+              ctx.debugRenderSystem.cameraController.camera.projection,
+            );
+          } else {
+            mat4.copy(material.uniforms.projection as mat4, cameraController.camera.projection);
+          }
+        }
+
+        if ('view_position' in material.uniforms) {
+          vec3.copy(material.uniforms.view_position as vec3, cameraController.camera.position);
+        }
+
+        shader.update(material.uniforms);
+      }
+    } else {
+      throw new Error(`Unknown material subtype: ${(material as any).subtype}`);
+    }
+
+    shader.buffers.forEach((buf) => {
+      renderer.submit({
+        type: CommandType.WriteBuffer,
+        src: buf.data,
+        dst: buf.buffer,
+      });
+    });
+
+    shader.textures.forEach((texture) => {
+      renderer.submit({
+        type: CommandType.CopyToTexture,
+        src: texture.data,
+        dst: texture.texture,
+      });
+    });
+
+    ctx.stats.addTriangles(count / 3);
+
+    renderer.submit({
+      type: CommandType.Draw,
+      shader,
+      indices,
+      buffers: buffers ?? [],
+      count,
+      instances,
+      transparent,
+    });
+
+    if (geometry.showBoundingBox) {
+      // TODO: use the transformed BB from Frustum culling
+      ctx.boundingBoxes.push({ boundingBox: geometry.boundingBox, transform: transform.matrix });
+    }
+  }
+
+  children.forEach((node) => {
+    renderNode(ctx, dt, node);
+  });
+}
+
+function getShaderForMaterial(
+  ctx: { shaderManager: ShaderManager; renderer: Renderer },
+  material: MaterialComponent,
+) {
+  if (
+    material.subtype !== MaterialComponentType.MeshBasic &&
+    material.subtype !== MaterialComponentType.MeshDiffuse &&
+    material.subtype !== MaterialComponentType.LineBasic
+  ) {
+    throw new Error(`[getShaderForMaterial] subtype: ${material.subtype} not implemented yet!`);
+  }
+
+  const transparent = isMaterialTransparent(material);
+
+  if (ctx.renderer.type === RendererType.Default) {
+    if (typeof material.shader !== 'number') {
+      throw new Error(`Invalid shader for render type: ${material.shader}`);
+    }
+
+    return ctx.shaderManager.get<Shader>(material.shader);
+  } else if (ctx.renderer.type === RendererType.WeightedBlended) {
+    if (!isWeightedBlendedShaderId(material.shader)) {
+      throw new Error(`Invalid shader for render type: ${material.shader}`);
+    }
+    return transparent
+      ? ctx.shaderManager.get<Shader>(material.shader.transparent)
+      : ctx.shaderManager.get<Shader>(material.shader.opaque);
+  }
+
+  throw new Error(`Unknown renderer type: ${ctx.renderer.type}`);
+}
+
+function isMaterialTransparent(material: MaterialComponent) {
+  if (
+    material.subtype !== MaterialComponentType.MeshBasic &&
+    material.subtype !== MaterialComponentType.MeshDiffuse &&
+    material.subtype !== MaterialComponentType.LineBasic
+  ) {
+    throw new Error(`[isMaterialTransparent] subtype: ${material.subtype} not implemented yet!`);
+  }
+
+  return material.transparent && material.opacity !== 1.0;
 }

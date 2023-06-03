@@ -73,3 +73,5 @@ export function createDebugRenderSystem(params: {
     cameraController,
   };
 }
+
+export type DebugRenderSystem = ReturnType<typeof createDebugRenderSystem>;

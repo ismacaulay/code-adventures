@@ -12,6 +12,7 @@ interface ScriptDescriptor {
 }
 
 export interface ScriptManager {
+  get(id: number): Script;
   create(descriptor: ScriptDescriptor): Promise<number>;
 }
 
