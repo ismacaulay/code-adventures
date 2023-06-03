@@ -169,7 +169,7 @@ export function createOrbitControls(
   }
 
   function removeEventListeners() {
-    element.removeEventListener('pointerdown', handlePointerDown);
+    element.removeEventListener('pointerdown', handlePointerDown, true);
     element.removeEventListener('wheel', handleMouseWheel, true);
   }
 
@@ -242,11 +242,13 @@ export function createOrbitControls(
       return enabled;
     },
     set enabled(value: boolean) {
-      enabled = value;
-      if (enabled) {
-        addEventListeners();
-      } else {
-        removeEventListeners();
+      if (enabled !== value) {
+        enabled = value;
+        if (enabled) {
+          addEventListeners();
+        } else {
+          removeEventListeners();
+        }
       }
     },
 

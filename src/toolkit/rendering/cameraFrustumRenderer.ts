@@ -70,7 +70,7 @@ export function createCameraFrustumRenderer(params: {
   const u1: vec3 = vertices.subarray(30, 33);
   const u2: vec3 = vertices.subarray(33, 36);
 
-  const inverseProjection = mat4.create();
+  const inverseViewProjection = mat4.create();
   const tmp = vec3.create();
 
   const cameraControllerUnsub = cameraController.subscribe(() => {
@@ -81,48 +81,46 @@ export function createCameraFrustumRenderer(params: {
     update() {
       if (!changed) return;
 
-      // TODO: all of this happens reguardless of if the projection matrix changed
-      mat4.invert(inverseProjection, cameraController.camera.viewProjection);
+      mat4.invert(inverseViewProjection, cameraController.camera.viewProjection);
 
       vec3.set(tmp, -1, -1, -1);
-      vec3.transformMat4(n0, tmp, inverseProjection);
+      vec3.transformMat4(n0, tmp, inverseViewProjection);
 
       vec3.set(tmp, 1, -1, -1);
-      vec3.transformMat4(n1, tmp, inverseProjection);
+      vec3.transformMat4(n1, tmp, inverseViewProjection);
 
       vec3.set(tmp, 1, 1, -1);
-      vec3.transformMat4(n2, tmp, inverseProjection);
+      vec3.transformMat4(n2, tmp, inverseViewProjection);
 
       vec3.set(tmp, -1, 1, -1);
-      vec3.transformMat4(n3, tmp, inverseProjection);
+      vec3.transformMat4(n3, tmp, inverseViewProjection);
 
       vec3.set(tmp, -1, -1, 1);
-      vec3.transformMat4(f0, tmp, inverseProjection);
+      vec3.transformMat4(f0, tmp, inverseViewProjection);
 
       vec3.set(tmp, 1, -1, 1);
-      vec3.transformMat4(f1, tmp, inverseProjection);
+      vec3.transformMat4(f1, tmp, inverseViewProjection);
 
       vec3.set(tmp, 1, 1, 1);
-      vec3.transformMat4(f2, tmp, inverseProjection);
+      vec3.transformMat4(f2, tmp, inverseViewProjection);
 
       vec3.set(tmp, -1, 1, 1);
-      vec3.transformMat4(f3, tmp, inverseProjection);
+      vec3.transformMat4(f3, tmp, inverseViewProjection);
 
       vec3.set(tmp, -1, 1, 1);
-      vec3.transformMat4(f3, tmp, inverseProjection);
+      vec3.transformMat4(f3, tmp, inverseViewProjection);
 
       vec3.copy(p, cameraController.position);
 
       vec3.set(tmp, -0.7, 1.1, -1);
-      vec3.transformMat4(u0, tmp, inverseProjection);
+      vec3.transformMat4(u0, tmp, inverseViewProjection);
 
       vec3.set(tmp, 0.7, 1.1, -1);
-      vec3.transformMat4(u1, tmp, inverseProjection);
+      vec3.transformMat4(u1, tmp, inverseViewProjection);
 
       vec3.set(tmp, 0, 1.7, -1);
-      vec3.transformMat4(u2, tmp, inverseProjection);
+      vec3.transformMat4(u2, tmp, inverseViewProjection);
 
-      // TODO: This is going to happen all the time
       renderer.submit({
         type: CommandType.WriteBuffer,
         src: vertices,
