@@ -5,7 +5,10 @@ import {
 } from 'types/ecs/component';
 import type { MeshGeometryComponent } from 'types/ecs/component';
 import { BoundingBox } from 'toolkit/geometry/boundingBox';
-import type { VertexBufferDescriptor } from 'toolkit/rendering/buffers/vertexBuffer';
+import {
+  BufferAttributeFormat,
+  type VertexBufferDescriptor,
+} from 'toolkit/rendering/buffers/vertexBuffer';
 import type { IndexBufferDescriptor } from 'toolkit/rendering/buffers/indexBuffer';
 import { Sphere } from 'toolkit/math/sphere';
 
@@ -54,13 +57,23 @@ export function createBufferGeometryComponent({
   };
 }
 
+/**
+ *  Creates a ClusterGeometryComponent
+ *
+ *  @param {BoundingBox} params.boundingBox - overall object bounding box
+ *  @param {Float32Array | Float64Array} params.vertices - all of the vertices in the clusters
+ *  @param {Uint32Array} params.indices - all of the indicies for the clusters
+ *  @param {Uint32Array} params.offsets - the offsets into the triangles and vertices arrays; triangle offset, triangle count, vertex offset, vertex count
+ *  @param {Float32Array | Float64Array} params.bounds - cluster bounds; each bounds is a centre and a radius
+ *  @param {VertexBufferDescriptor[]} params.attributes - additional attributes for each cluster
+ */
 export function createClusterGeometryComponent(params: {
   boundingBox: BoundingBox;
-  counts: Uint32Array;
-  bounds: Float32Array | Float64Array;
   indices: Uint32Array;
   vertices: Float32Array | Float64Array;
-  attributes: VertexBufferDescriptor[];
+  offsets: Uint32Array;
+  bounds: Float32Array | Float64Array;
+  colours: Uint32Array;
 }): ClusterGeometryComponent {
   let boundingSphere: Sphere | undefined;
 
@@ -81,11 +94,37 @@ export function createClusterGeometryComponent(params: {
     },
 
     clusters: {
-      counts: params.counts,
+      count: params.offsets.length / 4,
+
+      offsets: params.offsets,
       bounds: params.bounds,
       indices: params.indices,
       vertices: params.vertices,
-      attributes: params.attributes,
+      colours: params.colours,
+    },
+
+    buffers: {
+      indices: {
+        array: new Uint32Array(params.indices.length),
+      },
+      vertices: {
+        array: new Float64Array(params.vertices.length),
+        attributes: [
+          {
+            location: 0,
+            format: BufferAttributeFormat.Float32x3,
+          },
+        ],
+      },
+      colours: {
+        array: new Uint32Array(params.colours.length),
+        attributes: [
+          {
+            location: 1,
+            format: BufferAttributeFormat.Uint32,
+          },
+        ],
+      },
     },
   };
 }

@@ -9,7 +9,10 @@
     createMeshDiffuseMaterialComponent,
     createRawShaderMaterialComponent,
   } from 'toolkit/ecs/components/material';
-  import { createBufferGeometryComponent } from 'toolkit/ecs/components/geometry';
+  import {
+    createBufferGeometryComponent,
+    createClusterGeometryComponent,
+  } from 'toolkit/ecs/components/geometry';
   import { BoundingBox } from 'toolkit/geometry/boundingBox';
   import { BufferAttributeFormat } from 'toolkit/rendering/buffers/vertexBuffer';
   import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
@@ -76,7 +79,7 @@ fn fragment_main(@location(0) position_eye: vec4<f32>, @location(1) @interpolate
 `;
 
   async function run(app: WebGPUApplication) {
-    const [verticesBuf, trianglesBuf, coloursBuf, boundsBuf, countsBuf] = await Promise.all([
+    const [verticesBuf, trianglesBuf, coloursBuf, boundsBuf, offsetsBuf] = await Promise.all([
       fetchBinary(`${base}/vertices.bin`),
       fetchBinary(`${base}/triangles.bin`),
       fetchBinary(`${base}/colours.bin`),
@@ -89,11 +92,11 @@ fn fragment_main(@location(0) position_eye: vec4<f32>, @location(1) @interpolate
     const triangles = new Uint32Array(trianglesBuf);
     const colours = new Uint32Array(coloursBuf);
     const bounds = new Float32Array(boundsBuf);
-    const counts = new Uint32Array(countsBuf);
+    const offsets = new Uint32Array(offsetsBuf);
 
     // const meshletCount = bounds.length / 4; // { centre: vec3, radius: float }
     // console.log(bounds, meshletCount);
-    console.log(counts, counts.length / 4);
+    // console.log(counts, counts.length / 4);
 
     const { cameraController, entityManager, sceneGraph } = app;
 
@@ -126,30 +129,39 @@ fn fragment_main(@location(0) position_eye: vec4<f32>, @location(1) @interpolate
     });
     entityManager.addComponent(name, material);
 
-    const geometry = createBufferGeometryComponent({
+    // const geometry = createBufferGeometryComponent({
+    //   boundingBox,
+    //   count: triangles.length,
+    //   indices: triangles,
+    //   buffers: [
+    //     {
+    //       array: vertices,
+    //       attributes: [
+    //         {
+    //           format: BufferAttributeFormat.Float32x3,
+    //           location: 0,
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       array: colours,
+    //       attributes: [
+    //         {
+    //           format: BufferAttributeFormat.Uint32,
+    //           location: 1,
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // });
+
+    const geometry = createClusterGeometryComponent({
       boundingBox,
-      count: triangles.length,
+      offsets,
+      bounds,
       indices: triangles,
-      buffers: [
-        {
-          array: vertices,
-          attributes: [
-            {
-              format: BufferAttributeFormat.Float32x3,
-              location: 0,
-            },
-          ],
-        },
-        {
-          array: colours,
-          attributes: [
-            {
-              format: BufferAttributeFormat.Uint32,
-              location: 1,
-            },
-          ],
-        },
-      ],
+      vertices,
+      colours,
     });
     entityManager.addComponent(name, geometry);
     sceneGraph.root.add(createSceneGraphNode({ uid: name }));
@@ -157,8 +169,9 @@ fn fragment_main(@location(0) position_eye: vec4<f32>, @location(1) @interpolate
     cameraController.cameraType = CameraType.Perspective;
     cameraController.controlType = CameraControlType.Orbit;
     cameraController.position = [0, 0, 1];
+    // cameraController.position = [0.3404258191585541, 0.055514365434646606, 1];
+    // cameraController.target = [0.3404258191585541, 0.055514365434646606, -1.8626149303087905e-20];
     // (cameraController.camera as OrthographicCamera).zoom = 12;
-    // cameraController.camera.updateProjectionMatrix();
 
     // const result = BoundingBox.centre(boundingBox);
     // cameraController.target = vec3.clone(result);

@@ -22,6 +22,19 @@ export module Plane {
     return out;
   }
 
+  export function normalize(out: Plane, p: Plane): Plane {
+    const invMag =
+      1.0 /
+      Math.sqrt(p.normal[0] * p.normal[0] + p.normal[1] * p.normal[1] + p.normal[2] * p.normal[2]);
+
+    out.normal[0] = p.normal[0] * invMag;
+    out.normal[1] = p.normal[1] * invMag;
+    out.normal[2] = p.normal[2] * invMag;
+    out.constant = p.constant * invMag;
+
+    return out;
+  }
+
   export function signedDistanceToPoint(pl: Plane, p: vec3): number {
     return pl.normal[0] * p[0] + pl.normal[1] * p[1] + pl.normal[2] * p[2] + pl.constant;
   }

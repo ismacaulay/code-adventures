@@ -60,13 +60,28 @@ export module Frustum {
       m33 = matrix[15];
 
     Plane.setValues(out.left, m03 + matrix[0], m13 + matrix[4], m23 + matrix[8], m33 + matrix[12]);
-    Plane.setValues(out.right, m03 - matrix[0], m13 - matrix[4], m23 - matrix[8], m33 - matrix[12]);
+    Plane.normalize(out.left, out.left);
 
-    Plane.setValues(out.bottom, m03 + matrix[1], m13 + matrix[5], m23 + matrix[9], m33 + matrix[13]);
+    Plane.setValues(out.right, m03 - matrix[0], m13 - matrix[4], m23 - matrix[8], m33 - matrix[12]);
+    Plane.normalize(out.right, out.right);
+
+    Plane.setValues(
+      out.bottom,
+      m03 + matrix[1],
+      m13 + matrix[5],
+      m23 + matrix[9],
+      m33 + matrix[13],
+    );
+    Plane.normalize(out.bottom, out.bottom);
+
     Plane.setValues(out.top, m03 - matrix[1], m13 - matrix[5], m23 - matrix[9], m33 - matrix[13]);
+    Plane.normalize(out.top, out.top);
 
     Plane.setValues(out.near, m03 + matrix[2], m13 + matrix[6], m23 + matrix[10], m33 + matrix[14]);
+    Plane.normalize(out.near, out.near);
+
     Plane.setValues(out.far, m03 - matrix[2], m13 - matrix[6], m23 - matrix[10], m33 - matrix[14]);
+    Plane.normalize(out.far, out.far);
 
     return out;
   }

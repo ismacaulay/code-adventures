@@ -63,12 +63,19 @@ export interface ClusterGeometryComponent extends BaseGeometryComponent {
   subtype: GeometryComponentType.Cluster;
 
   clusters: {
-    counts: Uint32Array;
+    count: number;
+
+    offsets: Uint32Array;
     bounds: Float32Array | Float64Array;
     indices: Uint32Array;
     vertices: Float32Array | Float64Array;
+    colours: Uint32Array;
+  };
 
-    attributes: VertexBufferDescriptor[];
+  buffers: {
+    indices: IndexBufferDescriptor;
+    vertices: VertexBufferDescriptor;
+    colours: VertexBufferDescriptor;
   };
 }
 

@@ -8,7 +8,12 @@ import { createScriptManager, type ScriptManager } from 'toolkit/ecs/scriptManag
 import { createShaderManager, DefaultShaders, type ShaderManager } from 'toolkit/ecs/shaderManager';
 import { createTextureManager } from 'toolkit/ecs/textureManager';
 import { BoundingBox } from 'toolkit/geometry/boundingBox';
-import { FrustumIntersection, intersectFrustumAABB } from 'toolkit/math/intersect/frustum';
+import {
+  FrustumIntersection,
+  intersectFrustumAABB,
+  intersectFrustumSphere,
+} from 'toolkit/math/intersect/frustum';
+import { Sphere } from 'toolkit/math/sphere';
 import {
   createBoundingBoxRenderer,
   type RenderableBoundingBox,
@@ -353,7 +358,6 @@ function separateOpaqueAndTransparentNodes(
   );
 }
 
-const transformedBoundingBox = BoundingBox.create();
 function renderNode(
   ctx: {
     renderer: Renderer;
@@ -389,22 +393,24 @@ function renderNode(
   }
 
   if (transform && geometry && material) {
+    // TODO: there is a bug with perspective orbit controls where the culling does work.
+    // It would be good to be able to switch to a debug scene where we can see the scene and the camera
+    const transformedBoundingBox = BoundingBox.create();
+    vec3.transformMat4(transformedBoundingBox.min, geometry.boundingBox.min, transform.matrix);
+    vec3.transformMat4(transformedBoundingBox.max, geometry.boundingBox.max, transform.matrix);
+    if (
+      intersectFrustumAABB(cameraController.frustum, transformedBoundingBox) ==
+      FrustumIntersection.Outside
+    ) {
+      return;
+    }
+
     let buffers: VertexBuffer[] = [];
     let indices: Maybe<IndexBuffer> = undefined;
-    let count = 0;
+    let renderCount = 0;
     let instances = 0;
-    if (geometry.subtype === GeometryComponentType.Buffer) {
-      // TODO: there is a bug with perspective orbit controls where the culling does work.
-      // It would be good to be able to switch to a debug scene where we can see the scene and the camera
-      vec3.transformMat4(transformedBoundingBox.min, geometry.boundingBox.min, transform.matrix);
-      vec3.transformMat4(transformedBoundingBox.max, geometry.boundingBox.max, transform.matrix);
-      if (
-        intersectFrustumAABB(cameraController.frustum, transformedBoundingBox) ==
-        FrustumIntersection.Outside
-      ) {
-        return;
-      }
 
+    if (geometry.subtype === GeometryComponentType.Buffer) {
       for (let i = 0; i < geometry.buffers.length; ++i) {
         const buffer = geometry.buffers[i];
         // TODO: should the buffers on the geometry have a needsUpdate?
@@ -433,8 +439,103 @@ function renderNode(
         }
       }
 
-      count = geometry.count;
+      renderCount = geometry.count;
       instances = geometry.instances;
+    } else if (geometry.subtype === GeometryComponentType.Cluster) {
+      const sphere = Sphere.create();
+      let count = 0;
+      let vertexIdx = 0;
+      let indexIdx = 0;
+      let colourIdx = 0;
+      let triangleOffset, triangleCount;
+      let vertexOffset, vertexCount;
+      let colourOffset, colourCount;
+      let clusterCount = 0;
+
+      if (geometry.buffers.indices.id === undefined) {
+        geometry.buffers.indices.id = bufferManager.createIndexBuffer(geometry.buffers.indices);
+      }
+      const indexBuffer = bufferManager.get<IndexBuffer>(geometry.buffers.indices.id);
+      indexBuffer.data.fill(0);
+
+      if (geometry.buffers.vertices.id === undefined) {
+        geometry.buffers.vertices.id = bufferManager.createVertexBuffer(geometry.buffers.vertices);
+        renderer.submit({
+          type: CommandType.WriteBuffer,
+          src: geometry.clusters.vertices,
+          dst: bufferManager.get<VertexBuffer>(geometry.buffers.vertices.id).buffer,
+        });
+      }
+      const vertexBuffer = bufferManager.get<VertexBuffer>(geometry.buffers.vertices.id);
+
+      if (geometry.buffers.colours.id === undefined) {
+        geometry.buffers.colours.id = bufferManager.createVertexBuffer(geometry.buffers.colours);
+        renderer.submit({
+          type: CommandType.WriteBuffer,
+          src: geometry.clusters.colours,
+          dst: bufferManager.get<VertexBuffer>(geometry.buffers.colours.id).buffer,
+        });
+      }
+      const colourBuffer = bufferManager.get<VertexBuffer>(geometry.buffers.colours.id);
+
+      for (let i = 0; i < geometry.clusters.count; ++i) {
+        sphere.centre[0] = geometry.clusters.bounds[i * 4];
+        sphere.centre[1] = geometry.clusters.bounds[i * 4 + 1];
+        sphere.centre[2] = geometry.clusters.bounds[i * 4 + 2];
+        sphere.radius = geometry.clusters.bounds[i * 4 + 3];
+        vec3.transformMat4(sphere.centre, sphere.centre, transform.matrix);
+
+        if (
+          intersectFrustumSphere(cameraController.frustum, sphere) == FrustumIntersection.Outside
+        ) {
+          continue;
+        }
+
+        // We cant just use the indices from the cluster information since they will be wrong
+        // we need to recreate them based on
+        triangleOffset = geometry.clusters.offsets[i * 4] * 3;
+        triangleCount = geometry.clusters.offsets[i * 4 + 1] * 3;
+        indexBuffer.data.set(
+          geometry.clusters.indices.subarray(triangleOffset, triangleOffset + triangleCount),
+          indexIdx,
+        );
+        indexIdx += triangleCount;
+
+        // vertexOffset = geometry.clusters.offsets[i * 4 + 2] * 3;
+        // vertexCount = geometry.clusters.offsets[i * 4 + 3] * 3;
+        // vertexBuffer.data.set(
+        //   geometry.clusters.vertices.subarray(vertexOffset, vertexOffset + vertexCount),
+        //   vertexIdx,
+        // );
+        // vertexIdx += vertexCount;
+
+        // there is one colour value per vertex
+        // colourOffset = geometry.clusters.offsets[i * 4 + 2];
+        // colourCount = geometry.clusters.offsets[i * 4 + 3];
+        // colourBuffer.data.set(
+        //   geometry.clusters.colours.subarray(colourOffset, colourOffset + colourCount),
+        //   colourIdx,
+        // );
+        // colourIdx += colourCount;
+        //
+        count += triangleCount;
+      }
+
+      if (count === 0) {
+        return;
+      }
+
+      // TODO: We only want to do this if we actually change the buffer from one frame to the next. what is the best way to track that?
+      renderer.submit({
+        type: CommandType.WriteBuffer,
+        src: indexBuffer.data,
+        dst: indexBuffer.buffer,
+      });
+      indices = indexBuffer;
+      buffers.push(vertexBuffer, colourBuffer);
+
+      instances = 1;
+      renderCount += count;
     }
 
     if (material.shader === undefined) {
@@ -539,14 +640,14 @@ function renderNode(
       });
     });
 
-    ctx.stats.addTriangles(count / 3);
+    ctx.stats.addTriangles(renderCount / 3);
 
     renderer.submit({
       type: CommandType.Draw,
       shader,
       indices,
       buffers: buffers ?? [],
-      count,
+      count: renderCount,
       instances,
       transparent,
     });
