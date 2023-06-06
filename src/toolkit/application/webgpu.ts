@@ -492,7 +492,7 @@ function renderNode(
         }
 
         // We cant just use the indices from the cluster information since they will be wrong
-        // we need to recreate them based on
+        // we need to recreate them based on what is visible
         triangleOffset = geometry.clusters.offsets[i * 4] * 3;
         triangleCount = geometry.clusters.offsets[i * 4 + 1] * 3;
         indexBuffer.data.set(
