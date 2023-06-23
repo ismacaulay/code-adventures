@@ -1,5 +1,5 @@
 <script lang="ts">
-  import WebGpuScene from 'pages/webgpu/components/WebGPUScene.svelte';
+  import WebGpuScene from 'components/WebGPUScene.svelte';
   import type { WebGPUApplication } from 'toolkit/application/webgpu';
   import { fetchBinary } from 'toolkit/network';
   import { RendererType } from 'toolkit/rendering/renderer';

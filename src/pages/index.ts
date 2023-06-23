@@ -1,8 +1,11 @@
 import computationalGeometry from './computationalGeometry/pages';
-import webgpu from './webgpu/pages';
+import computerGraphics from './computerGraphics/pages';
 import wasm from './wasm/pages';
 import voxelization from './voxelization/pages';
-import moanaIsland from './moanaIsland/pages';
-import advanced from './advanced/pages';
 
-export default { computationalGeometry, webgpu, wasm, voxelization, moanaIsland, advanced };
+export default {
+  computationalGeometry,
+  computerGraphics,
+  wasm,
+  voxelization,
+};

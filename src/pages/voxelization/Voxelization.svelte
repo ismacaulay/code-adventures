@@ -1,6 +1,6 @@
 <script lang="ts">
   import { mat4, vec3 } from 'gl-matrix';
-  import WebGpuScene from 'pages/webgpu/components/WebGPUScene.svelte';
+  import WebGpuScene from 'components/WebGPUScene.svelte';
   import { onDestroy } from 'svelte';
   import type { WebGPUApplication } from 'toolkit/application/webgpu';
   import { CameraType } from 'toolkit/camera/camera';

@@ -1,7 +1,9 @@
-import WebGPUScene from './components/WebGPUScene.svelte';
+import WebGPUScene from 'components/WebGPUScene.svelte';
+import MoanaIsland from './MoanaIsland.svelte';
+import Meshlets from './Meshlets.svelte';
 
 function toUrl(path: string) {
-  return `webgpu/${path}`;
+  return `computer-graphics/${path}`;
 }
 
 function createPageGenerator(path: string) {
@@ -48,6 +50,26 @@ export default [
       {
         section: 'Weighted Blended Order-Independent Transparency',
         pages: [wboitPage('quads'), wboitPage('cubes'), wboitPage('bunny'), wboitPage('dragon')],
+      },
+    ],
+  },
+  {
+    section: 'Moana Island Scene',
+    pages: [
+      {
+        url: toUrl('moana-island-scene'),
+        title: 'moana island scene',
+        component: MoanaIsland,
+      },
+    ],
+  },
+  {
+    section: 'Culling',
+    pages: [
+      {
+        url: toUrl('view-frustum-culling-cluster'),
+        title: 'view frustum culling - cluster',
+        component: Meshlets,
       },
     ],
   },

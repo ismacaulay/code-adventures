@@ -1,10 +1,8 @@
 <script>
   import ComputationalGeometry from './computationalGeometry/index.svelte';
-  import WebGPU from './webgpu/index.svelte';
+  import ComputerGraphics from './computerGraphics/index.svelte';
   import Wasm from './wasm/index.svelte';
   import Voxelization from './voxelization/index.svelte';
-  import MoanaIsland from './moanaIsland/index.svelte';
-  import Advanced from './advanced/index.svelte';
 </script>
 
 <style>
@@ -15,10 +13,8 @@
 </style>
 
 <div class="container">
-  <WebGPU />
+  <ComputerGraphics />
+  <Voxelization />
   <Wasm />
   <ComputationalGeometry />
-  <Voxelization />
-  <MoanaIsland />
-  <Advanced />
 </div>

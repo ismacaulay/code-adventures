@@ -21,16 +21,16 @@
   }
 </style>
 
-<div class="grid grid-cols-4 {subsection ? 'col-span-4' : ''}">
+<div class="grid grid-cols-3 {subsection ? 'col-span-3' : ''}">
   {#each pages as page}
     {#if page.section}
       {#if subsection}
-        <h3 class="text-sm col-span-4">{page.section}</h3>
+        <h3 class="text-sm col-span-3">{page.section}</h3>
       {:else}
-        <h2 class="text-lg font-thin col-span-4">{page.section}</h2>
+        <h2 class="text-lg font-thin col-span-3 pt-3">{page.section}</h2>
       {/if}
       {#if page.description}
-        <p class="col-span-4">{@html page.description}</p>
+        <p class="col-span-3">{@html page.description}</p>
       {/if}
       <svelte:self pages={page.pages} subsection={true} />
     {:else if page.url}
