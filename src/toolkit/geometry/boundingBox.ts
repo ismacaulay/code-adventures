@@ -179,6 +179,20 @@ export module BoundingBox {
     return Math.hypot(bb.max[0] - bb.min[0], bb.max[1] - bb.min[1], bb.max[2] - bb.min[2]);
   }
 
+  export function corners(bb: BoundingBox): vec3[] {
+    return [
+      vec3.fromValues(bb.min[0], bb.min[1], bb.min[2]),
+      vec3.fromValues(bb.min[0], bb.max[1], bb.min[2]),
+      vec3.fromValues(bb.max[0], bb.max[1], bb.min[2]),
+      vec3.fromValues(bb.max[0], bb.min[1], bb.min[2]),
+
+      vec3.fromValues(bb.min[0], bb.min[1], bb.max[2]),
+      vec3.fromValues(bb.min[0], bb.max[1], bb.max[2]),
+      vec3.fromValues(bb.max[0], bb.max[1], bb.max[2]),
+      vec3.fromValues(bb.max[0], bb.min[1], bb.max[2]),
+    ];
+  }
+
   export function getPositiveVertex(out: vec3, bb: BoundingBox, n: vec3): vec3 {
     out[0] = bb.min[0];
     out[1] = bb.min[1];
@@ -217,5 +231,9 @@ export module BoundingBox {
     }
 
     return out;
+  }
+
+  export function toString(bb: BoundingBox) {
+    return `min: ${bb.min[0]}, ${bb.min[1]}, ${bb.min[2]} max: ${bb.max[0]}, ${bb.max[1]}, ${bb.max[2]}`;
   }
 }

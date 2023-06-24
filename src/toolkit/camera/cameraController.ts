@@ -1,5 +1,7 @@
 import { vec3 } from 'gl-matrix';
+import { BoundingBox } from 'toolkit/geometry/boundingBox';
 import { Frustum } from 'toolkit/math/frustum';
+import type { SceneBoundingBox } from 'toolkit/sceneBoundingBox';
 import { createSignal } from 'toolkit/signal';
 import { noop } from 'toolkit/subscription';
 import { CameraType, type Camera } from './camera';
@@ -39,11 +41,14 @@ export type CameraController = {
 
 export function createCameraController(
   canvas: HTMLElement,
+  sceneBoundingBox: SceneBoundingBox,
   initial: {
     type: CameraType;
     control: CameraControlType;
-  } = { type: CameraType.Perspective, control: CameraControlType.Orbit },
+    autoNearFar: boolean;
+  } = { type: CameraType.Perspective, control: CameraControlType.Orbit, autoNearFar: true },
 ): CameraController {
+  const unsubscribers: Unsubscriber[] = [];
   const signal = createSignal();
 
   const orthographic = createOrthographicCamera({
@@ -68,10 +73,66 @@ export function createCameraController(
   let currentType: CameraType = initial.type;
   let camera: Camera = currentType === CameraType.Orthographic ? orthographic : perspective;
 
+  function recomputeNearAndFarPlanes() {
+    if (!initial.autoNearFar) {
+      return;
+    }
+
+    const corners = BoundingBox.corners(sceneBoundingBox.boundingBox);
+    const positionToCorner = vec3.create();
+
+    const positionToTarget = vec3.create();
+    vec3.sub(positionToTarget, camera.target, camera.position);
+    vec3.normalize(positionToTarget, positionToTarget);
+
+    let dist: number;
+    let near = Number.POSITIVE_INFINITY;
+    let far = Number.NEGATIVE_INFINITY;
+
+    for (let i = 0; i < corners.length; ++i) {
+      vec3.sub(positionToCorner, corners[i], camera.position);
+      dist = vec3.dot(positionToCorner, positionToTarget);
+
+      if (dist < near) {
+        near = dist;
+      }
+
+      if (dist > far) {
+        far = dist;
+      }
+    }
+
+    if (near > far) {
+      const tmp = near;
+      near = far;
+      far = tmp;
+    }
+
+    const buffer = 0.05 * (far - near);
+    far = far + buffer;
+    near = near - buffer;
+
+    if (near < 0) {
+      near = 0.1;
+    }
+
+    console.log(near, far);
+    camera.znear = near;
+    camera.zfar = far;
+    camera.updateProjectionMatrix();
+  }
+
   const frustum = Frustum.create();
-  signal.subscribe(() => {
-    Frustum.setFromMatrix(frustum, camera.viewProjection);
-  });
+  unsubscribers.push(
+    signal.subscribe(() => {
+      recomputeNearAndFarPlanes();
+
+      Frustum.setFromMatrix(frustum, camera.viewProjection);
+    }),
+    sceneBoundingBox.subscribe(() => {
+      recomputeNearAndFarPlanes();
+    }),
+  );
 
   let currentControlType: CameraControlType;
   let controls: CameraControls;
@@ -133,6 +194,8 @@ export function createCameraController(
       vec3.copy(camera.position, position);
       vec3.copy(camera.up, up);
       camera.aspect = aspect;
+      recomputeNearAndFarPlanes();
+
       camera.updateViewMatrix();
       camera.updateProjectionMatrix();
 
@@ -194,6 +257,7 @@ export function createCameraController(
     },
 
     destroy() {
+      unsubscribers.forEach((cb) => cb());
       controls.destroy();
       signal.destroy();
     },

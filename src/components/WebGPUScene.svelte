@@ -9,7 +9,7 @@
   import { createWebGPUApplication, type WebGPUApplication } from 'toolkit/application/webgpu';
   import type { TreeViewNode } from 'types/components/tree';
   import { type Component, ComponentType } from 'types/ecs/component';
-  import type { ReadonlySceneGraphNode } from 'types/sceneGraph';
+  import type { SceneGraphNode } from 'toolkit/sceneGraph';
   import { CameraType, type Camera } from 'toolkit/camera/camera';
   import MaterialEditor from 'components/MaterialEditor.svelte';
   import { createCameraViewModel, type CameraViewModel } from '../models/camera';
@@ -78,7 +78,7 @@
     }
   }
 
-  function processSceneGraphNode(node: ReadonlySceneGraphNode): TreeViewNode {
+  function processSceneGraphNode(node: SceneGraphNode): TreeViewNode {
     return {
       uid: node.uid,
       children: node.children.map(processSceneGraphNode),

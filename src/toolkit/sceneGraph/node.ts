@@ -1,4 +1,14 @@
-import type { SceneGraphNode } from 'types/sceneGraph';
+export type SceneGraphNode = {
+  uid: string;
+  children: readonly SceneGraphNode[];
+
+  renderOrder: number;
+  visible: boolean;
+
+  onChange(cb: () => void): () => void;
+  add(child: SceneGraphNode): void;
+  remove(child: SceneGraphNode): void;
+};
 
 export function createSceneGraphNode(params: {
   uid: string;
@@ -6,11 +16,12 @@ export function createSceneGraphNode(params: {
   renderOrder?: number;
 }): SceneGraphNode {
   const { uid, renderOrder = 0 } = params;
-  let { visible = true } = params;
+
+  let visible = params.visible ?? true;
 
   const children: SceneGraphNode[] = [];
 
-  const unsubscribers = [];
+  const unsubscribers: Unsubscriber[] = [];
   const callbacks: VoidFunction[] = [];
 
   function changed() {
@@ -52,6 +63,8 @@ export function createSceneGraphNode(params: {
       }
 
       children.splice(idx, 1);
+      const unsubs = unsubscribers.splice(idx, 1);
+      unsubs.forEach((cb) => cb());
 
       changed();
     },

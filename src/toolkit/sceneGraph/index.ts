@@ -1,5 +1,14 @@
-import type { SceneGraph } from 'types/sceneGraph';
-import { createSceneGraphNode } from './node';
+import { type SceneGraphNode, createSceneGraphNode } from './node';
+
+export type { SceneGraphNode };
+
+export type SceneGraph = {
+  readonly root: SceneGraphNode;
+
+  onChange(cb: () => void): Unsubscriber;
+  clear(): void;
+  destroy(): void;
+};
 
 // TODO: This is a leaky mess and children are not being unsubscribed properly
 export function createSceneGraph(): SceneGraph {
@@ -15,7 +24,9 @@ export function createSceneGraph(): SceneGraph {
   return {
     root,
 
-    clear() {},
+    clear() {
+      // TODO: Implement me!
+    },
     destroy() {
       unsub();
     },

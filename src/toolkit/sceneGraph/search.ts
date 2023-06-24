@@ -1,4 +1,4 @@
-import type { SceneGraphNode } from 'types/sceneGraph';
+import type { SceneGraphNode } from './node';
 
 export function findNodeByUid(node: SceneGraphNode, uid: string): SceneGraphNode | undefined {
   if (node.uid === uid) {

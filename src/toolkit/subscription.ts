@@ -1,10 +1,12 @@
 export const noop = () => {};
 
-export function createCallbackHandler() {
-  let callbacks: VoidFunction[] = [];
+type CallbackFunc<T> = (params: T) => void;
+
+export function createCallbackHandler<T = void>() {
+  let callbacks: CallbackFunc<T>[] = [];
 
   return {
-    add(cb: VoidFunction): Unsubscriber {
+    add(cb: CallbackFunc<T>): Unsubscriber {
       callbacks.push(cb);
 
       return function unsubscribe() {
@@ -15,8 +17,8 @@ export function createCallbackHandler() {
       };
     },
 
-    call() {
-      callbacks.forEach((cb) => cb());
+    call(param: T) {
+      callbacks.forEach((cb) => cb(param));
     },
 
     destroy() {

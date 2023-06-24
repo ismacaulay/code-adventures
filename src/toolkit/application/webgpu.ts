@@ -41,7 +41,8 @@ import {
 } from 'types/ecs/component';
 
 import type { EntityManager } from 'types/ecs/entity';
-import type { SceneGraph, SceneGraphNode } from 'types/sceneGraph';
+import type { SceneGraph, SceneGraphNode } from 'toolkit/sceneGraph';
+import { createSceneBoundingBox } from 'toolkit/sceneBoundingBox';
 
 export type WebGPUApplication = {
   readonly renderer: Renderer;
@@ -78,10 +79,13 @@ export async function createWebGPUApplication(
 ): Promise<WebGPUApplication> {
   console.log('creating webgpu application', appId);
   const sceneGraph = createSceneGraph();
-  const cameraController = createCameraController(canvas);
+  const entityManager = createEntityManager();
+
+  const sceneBoundingBox = createSceneBoundingBox(sceneGraph, { entityManager });
+
+  const cameraController = createCameraController(canvas, sceneBoundingBox);
 
   const renderer = await createWebGPURenderer(canvas, opts);
-  const entityManager = createEntityManager();
   const bufferManager = createBufferManager(renderer.device);
   const textureManager = createTextureManager(renderer.device);
   const shaderManager = createShaderManager(renderer.device, {
@@ -125,6 +129,7 @@ export async function createWebGPUApplication(
     renderer,
     bufferManager,
     shaderManager,
+    sceneBoundingBox,
   });
 
   const resizer = new ResizeObserver(() => {
@@ -168,6 +173,8 @@ export async function createWebGPUApplication(
   const preRenderCallbacks: (() => void)[] = [];
   const postRenderCallbacks: (() => void)[] = [];
 
+  const identity = mat4.create();
+
   function render() {
     stats.begin();
 
@@ -208,6 +215,9 @@ export async function createWebGPUApplication(
     // TODO: if nothing has changed we probably want to just keep rendering the bounding boxes
     //       as is
     boundingBoxes.length = 0;
+
+    // TODO: add a way to toggle this on and off
+    // ctx.boundingBoxes.push({ boundingBox: sceneBoundingBox.boundingBox, transform: identity });
 
     // we need to split the drawing into opaque and transparent objects
     // but this should be based on what type of transparent rendering

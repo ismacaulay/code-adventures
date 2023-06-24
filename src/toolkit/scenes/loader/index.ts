@@ -13,7 +13,7 @@ import { RendererType, type Renderer } from 'toolkit/rendering/renderer';
 import { createSceneGraphNode } from 'toolkit/sceneGraph/node';
 import type { Component } from 'types/ecs/component';
 import type { EntityManager } from 'types/ecs/entity';
-import type { SceneGraph, SceneGraphNode } from 'types/sceneGraph';
+import type { SceneGraph, SceneGraphNode } from 'toolkit/sceneGraph';
 import type { SceneV1 } from 'types/scenes/v1/scene';
 import type { SceneGraphDescriptorV1 } from 'types/scenes/v1/sceneGraph';
 import {
