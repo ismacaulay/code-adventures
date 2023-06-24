@@ -1,7 +1,11 @@
-import { glMatrix } from 'gl-matrix';
-
+const TO_RADIANS = Math.PI / 180;
 export function radians(degrees: number) {
-  return glMatrix.toRadian(degrees);
+  return degrees * TO_RADIANS;
+}
+
+const TO_DEGREES = 180 / Math.PI;
+export function degrees(radians: number) {
+  return radians * TO_DEGREES;
 }
 
 export function inverseLerp(a: number, b: number, value: number) {

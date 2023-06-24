@@ -12,6 +12,7 @@ export type FreeCameraControls = {
   moveSensitivity: number;
   mouseSensitivity: number;
 
+  computeYawAndPitch(): void;
   update(dt: number): void;
   camera: Camera;
   destroy(): void;

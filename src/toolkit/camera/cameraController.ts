@@ -116,7 +116,6 @@ export function createCameraController(
       near = 0.1;
     }
 
-    console.log(near, far);
     camera.znear = near;
     camera.zfar = far;
     camera.updateProjectionMatrix();

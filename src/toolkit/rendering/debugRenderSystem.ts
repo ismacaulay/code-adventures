@@ -23,7 +23,6 @@ export function createDebugRenderSystem(params: {
   const { cameraController: normalCameraController } = params;
 
   let enabled = false;
-
   const cameraController = createCameraController(params.canvas, params.sceneBoundingBox, {
     type: CameraType.Perspective,
     control: CameraControlType.Free,
@@ -48,6 +47,9 @@ export function createDebugRenderSystem(params: {
         cameraController.position = normalCameraController.position;
         cameraController.up = normalCameraController.up;
         cameraController.target = normalCameraController.target;
+        if (cameraController.controls.type === CameraControlType.Free) {
+          cameraController.controls.computeYawAndPitch();
+        }
 
         firstTime = false;
       }

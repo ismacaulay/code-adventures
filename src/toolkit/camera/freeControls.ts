@@ -1,5 +1,5 @@
 import { vec3 } from 'gl-matrix';
-import { radians } from 'toolkit/math';
+import { degrees, radians } from 'toolkit/math';
 import { createSignal } from 'toolkit/signal';
 import type { Camera } from './camera';
 import { CameraControlType, type FreeCameraControls } from './controls';
@@ -121,11 +121,21 @@ export function createFreeControls(
     changed = true;
   }
 
-  let yaw = -90;
-  let pitch = 0;
   const front = vec3.create();
   const right = vec3.create();
   const worldUp = vec3.fromValues(0, 1, 0);
+  let yaw = 0;
+  let pitch = 0;
+
+  function computeYawAndPitch() {
+    vec3.sub(front, camera.target, camera.position);
+    vec3.normalize(front, front);
+
+    yaw = degrees(Math.atan2(front[2], front[0]));
+    pitch = degrees(Math.asin(front[1]));
+    updateCamera();
+  }
+  computeYawAndPitch();
 
   function updateCamera() {
     vec3.normalize(
@@ -137,7 +147,6 @@ export function createFreeControls(
         Math.sin(radians(yaw)) * Math.cos(radians(pitch)),
       ),
     );
-
     vec3.normalize(right, vec3.cross(right, front, worldUp));
 
     vec3.cross(camera.up, right, front);
@@ -154,7 +163,6 @@ export function createFreeControls(
     if (pitch > 89.0) pitch = 89.0;
     if (pitch < -89.0) pitch = -89.0;
 
-    updateCamera();
     changed = true;
   }
 
@@ -210,16 +218,17 @@ export function createFreeControls(
       mouseSensitivity = value;
     },
 
+    computeYawAndPitch,
+
     // TODO: dt is always 0
     update(dt: number) {
       if (!enabled) return;
       if (!locked) return;
       if (!changed) return;
 
+      // update the position
       vec3.scale(_front, front, dt * directionValue(keys, S_KEY_BIT, W_KEY_BIT) * moveSensitivity);
-
       vec3.scale(_right, right, dt * directionValue(keys, A_KEY_BIT, D_KEY_BIT) * moveSensitivity);
-
       vec3.scale(
         _up,
         camera.up,
@@ -228,6 +237,7 @@ export function createFreeControls(
 
       vec3.add(dir, _up, vec3.add(dir, _front, _right));
       vec3.add(camera.position, camera.position, dir);
+
       updateCamera();
 
       changed = (keys | 0x00) != 0;
