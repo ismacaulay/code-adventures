@@ -151,21 +151,14 @@
     // cameraController.position = [348.0909729003906, 128.07098388671875, 124.46318817138672];
     // cameraController.target = [556.5510864257812, 827.2630615234375, -4490.3173828125];
     const camera = app.cameraController.camera as PerspectiveCamera;
-    const result = BoundingBox.centre(boundingBox);
+    camera.fov = 69.5;
+    camera.updateProjectionMatrix();
 
+    const result = BoundingBox.centre(boundingBox);
     cameraController.target = vec3.clone(result);
     console.log(boundingBox, [result[0], result[1], result[2]]);
     cameraController.position = vec3.clone(boundingBox.max);
-
-    // const radius = BoundingBox.diagonal(boundingBox);
-    // const distance = vec3.length(vec3.sub(result, cameraController.position, result));
-    //
-    // camera.znear = distance * 0.001;
-    // camera.zfar = distance + radius;
-    camera.fov = 69.5;
-    camera.updateProjectionMatrix();
-    console.log(cameraController.camera.znear, cameraController.camera.zfar);
-    console.log(`triangles: ${triangleCount}`);
+    cameraController.controls.computeYawPitch();
   }
 </script>
 

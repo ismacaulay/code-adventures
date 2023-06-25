@@ -55,7 +55,7 @@ export function createDebugRenderSystem(params: {
         cameraController.up = normalCameraController.up;
         cameraController.target = normalCameraController.target;
         if (cameraController.controls.type === CameraControlType.Free) {
-          cameraController.controls.computeYawAndPitch();
+          cameraController.controls.computeYawPitch();
         }
 
         firstTime = false;

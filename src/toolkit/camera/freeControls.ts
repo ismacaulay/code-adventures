@@ -127,7 +127,7 @@ export function createFreeControls(
   let yaw = 0;
   let pitch = 0;
 
-  function computeYawAndPitch() {
+  function computeYawPitch() {
     vec3.sub(front, camera.target, camera.position);
     vec3.normalize(front, front);
 
@@ -135,7 +135,7 @@ export function createFreeControls(
     pitch = degrees(Math.asin(front[1]));
     updateCamera();
   }
-  computeYawAndPitch();
+  computeYawPitch();
 
   function updateCamera() {
     vec3.normalize(
@@ -218,7 +218,7 @@ export function createFreeControls(
       mouseSensitivity = value;
     },
 
-    computeYawAndPitch,
+    computeYawPitch,
 
     update(dt: number) {
       if (!enabled) return;
