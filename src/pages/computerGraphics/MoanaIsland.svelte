@@ -142,10 +142,10 @@
 
     cameraController.cameraType = CameraType.Perspective;
     cameraController.controlType = CameraControlType.Free;
-    const controls = cameraController.controls;
-    if (controls.type === CameraControlType.Free) {
-      controls.moveSensitivity = 5000;
-    }
+    // const controls = cameraController.controls;
+    // if (controls.type === CameraControlType.Free) {
+    //   controls.moveSensitivity = 5000;
+    // }
     // cameraController.position = [-2029.422607421875, 9773.810546875, 11292.3115234375];
     // cameraController.position = [67.51712036132812, 1245.0089111328125, 1277.9298095703125];
     // cameraController.position = [348.0909729003906, 128.07098388671875, 124.46318817138672];
@@ -157,11 +157,11 @@
     console.log(boundingBox, [result[0], result[1], result[2]]);
     cameraController.position = vec3.clone(boundingBox.max);
 
-    const radius = BoundingBox.diagonal(boundingBox);
-    const distance = vec3.length(vec3.sub(result, cameraController.position, result));
-
-    camera.znear = distance * 0.001;
-    camera.zfar = distance + radius;
+    // const radius = BoundingBox.diagonal(boundingBox);
+    // const distance = vec3.length(vec3.sub(result, cameraController.position, result));
+    //
+    // camera.znear = distance * 0.001;
+    // camera.zfar = distance + radius;
     camera.fov = 69.5;
     camera.updateProjectionMatrix();
     console.log(cameraController.camera.znear, cameraController.camera.zfar);

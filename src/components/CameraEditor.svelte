@@ -7,7 +7,7 @@
 
   export let model: CameraViewModel;
 
-  const { cameraType, controlType, position, target, up } = model;
+  const { cameraType, controlType, position, target, up, near, far } = model;
 </script>
 
 <Component title="Camera">
@@ -26,5 +26,13 @@
   <Vec3Input label="target" bind:value={$target} />
   <Vec3Input label="up" bind:value={$up} />
 
+  <div class="flex flex-col">
+    <span>
+      near: {$near}
+    </span>
+    <span>
+      far: {$far}
+    </span>
+  </div>
   <!-- camera specific -->
 </Component>

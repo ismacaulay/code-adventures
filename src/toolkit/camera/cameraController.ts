@@ -28,6 +28,8 @@ export type CameraController = {
   target: vec3;
   position: vec3;
   up: vec3;
+  near: number;
+  far: number;
   frustum: Frustum;
 
   update(dt: number): void;
@@ -42,14 +44,18 @@ export type CameraController = {
 export function createCameraController(
   canvas: HTMLElement,
   sceneBoundingBox: SceneBoundingBox,
+  opts?: {
+    autoNearFar?: boolean;
+  },
   initial: {
     type: CameraType;
     control: CameraControlType;
-    autoNearFar: boolean;
-  } = { type: CameraType.Perspective, control: CameraControlType.Orbit, autoNearFar: true },
+  } = { type: CameraType.Perspective, control: CameraControlType.Orbit },
 ): CameraController {
   const unsubscribers: Unsubscriber[] = [];
   const signal = createSignal();
+
+  const { autoNearFar = true } = opts || {};
 
   const orthographic = createOrthographicCamera({
     aspect: canvas.clientWidth / canvas.clientHeight,
@@ -74,7 +80,7 @@ export function createCameraController(
   let camera: Camera = currentType === CameraType.Orthographic ? orthographic : perspective;
 
   function recomputeNearAndFarPlanes() {
-    if (!initial.autoNearFar) {
+    if (!autoNearFar) {
       return;
     }
 
@@ -113,12 +119,21 @@ export function createCameraController(
     near = near - buffer;
 
     if (near < 0) {
-      near = 0.1;
+      const diag = BoundingBox.diagonal(sceneBoundingBox.boundingBox);
+      near = diag * 0.001;
     }
 
     camera.znear = near;
     camera.zfar = far;
     camera.updateProjectionMatrix();
+  }
+
+  function updateFreeControlMoveSensitivity() {
+    if (controls.type === CameraControlType.Free) {
+      const { min, max } = sceneBoundingBox.boundingBox;
+      const longest = Math.max(Math.max(max[0] - min[0], max[1] - min[1]), max[2] - min[2]);
+      controls.moveSensitivity = 0.25 * longest;
+    }
   }
 
   const frustum = Frustum.create();
@@ -129,6 +144,7 @@ export function createCameraController(
       Frustum.setFromMatrix(frustum, camera.viewProjection);
     }),
     sceneBoundingBox.subscribe(() => {
+      updateFreeControlMoveSensitivity();
       recomputeNearAndFarPlanes();
     }),
   );
@@ -151,6 +167,7 @@ export function createCameraController(
     if (type === CameraControlType.Free) {
       controls = createFreeControls(canvas, { camera });
       controlsUnsub = controls.subscribe(signal.emit);
+      updateFreeControlMoveSensitivity();
     } else if (type === CameraControlType.Orbit) {
       controls = createOrbitControls(canvas, { camera });
       controlsUnsub = controls.subscribe(signal.emit);
@@ -245,6 +262,13 @@ export function createCameraController(
       vec3.copy(camera.up, up);
       camera.updateViewMatrix();
       signal.emit();
+    },
+
+    get near() {
+      return camera.znear;
+    },
+    get far() {
+      return camera.zfar;
     },
 
     get frustum() {

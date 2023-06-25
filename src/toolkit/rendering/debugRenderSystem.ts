@@ -23,15 +23,22 @@ export function createDebugRenderSystem(params: {
   const { cameraController: normalCameraController } = params;
 
   let enabled = false;
-  const cameraController = createCameraController(params.canvas, params.sceneBoundingBox, {
-    type: CameraType.Perspective,
-    control: CameraControlType.Free,
-    autoNearFar: false,
-  });
-  cameraController.camera.znear = 0.01;
-  cameraController.camera.zfar = 1000;
+  const cameraController = createCameraController(
+    params.canvas,
+    params.sceneBoundingBox,
+    { autoNearFar: false },
+    {
+      type: CameraType.Perspective,
+      control: CameraControlType.Free,
+    },
+  );
+  // TODO: make these dynamic?
+  cameraController.camera.znear = 100;
+  cameraController.camera.zfar = 500000;
   cameraController.camera.updateProjectionMatrix();
-
+  if (cameraController.controls.type === CameraControlType.Free) {
+    cameraController.controls.moveSensitivity = 5000;
+  }
   const frustumRenderer = createCameraFrustumRenderer(params);
 
   let firstTime = true;

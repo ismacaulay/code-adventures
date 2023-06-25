@@ -43,6 +43,7 @@ import {
 import type { EntityManager } from 'types/ecs/entity';
 import type { SceneGraph, SceneGraphNode } from 'toolkit/sceneGraph';
 import { createSceneBoundingBox } from 'toolkit/sceneBoundingBox';
+import { IDENTITY } from 'toolkit/math/matrix';
 
 export type WebGPUApplication = {
   readonly renderer: Renderer;
@@ -83,7 +84,7 @@ export async function createWebGPUApplication(
 
   const sceneBoundingBox = createSceneBoundingBox(sceneGraph, { entityManager });
 
-  const cameraController = createCameraController(canvas, sceneBoundingBox);
+  const cameraController = createCameraController(canvas, sceneBoundingBox, { autoNearFar: true });
 
   const renderer = await createWebGPURenderer(canvas, opts);
   const bufferManager = createBufferManager(renderer.device);
@@ -173,8 +174,6 @@ export async function createWebGPUApplication(
   const preRenderCallbacks: (() => void)[] = [];
   const postRenderCallbacks: (() => void)[] = [];
 
-  const identity = mat4.create();
-
   function render() {
     stats.begin();
 
@@ -217,7 +216,7 @@ export async function createWebGPUApplication(
     boundingBoxes.length = 0;
 
     // TODO: add a way to toggle this on and off
-    // ctx.boundingBoxes.push({ boundingBox: sceneBoundingBox.boundingBox, transform: identity });
+    ctx.boundingBoxes.push({ boundingBox: sceneBoundingBox.boundingBox, transform: IDENTITY });
 
     // we need to split the drawing into opaque and transparent objects
     // but this should be based on what type of transparent rendering

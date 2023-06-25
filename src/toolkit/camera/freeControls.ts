@@ -25,7 +25,7 @@ export function createFreeControls(
     moveSensitivity: number;
   } = {
     mouseSensitivity: 0.1,
-    moveSensitivity: 2.5,
+    moveSensitivity: 10,
   },
 ): FreeCameraControls {
   let { mouseSensitivity, moveSensitivity } = options;
@@ -220,7 +220,6 @@ export function createFreeControls(
 
     computeYawAndPitch,
 
-    // TODO: dt is always 0
     update(dt: number) {
       if (!enabled) return;
       if (!locked) return;

@@ -10,6 +10,8 @@ export interface CameraViewModel {
   position: Writable<vec3>;
   target: Writable<vec3>;
   up: Writable<vec3>;
+  near: Writable<number>;
+  far: Writable<number>;
 
   destroy(): void;
 }
@@ -20,6 +22,8 @@ export function createCameraViewModel(controller: CameraController): CameraViewM
   const position = writable(vec3.clone(controller.position));
   const target = writable(vec3.clone(controller.target));
   const up = writable(vec3.clone(controller.up));
+  const near = writable(controller.near);
+  const far = writable(controller.far);
 
   let unsubscribers: Unsubscriber[] = [
     controller.subscribe(() => {
@@ -41,6 +45,14 @@ export function createCameraViewModel(controller: CameraController): CameraViewM
 
       if (!vec3.equals(get(up), controller.up)) {
         up.set(vec3.clone(controller.up));
+      }
+
+      if (controller.near !== get(near)) {
+        near.set(controller.near);
+      }
+
+      if (controller.far !== get(far)) {
+        far.set(controller.far);
       }
     }),
 
@@ -81,6 +93,8 @@ export function createCameraViewModel(controller: CameraController): CameraViewM
     position,
     target,
     up,
+    near,
+    far,
 
     destroy() {
       unsubscribers.forEach((cb) => cb());
