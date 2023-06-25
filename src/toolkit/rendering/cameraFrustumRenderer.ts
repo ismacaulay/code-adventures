@@ -83,16 +83,16 @@ export function createCameraFrustumRenderer(params: {
 
       mat4.invert(inverseViewProjection, cameraController.camera.viewProjection);
 
-      vec3.set(tmp, -1, -1, -1);
+      vec3.set(tmp, -1, -1, 0);
       vec3.transformMat4(n0, tmp, inverseViewProjection);
 
-      vec3.set(tmp, 1, -1, -1);
+      vec3.set(tmp, 1, -1, 0);
       vec3.transformMat4(n1, tmp, inverseViewProjection);
 
-      vec3.set(tmp, 1, 1, -1);
+      vec3.set(tmp, 1, 1, 0);
       vec3.transformMat4(n2, tmp, inverseViewProjection);
 
-      vec3.set(tmp, -1, 1, -1);
+      vec3.set(tmp, -1, 1, 0);
       vec3.transformMat4(n3, tmp, inverseViewProjection);
 
       vec3.set(tmp, -1, -1, 1);
@@ -112,13 +112,13 @@ export function createCameraFrustumRenderer(params: {
 
       vec3.copy(p, cameraController.position);
 
-      vec3.set(tmp, -0.7, 1.1, -1);
+      vec3.set(tmp, -0.7, 1.1, 0);
       vec3.transformMat4(u0, tmp, inverseViewProjection);
 
-      vec3.set(tmp, 0.7, 1.1, -1);
+      vec3.set(tmp, 0.7, 1.1, 0);
       vec3.transformMat4(u1, tmp, inverseViewProjection);
 
-      vec3.set(tmp, 0, 1.7, -1);
+      vec3.set(tmp, 0, 1.7, 0);
       vec3.transformMat4(u2, tmp, inverseViewProjection);
 
       renderer.submit({

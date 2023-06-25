@@ -33,7 +33,7 @@ export function createDebugRenderSystem(params: {
     },
   );
   // TODO: make these dynamic?
-  cameraController.camera.znear = 100;
+  cameraController.camera.znear = 0.1;
   cameraController.camera.zfar = 500000;
   cameraController.camera.updateProjectionMatrix();
   if (cameraController.controls.type === CameraControlType.Free) {

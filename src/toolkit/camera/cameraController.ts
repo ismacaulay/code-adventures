@@ -79,26 +79,20 @@ export function createCameraController(
   let currentType: CameraType = initial.type;
   let camera: Camera = currentType === CameraType.Orthographic ? orthographic : perspective;
 
+  // const centre = vec3.create();
+  const tmp = vec3.create();
   function recomputeNearAndFarPlanes() {
     if (!autoNearFar) {
       return;
     }
 
     const corners = BoundingBox.corners(sceneBoundingBox.boundingBox);
-    const positionToCorner = vec3.create();
-
-    const positionToTarget = vec3.create();
-    vec3.sub(positionToTarget, camera.target, camera.position);
-    vec3.normalize(positionToTarget, positionToTarget);
-
     let dist: number;
     let near = Number.POSITIVE_INFINITY;
     let far = Number.NEGATIVE_INFINITY;
-
     for (let i = 0; i < corners.length; ++i) {
-      vec3.sub(positionToCorner, corners[i], camera.position);
-      dist = vec3.dot(positionToCorner, positionToTarget);
-
+      vec3.transformMat4(tmp, corners[i], camera.view);
+      dist = -tmp[2];
       if (dist < near) {
         near = dist;
       }
@@ -114,7 +108,7 @@ export function createCameraController(
       far = tmp;
     }
 
-    const buffer = 0.05 * (far - near);
+    const buffer = 0.01 * Math.abs(far - near);
     far = far + buffer;
     near = near - buffer;
 
@@ -122,6 +116,19 @@ export function createCameraController(
       const diag = BoundingBox.diagonal(sceneBoundingBox.boundingBox);
       near = diag * 0.001;
     }
+
+    // BoundingBox.centre(sceneBoundingBox.boundingBox, centre);
+    // const diag = BoundingBox.diagonal(sceneBoundingBox.boundingBox);
+    // const d = vec3.length(vec3.sub(tmp, camera.position, centre));
+    // const offset = diag / 2;
+    // // const dMin = vec3.length(vec3.sub(tmp, sceneBoundingBox.boundingBox.min, centre));
+    // // const dMax = vec3.length(vec3.sub(tmp, sceneBoundingBox.boundingBox.max, centre));
+    //
+    // let far = d + offset;
+    // let near = d - offset;
+    // if (near < 0) {
+    //   near = diag * 0.001;
+    // }
 
     camera.znear = near;
     camera.zfar = far;
@@ -140,7 +147,6 @@ export function createCameraController(
   unsubscribers.push(
     signal.subscribe(() => {
       recomputeNearAndFarPlanes();
-
       Frustum.setFromMatrix(frustum, camera.viewProjection);
     }),
     sceneBoundingBox.subscribe(() => {
@@ -181,6 +187,8 @@ export function createCameraController(
     signal.emit();
   }
   setControlType(initial.control);
+
+  signal.emit();
 
   return {
     get camera() {

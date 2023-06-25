@@ -25,8 +25,8 @@ export function createOrthographicCamera(params: OrthographicCameraParams): Orth
   const bottom = params.bottom;
   let zoom = 1;
 
-  const znear = params.znear;
-  const zfar = params.zfar;
+  let znear = params.znear;
+  let zfar = params.zfar;
   let aspect = params.aspect;
 
   const view = mat4.create();
@@ -80,8 +80,19 @@ export function createOrthographicCamera(params: OrthographicCameraParams): Orth
     set aspect(value: number) {
       aspect = value;
     },
-    znear,
-    zfar,
+    get znear() {
+      return znear;
+    },
+    set znear(value: number) {
+      znear = value;
+    },
+
+    get zfar() {
+      return zfar;
+    },
+    set zfar(value: number) {
+      zfar = value;
+    },
 
     get position() {
       return _position;

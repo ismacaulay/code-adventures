@@ -324,6 +324,7 @@ export async function createWebGPUApplication(
       entityManager.destroy();
       cameraController.destroy();
       debugRenderSystem.destroy();
+      sceneGraph.destroy();
 
       resizer.disconnect();
     },
