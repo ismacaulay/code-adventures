@@ -113,8 +113,7 @@ export function createCameraController(
     near = near - buffer;
 
     if (near < 0) {
-      const diag = BoundingBox.diagonal(sceneBoundingBox.boundingBox);
-      near = diag * 0.001;
+      near = 0.001 * BoundingBox.diagonal(sceneBoundingBox.boundingBox);
     }
 
     // BoundingBox.centre(sceneBoundingBox.boundingBox, centre);

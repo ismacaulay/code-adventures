@@ -2,16 +2,14 @@
   "version": 1,
 
   "settings": {
-    "background": [0.1, 0.1, 0.1],
     "renderer": "weighted-blended"
   },
 
   "camera": {
-    "type": "orthographic",
+    "type": "perspective",
     "target": [0, 0, 0],
-    "position": [0, 0, -1],
-    "up": [0, 1, 0],
-    "zoom": 0.02
+    "position": [0, 0, -100],
+    "up": [0, 1, 0]
   },
 
   "root": [

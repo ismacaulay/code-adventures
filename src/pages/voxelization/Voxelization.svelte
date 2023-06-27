@@ -22,30 +22,15 @@
   import { generateMeshFromVoxels } from 'toolkit/voxelization/meshGenerator';
   import { voxelizeMesh } from 'toolkit/voxelization/voxelization';
 
+  export let id: string;
+  export let loader: () => Promise<any>;
+
   let app: Maybe<WebGPUApplication>;
   let unsubscribers: Unsubscriber[] = [];
-  async function loadBunny() {
-    return loadObj('/models/bunny.obj').then((data) => {
-      data.vertices = data.vertices.map((v) => v * 1000);
-      return { data, camera: { position: [0, 0, 1] as vec3, zoom: 0.01 } };
-    });
-  }
-
-  async function loadDragon() {
-    return loadObj('/models/dragon.obj').then((data) => {
-      return { data, camera: { position: [0, 0, -1] as vec3, zoom: 0.025 } };
-    });
-  }
-
-  const loaders = {
-    bunny: loadBunny,
-    dragon: loadDragon,
-  };
-  const id = 'dragon';
 
   $: {
     if (app) {
-      loaders[id]().then(({ data, camera }) => {
+      loader().then(({ data, camera }) => {
         if (!app) {
           console.log('App destroyed while loading obj');
           return;
@@ -188,7 +173,6 @@
           shaderManager,
           cameraController,
         } = app;
-        renderer.clearColour = [0.1, 0.1, 0.1];
         renderer.type = RendererType.WeightedBlended;
 
         cameraController.cameraType = CameraType.Orthographic;
